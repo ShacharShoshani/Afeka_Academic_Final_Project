@@ -2,7 +2,7 @@
 
 Our app is called Livin.
 
-It is an app for posting and searching jobs of pet and plant sitters, and it will have a case for taking care of stray animals temporally.
+It is an app for posting and searching jobs of pet and plant sitters, and it will have a case for taking care of stray animals temporally. Our app will also have a smart match algorithm between jobs seekers and job offers.
 
 # Frontend Setup
 
