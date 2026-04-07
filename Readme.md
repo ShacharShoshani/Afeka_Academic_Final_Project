@@ -4,7 +4,7 @@ Our app is called Livin.
 
 It is an app for posting and searching jobs of pet and plant sitters, and it will have a case for taking care of stray animals temporally. Our app will also have a smart match algorithm between jobs seekers and job offers.
 
-# Frontend Setup
+# Setup
 
 ## Prerequisites
 
@@ -17,21 +17,22 @@ It is an app for posting and searching jobs of pet and plant sitters, and it wil
 Run the setup commands
 
 ```(bash)
-nvm install && npm i -g @angular/cli && cd livin_frontend && npm i
+nvm install && npm i -g @angular/cli && npm i
 ```
 
-Generate a local environment file for the frontend (Run this from the livin_frontend directory, which you're now in):
+Generate a local environment file for the frontend:
 
 ```(bash)
-cp src/environments/environment.template.ts src/environments/environment.local.ts
+cp frontend/src/environments/environment.template.ts frontend/src/environments/environment.local.ts
 ```
 
 Replace the google api key place holder with your key
 
 ## Run the app
-
+Open a second terminal. Run in one terminal the backend and in the second the frontend:
 ```(bash)
-npm start
+npm dev:backend
 ```
-
-Visit http://localhost:4200 to see your app
+```(bash)
+npm dev:frontend
+```
