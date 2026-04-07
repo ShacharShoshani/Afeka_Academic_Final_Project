@@ -1,11 +1,15 @@
 import express from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
+import morgan from 'morgan';
 import { env } from './config/env.js';
 import { healthRouter } from './routes/health.routes.js';
 import { errorHandler } from './middleware/errorHandler.js';
 
 const app = express();
+
+// Request logging
+app.use(morgan('combined'));
 
 // Security headers (XSS, clickjacking, MIME sniffing, etc.)
 app.use(helmet());
