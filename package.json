@@ -1,0 +1,17 @@
+{
+  "name": "afeka-final-project",
+  "version": "0.0.0",
+  "description": "Afeka Academic Final Project - Livin App",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "scripts": {
+    "start": "npm run start --workspace=backend",
+    "dev:backend": "npm run dev --workspace=backend",
+    "dev:frontend": "npm start --workspace=frontend",
+    "build": "npm run build --workspace=backend && npm run build --workspace=frontend",
+    "test": "npm test --workspaces"
+  }
+}

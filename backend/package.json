@@ -1,5 +1,5 @@
 {
-  "name": "livin-backend",
+  "name": "@livin/backend",
   "version": "0.0.0",
   "private": true,
   "scripts": {
