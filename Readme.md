@@ -31,8 +31,8 @@ Replace the google api key place holder with your key
 ## Run the app
 Open a second terminal. Run in one terminal the backend and in the second the frontend:
 ```(bash)
-npm dev:backend
+npm run dev:backend
 ```
 ```(bash)
-npm dev:frontend
+npm run dev:frontend
 ```
