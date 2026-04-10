@@ -1,0 +1,10 @@
+.git
+**/node_modules
+**/dist
+**/.angular
+**/.env
+**/.env.local
+**/environment.local.ts
+**/npm-debug.log
+livin_backend
+livin_frontend
