@@ -1,5 +1,5 @@
 # -- Build stage --
-FROM node:22-alpine AS builder
+FROM node:24.14.1-alpine3.23 AS builder
 WORKDIR /app
 
 COPY backend/package.json ./
@@ -10,7 +10,7 @@ COPY backend/src/ src/
 RUN npx tsc
 
 # -- Production stage --
-FROM node:22-alpine
+FROM node:24.14.1-alpine3.23
 WORKDIR /app
 ENV NODE_ENV=production
 

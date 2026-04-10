@@ -1,5 +1,5 @@
 # -- Build stage --
-FROM node:22-alpine AS builder
+FROM node:24.14.1-alpine3.23 AS builder
 WORKDIR /app
 
 COPY frontend/package.json ./
@@ -17,7 +17,7 @@ RUN printf "export const environment = {\n  production: true,\n  googleMapsApiKe
 RUN npx ng build --configuration=production
 
 # -- Production stage --
-FROM nginx:1.27-alpine
+FROM nginx:1.29.8-alpine3.23
 
 COPY frontend/nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=builder /app/dist/livin_frontend/browser/ /usr/share/nginx/html/
