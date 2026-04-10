@@ -12,6 +12,8 @@ It is an app for posting and searching jobs of pet and plant sitters, and it wil
 
 - Google Maps API Key from [Google Cloud Console](https://console.cloud.google.com/) enabled for Maps JavaScript API
 
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+
 ## Set NodeJS Environment
 
 Run the setup commands
@@ -28,11 +30,17 @@ cp frontend/src/environments/environment.template.ts frontend/src/environments/e
 
 Replace the google api key place holder with your key
 
-## Run the app
+## Run the app from terminal
 Open a second terminal. Run in one terminal the backend and in the second the frontend:
 ```(bash)
 npm run dev:backend
 ```
 ```(bash)
 npm run dev:frontend
+```
+
+## Run the app with docker
+Copy .env.example in the root folder into a new .env file and run the app:
+```(bash)
+docker compose up -d
 ```
