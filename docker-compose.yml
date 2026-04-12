@@ -36,11 +36,11 @@ services:
     build:
       context: .
       dockerfile: frontend/Dockerfile
-      args:
-        GOOGLE_MAPS_API_KEY: ${GOOGLE_MAPS_API_KEY:-}
     restart: unless-stopped
     depends_on:
       - backend
+    environment:
+      GOOGLE_MAPS_API_KEY: ${GOOGLE_MAPS_API_KEY:-}
     ports:
       - "80:80"
 

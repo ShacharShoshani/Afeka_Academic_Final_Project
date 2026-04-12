@@ -7,10 +7,9 @@ RUN npm install -g @angular/cli
 COPY frontend/ frontend/
 RUN npm ci
 
-# Generate environment file with the provided API key
-ARG GOOGLE_MAPS_API_KEY=''
-RUN printf "export const environment = {\n  production: true,\n  googleMapsApiKey: '%s',\n};\n" \
-    "${GOOGLE_MAPS_API_KEY}" > frontend/src/environments/environment.local.ts
+# Build with a placeholder — the real key is injected at container startup
+RUN printf "export const environment = {\n  production: true,\n  googleMapsApiKey: '__GOOGLE_MAPS_API_KEY_PLACEHOLDER__',\n};\n" \
+    > frontend/src/environments/environment.local.ts
 
 RUN npm run build --workspace=frontend -- --configuration=production
 
@@ -18,7 +17,10 @@ RUN npm run build --workspace=frontend -- --configuration=production
 FROM nginx:1.29.8-alpine3.23
 
 COPY frontend/nginx.conf /etc/nginx/conf.d/default.conf
+COPY frontend/docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
 COPY --from=builder /app/frontend/dist/livin_frontend/browser/ /usr/share/nginx/html/
 
 EXPOSE 80
+ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD ["nginx", "-g", "daemon off;"]
