@@ -1,0 +1,9 @@
+<div
+  class="progress-track"
+  role="progressbar"
+  [attr.aria-valuenow]="currentStep()"
+  aria-valuemin="0"
+  [attr.aria-valuemax]="totalSteps()"
+>
+  <div class="progress-fill" [style.width.%]="percentage()"></div>
+</div>
