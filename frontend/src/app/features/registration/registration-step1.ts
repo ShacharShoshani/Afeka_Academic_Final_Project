@@ -1,6 +1,6 @@
 import { Component, computed, signal } from '@angular/core';
+import { UserRole } from '@livin/common';
 import { ProgressBar } from '../../shared/components/progress-bar/progress-bar';
-import { UserRole } from '../../shared/models/registration.model';
 
 @Component({
   selector: 'app-registration-step1',
@@ -9,10 +9,10 @@ import { UserRole } from '../../shared/models/registration.model';
   styleUrl: './registration-step1.css',
 })
 export class RegistrationStep1 {
-  protected selectedRole = signal<UserRole | null>(null);
+  protected selectedRole = signal<`${UserRole}` | null>(null);
   protected canContinue = computed(() => this.selectedRole() !== null);
 
-  protected selectRole(role: UserRole): void {
+  protected selectRole(role: `${UserRole}`): void {
     this.selectedRole.set(role);
   }
 

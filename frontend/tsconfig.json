@@ -3,6 +3,10 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
+    "baseUrl": "./",
+    "paths": {
+      "@livin/common": ["../common/dist"]
+    },
     "strict": true,
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": true,
@@ -13,7 +17,8 @@
     "experimentalDecorators": true,
     "importHelpers": true,
     "target": "ES2022",
-    "module": "preserve"
+    "module": "ESNext",
+    "moduleResolution": "Bundler"
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,

@@ -2,10 +2,24 @@
 FROM node:24.14.1-alpine3.23 AS builder
 WORKDIR /app
 
+# Copy root manifests
 COPY package.json package-lock.json ./
-RUN npm install -g @angular/cli
-COPY frontend/ frontend/
+
+# Copy ALL workspace package.json files first. 
+# This is required for npm workspaces to work correctly during 'npm ci'.
+COPY common/package.json ./common/package.json
+COPY frontend/package.json ./frontend/package.json
+COPY backend/package.json ./backend/package.json
+
+# Install all dependencies for the entire workspace
 RUN npm ci
+
+# Copy common source and build it
+COPY common/ ./common/
+RUN npm run build --workspace=common
+
+# Copy frontend source
+COPY frontend/ ./frontend/
 
 # Build with a placeholder — the real key is injected at container startup
 RUN printf "export const environment = {\n  production: true,\n  googleMapsApiKey: '__GOOGLE_MAPS_API_KEY_PLACEHOLDER__',\n};\n" \

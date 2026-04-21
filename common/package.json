@@ -1,0 +1,14 @@
+{
+  "name": "@livin/common",
+  "version": "0.0.0",
+  "description": "Common types and utilities for Livin app components",
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc"
+  }
+}

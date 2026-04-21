@@ -5,7 +5,8 @@
   "private": true,
   "workspaces": [
     "backend",
-    "frontend"
+    "frontend",
+    "common"
   ],
   "scripts": {
     "start": "npm run start --workspace=backend",
@@ -13,5 +14,9 @@
     "dev:frontend": "npm start --workspace=frontend",
     "build": "npm run build --workspace=backend && npm run build --workspace=frontend",
     "test": "npm test --workspaces"
+  },
+  "devDependencies": {
+    "@types/node": "^24.12.2",
+    "typescript": "^5.9.3"
   }
 }
