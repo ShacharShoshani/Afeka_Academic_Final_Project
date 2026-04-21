@@ -1,9 +1,11 @@
-import { Component, computed, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { UserRole } from '@livin/common';
+import { Store } from '@ngrx/store';
 import { startWith } from 'rxjs';
+import { User, UserRole } from '@livin/common';
 import { ProgressBar } from '../../shared/components/progress-bar/progress-bar';
+import { setUserData } from 'src/app/store/user.actions';
 
 @Component({
   selector: 'app-registration-step1',
@@ -12,7 +14,8 @@ import { ProgressBar } from '../../shared/components/progress-bar/progress-bar';
   styleUrl: './registration-step1.css',
 })
 export class RegistrationStep1 {
-  protected selectedRole = signal<`${UserRole}` | null>(null);
+  private readonly store: Store<{ user: User }> = inject(Store);
+  protected selectedRole = signal<UserRole | null>(null);
 
   protected registrationForm = new FormGroup({
     name: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
@@ -33,20 +36,23 @@ export class RegistrationStep1 {
     return this.selectedRole() !== null && this.formStatus() === 'VALID';
   });
 
-  protected selectRole(role: `${UserRole}`): void {
+  protected selectRole(role: UserRole): void {
     this.selectedRole.set(role);
   }
 
   protected onContinue(): void {
     const role = this.selectedRole();
 
-    if (this.registrationForm.valid && role) {
-      const formData = {
-        role,
-        ...this.registrationForm.getRawValue(),
-      };
-      // Will navigate to step 2 once it exists
-      console.log('Registration Data Step 1:', formData);
+    if (!(this.registrationForm.valid && role)) {
+      return;
     }
+
+    const formData = {
+      role,
+      ...this.registrationForm.getRawValue(),
+    };
+
+    this.store.dispatch(setUserData(formData));
+    // Will navigate to step 2 once it exists
   }
 }

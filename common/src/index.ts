@@ -1,8 +1,4 @@
-enum UserRole {
-    Owner = "owner",
-    Caretaker = "caretaker",
-    Admin = "admin"
-}
+type UserRole = "owner" | "caretaker" | "admin"
 
 type User = {
     id: string;
