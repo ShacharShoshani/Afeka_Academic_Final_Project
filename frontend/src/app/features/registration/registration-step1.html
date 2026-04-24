@@ -15,9 +15,10 @@
     </svg>
 
     <h1 class="title">Welcome to Livin!</h1>
-    <p class="subtitle">How do you want to use the app?</p>
+    <p class="subtitle">Tell us about yourself and how you'll use the app</p>
 
     <!-- Role selection cards -->
+    <div class="section-title">I am a...</div>
     <div class="cards">
       <button
         class="role-card"
@@ -35,8 +36,8 @@
           </svg>
         </div>
         <div class="role-text">
-          <span class="role-title">I'm a Pet/Plant Owner</span>
-          <span class="role-subtitle">I need someone to care for my pets or plants</span>
+          <span class="role-title">Pet/Plant Owner</span>
+          <span class="role-subtitle">I need help with my pets or plants</span>
         </div>
         @if (selectedRole() === 'owner') {
           <svg class="checkmark" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -58,8 +59,8 @@
           </svg>
         </div>
         <div class="role-text">
-          <span class="role-title">I'm a Caretaker</span>
-          <span class="role-subtitle">I want to help care for pets and plants</span>
+          <span class="role-title">Caretaker</span>
+          <span class="role-subtitle">I want to care for pets and plants</span>
         </div>
         @if (selectedRole() === 'caretaker') {
           <svg class="checkmark" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -69,6 +70,30 @@
         }
       </button>
     </div>
+
+    <!-- Personal Info Form -->
+    <div class="section-title">Personal Details</div>
+    <form [formGroup]="registrationForm" class="form">
+      <div class="form-field">
+        <label for="name">Full Name</label>
+        <input id="name" type="text" formControlName="name" placeholder="John Doe">
+      </div>
+
+      <div class="form-field">
+        <label for="email">Email Address</label>
+        <input id="email" type="email" formControlName="email" placeholder="john@example.com">
+      </div>
+
+      <div class="form-field">
+        <label for="phone">Phone Number</label>
+        <input id="phone" type="tel" formControlName="phone" placeholder="+1 (555) 000-0000">
+      </div>
+
+      <div class="form-field">
+        <label for="residence">Residence / Address</label>
+        <input id="residence" type="text" formControlName="residence" placeholder="123 Main St, City">
+      </div>
+    </form>
   </div>
 
   <div class="footer">

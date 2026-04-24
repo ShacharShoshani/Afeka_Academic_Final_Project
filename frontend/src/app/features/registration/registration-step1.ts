@@ -1,23 +1,58 @@
-import { Component, computed, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { Store } from '@ngrx/store';
+import { startWith } from 'rxjs';
+import { User, UserRole } from '@livin/common';
 import { ProgressBar } from '../../shared/components/progress-bar/progress-bar';
-import { UserRole } from '../../shared/models/registration.model';
+import { setUserData } from 'src/app/store/user.actions';
 
 @Component({
   selector: 'app-registration-step1',
-  imports: [ProgressBar],
+  imports: [ProgressBar, ReactiveFormsModule],
   templateUrl: './registration-step1.html',
   styleUrl: './registration-step1.css',
 })
 export class RegistrationStep1 {
+  private readonly store: Store<{ user: User }> = inject(Store);
   protected selectedRole = signal<UserRole | null>(null);
-  protected canContinue = computed(() => this.selectedRole() !== null);
+
+  protected registrationForm = new FormGroup({
+    name: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+    email: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.email] }),
+    phone: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+    residence: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+  });
+
+  // Convert form status to a signal so the computed can track it
+  private formStatus = toSignal(
+    this.registrationForm.statusChanges.pipe(
+      startWith(this.registrationForm.status),
+      takeUntilDestroyed()
+    )
+  );
+
+  protected canContinue = computed(() => {
+    return this.selectedRole() !== null && this.formStatus() === 'VALID';
+  });
 
   protected selectRole(role: UserRole): void {
     this.selectedRole.set(role);
   }
 
   protected onContinue(): void {
+    const role = this.selectedRole();
+
+    if (!(this.registrationForm.valid && role)) {
+      return;
+    }
+
+    const formData = {
+      role,
+      ...this.registrationForm.getRawValue(),
+    };
+
+    this.store.dispatch(setUserData(formData));
     // Will navigate to step 2 once it exists
-    console.log('Selected role:', this.selectedRole());
   }
 }
