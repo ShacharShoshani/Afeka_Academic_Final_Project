@@ -1,0 +1,127 @@
+<div class="page">
+  <header class="header">
+    <button class="back-btn" (click)="goBack()">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+    <span class="step-label">Step 3 of 4</span>
+  </header>
+
+  <app-progress-bar [currentStep]="3" [totalSteps]="4" />
+
+  <div class="content">
+    <h1 class="title">Set up your profile</h1>
+    <p class="subtitle">Help others get to know you</p>
+
+    <form [formGroup]="profileForm" class="form">
+      <div class="form-field">
+        <label for="bio">About me</label>
+        <textarea
+          id="bio"
+          formControlName="bio"
+          placeholder="Tell people a little about yourself..."
+          rows="4"
+        ></textarea>
+      </div>
+
+      <div class="form-field">
+        <label for="dateOfBirth">Date of Birth</label>
+        <input id="dateOfBirth" type="date" formControlName="dateOfBirth">
+      </div>
+    </form>
+
+    <!-- Care types — both roles -->
+    @if (role() === 'owner') {
+      <div class="section-title">What do you need help with?</div>
+    } @else {
+      <div class="section-title">What can you help with?</div>
+    }
+
+    <div class="chips">
+      <!-- Dogs -->
+      <button class="chip" [class.selected]="isCareTypeSelected('dogs')" (click)="toggleCareType('dogs')">
+        <svg class="chip-icon" viewBox="0 0 24 24" fill="none"><path d="M18 4c-1.5 0-3 1.5-3 3v2H9V7c0-1.5-1.5-3-3-3S3 5.5 3 7v4c0 4.4 3.6 8 8 8h2c4.4 0 8-3.6 8-8V7c0-1.5-1.5-3-3-3z" fill="currentColor"/><circle cx="9" cy="12" r="1.5" fill="var(--color-white)"/><circle cx="15" cy="12" r="1.5" fill="var(--color-white)"/></svg>
+        Dogs
+      </button>
+      <!-- Cats -->
+      <button class="chip" [class.selected]="isCareTypeSelected('cats')" (click)="toggleCareType('cats')">
+        <svg class="chip-icon" viewBox="0 0 24 24" fill="none"><path d="M12 22c-4.4 0-8-2.5-8-7 0-3 1.5-5.5 3-7l1-4 3 2h2l3-2 1 4c1.5 1.5 3 4 3 7 0 4.5-3.6 7-8 7z" fill="currentColor"/><path d="M4 4l3 4M20 4l-3 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><circle cx="9.5" cy="13" r="1.2" fill="var(--color-white)"/><circle cx="14.5" cy="13" r="1.2" fill="var(--color-white)"/><ellipse cx="12" cy="15.5" rx="1" ry="0.7" fill="var(--color-white)"/></svg>
+        Cats
+      </button>
+      <!-- Birds -->
+      <button class="chip" [class.selected]="isCareTypeSelected('birds')" (click)="toggleCareType('birds')">
+        <svg class="chip-icon" viewBox="0 0 24 24" fill="none"><path d="M20.5 5.5c-1.5-1.5-4-1.5-5.5 0L12 8.5 9 5.5C7.5 4 5 4 3.5 5.5S2 9.5 3.5 11L12 19.5l8.5-8.5c1.5-1.5 1.5-4 0-5.5z" fill="currentColor"/><circle cx="7" cy="8" r="1" fill="var(--color-white)"/><path d="M12 19.5V22" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M9 22h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Birds
+      </button>
+      <!-- Fish -->
+      <button class="chip" [class.selected]="isCareTypeSelected('fish')" (click)="toggleCareType('fish')">
+        <svg class="chip-icon" viewBox="0 0 24 24" fill="none"><path d="M2 12c3-4 7-6 12-6 2 0 3.5.5 5 1.5L22 12l-3 4.5c-1.5 1-3 1.5-5 1.5-5 0-9-2-12-6z" fill="currentColor"/><circle cx="17" cy="11" r="1.2" fill="var(--color-white)"/><path d="M2 12c1.5-1.5 2-3 2-5M2 12c1.5 1.5 2 3 2 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Fish
+      </button>
+      <!-- Rabbits -->
+      <button class="chip" [class.selected]="isCareTypeSelected('rabbits')" (click)="toggleCareType('rabbits')">
+        <svg class="chip-icon" viewBox="0 0 24 24" fill="none"><ellipse cx="12" cy="16" rx="6" ry="5" fill="currentColor"/><path d="M9 11V4c0-1 .5-2 1.5-2S12 3 12 4v7M12 11V5c0-1 .5-2 1.5-2S15 3 15 4v7" fill="currentColor"/><circle cx="10" cy="15" r="1" fill="var(--color-white)"/><circle cx="14" cy="15" r="1" fill="var(--color-white)"/><ellipse cx="12" cy="17" rx="0.8" ry="0.6" fill="var(--color-white)"/></svg>
+        Rabbits
+      </button>
+      <!-- Hamsters -->
+      <button class="chip" [class.selected]="isCareTypeSelected('hamsters')" (click)="toggleCareType('hamsters')">
+        <svg class="chip-icon" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="13" r="7" fill="currentColor"/><circle cx="6" cy="9" r="2.5" fill="currentColor"/><circle cx="18" cy="9" r="2.5" fill="currentColor"/><circle cx="9.5" cy="12" r="1.2" fill="var(--color-white)"/><circle cx="14.5" cy="12" r="1.2" fill="var(--color-white)"/><ellipse cx="12" cy="14.5" rx="1" ry="0.7" fill="var(--color-white)"/><path d="M10.5 16c.5.5 1 .7 1.5.7s1-.2 1.5-.7" stroke="var(--color-white)" stroke-width="0.8" stroke-linecap="round"/></svg>
+        Hamsters
+      </button>
+      <!-- Reptiles -->
+      <button class="chip" [class.selected]="isCareTypeSelected('reptiles')" (click)="toggleCareType('reptiles')">
+        <svg class="chip-icon" viewBox="0 0 24 24" fill="none"><path d="M4 12c0-3 2-6 5-7l2-1 2 1c3 1 5 4 5 7v3c0 2-1.5 3.5-3.5 3.5S12 17 12 15v-1c0-2-1.5-3.5-3.5-3.5h-1C5.5 10.5 4 12 4 14" fill="currentColor"/><circle cx="9" cy="8" r="0.8" fill="var(--color-white)"/><circle cx="14" cy="8" r="0.8" fill="var(--color-white)"/><path d="M20 15h2M20 13h1.5M4 14h-2M4 16h-1.5" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+        Reptiles
+      </button>
+      <!-- Plants -->
+      <button class="chip" [class.selected]="isCareTypeSelected('plants')" (click)="toggleCareType('plants')">
+        <svg class="chip-icon" viewBox="0 0 24 24" fill="none"><path d="M12 22V12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M12 12c0-4 3-7 7-8-1 4-4 7-7 8z" fill="currentColor"/><path d="M12 15c0-3-2.5-5.5-6-6.5 1 3.5 3.5 5.5 6 6.5z" fill="currentColor"/><path d="M10 22h4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        Plants
+      </button>
+      <!-- Stray Animals -->
+      <button class="chip" [class.selected]="isCareTypeSelected('stray_animals')" (click)="toggleCareType('stray_animals')">
+        <svg class="chip-icon" viewBox="0 0 24 24" fill="none"><ellipse cx="8" cy="7" rx="1.8" ry="2.2" fill="currentColor"/><ellipse cx="16" cy="7" rx="1.8" ry="2.2" fill="currentColor"/><ellipse cx="5" cy="11.5" rx="1.5" ry="2" fill="currentColor"/><ellipse cx="19" cy="11.5" rx="1.5" ry="2" fill="currentColor"/><path d="M8 16c0-2.2 1.8-4 4-4s4 1.8 4 4-1.8 4-4 4-4-1.8-4-4z" fill="currentColor"/><path d="M12 20v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M9.5 21.5h5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Stray Animals
+      </button>
+    </div>
+
+    <!-- Availability — caretakers only -->
+    @if (role() === 'caretaker') {
+      <div class="section-title">When are you available?</div>
+      <div class="chips">
+        <!-- Mornings -->
+        <button class="chip" [class.selected]="isAvailabilitySelected('mornings')" (click)="toggleAvailability('mornings')">
+          <svg class="chip-icon" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4" fill="currentColor"/><path d="M12 2v3M12 19v3M4.22 4.22l2.12 2.12M17.66 17.66l2.12 2.12M2 12h3M19 12h3M4.22 19.78l2.12-2.12M17.66 6.34l2.12-2.12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          Mornings
+        </button>
+        <!-- Afternoons -->
+        <button class="chip" [class.selected]="isAvailabilitySelected('afternoons')" (click)="toggleAvailability('afternoons')">
+          <svg class="chip-icon" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="5" fill="currentColor"/><path d="M12 3v2M12 19v2M5 12H3M21 12h-2M6.34 6.34L4.93 4.93M19.07 4.93l-1.41 1.41M6.34 17.66l-1.41 1.41M19.07 19.07l-1.41-1.41" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          Afternoons
+        </button>
+        <!-- Evenings -->
+        <button class="chip" [class.selected]="isAvailabilitySelected('evenings')" (click)="toggleAvailability('evenings')">
+          <svg class="chip-icon" viewBox="0 0 24 24" fill="none"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" fill="currentColor"/></svg>
+          Evenings
+        </button>
+        <!-- Weekends -->
+        <button class="chip" [class.selected]="isAvailabilitySelected('weekends')" (click)="toggleAvailability('weekends')">
+          <svg class="chip-icon" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="18" rx="2" fill="currentColor"/><path d="M3 10h18" stroke="var(--color-white)" stroke-width="1.5"/><path d="M16 2v4M8 2v4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="8" cy="15" r="1.2" fill="var(--color-white)"/><circle cx="12" cy="15" r="1.2" fill="var(--color-white)"/></svg>
+          Weekends
+        </button>
+      </div>
+    }
+  </div>
+
+  <div class="footer">
+    <button
+      class="continue-btn"
+      [disabled]="!canContinue()"
+      (click)="onContinue()"
+    >
+      Continue
+      <span aria-hidden="true">&rarr;</span>
+    </button>
+  </div>
+</div>

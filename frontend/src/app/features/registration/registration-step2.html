@@ -1,0 +1,50 @@
+<div class="page">
+  <header class="header">
+    <button class="back-btn" (click)="goBack()">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+    <span class="step-label">Step 2 of 4</span>
+  </header>
+
+  <app-progress-bar [currentStep]="2" [totalSteps]="4" />
+
+  <div class="content">
+    <h1 class="title">Personal Details</h1>
+    <p class="subtitle">Tell us a bit about yourself</p>
+
+    <form [formGroup]="personalForm" class="form">
+      <div class="form-field">
+        <label for="name">Full Name</label>
+        <input id="name" type="text" formControlName="name" placeholder="John Doe">
+      </div>
+
+      <div class="form-field">
+        <label for="email">Email Address</label>
+        <input id="email" type="email" formControlName="email" placeholder="john@example.com">
+      </div>
+
+      <div class="form-field">
+        <label for="phone">Phone Number</label>
+        <input id="phone" type="tel" formControlName="phone" placeholder="+972 50 000 0000">
+      </div>
+
+      <div class="form-field">
+        <label for="residence">Residence / Address</label>
+        <input id="residence" type="text" formControlName="residence" placeholder="Tel Aviv, Israel">
+      </div>
+    </form>
+  </div>
+
+  <div class="footer">
+    <button
+      class="continue-btn"
+      [disabled]="!canContinue()"
+      (click)="onContinue()"
+    >
+      Continue
+      <span aria-hidden="true">&rarr;</span>
+    </button>
+  </div>
+</div>

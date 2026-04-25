@@ -1,10 +1,14 @@
 import { TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
+import { provideStore } from '@ngrx/store';
+import { userReducer } from '../../store/user.reducer';
 import { RegistrationStep1 } from './registration-step1';
 
 describe('RegistrationStep1', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [RegistrationStep1],
+      providers: [provideRouter([]), provideStore({ user: userReducer })],
     }).compileComponents();
   });
 
@@ -86,7 +90,7 @@ describe('RegistrationStep1', () => {
     expect(cards[0].querySelector('.checkmark')).toBeTruthy();
   });
 
-  it('should render progress bar at step 1 of 3', () => {
+  it('should render progress bar', () => {
     const fixture = TestBed.createComponent(RegistrationStep1);
     fixture.detectChanges();
     const progressBar = fixture.nativeElement.querySelector('app-progress-bar');
