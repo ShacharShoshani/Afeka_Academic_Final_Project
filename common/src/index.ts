@@ -15,6 +15,8 @@ type User = {
     dateOfBirth: string;
     careTypes: CareType[];
     availability: Availability[]; // caretaker only
+    profilePhoto: string;
+    password: string;
 }
 
 export { UserRole, CareType, Availability, User };

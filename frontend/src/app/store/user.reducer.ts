@@ -1,5 +1,5 @@
 import { createReducer, on } from "@ngrx/store";
-import { setUserData, setProfileData } from "./user.actions";
+import { setUserData, setProfileData, setAccountData } from "./user.actions";
 import { User } from "@livin/common";
 
 const initialState: Partial<User> = {
@@ -13,10 +13,13 @@ const initialState: Partial<User> = {
   dateOfBirth: '',
   careTypes: [],
   availability: [],
+  profilePhoto: '',
+  password: '',
 };
 
 export const userReducer = createReducer(
   initialState,
   on(setUserData, (state, { userData }) => ({ ...state, ...userData })),
-  on(setProfileData, (state, { profileData }) => ({ ...state, ...profileData }))
+  on(setProfileData, (state, { profileData }) => ({ ...state, ...profileData })),
+  on(setAccountData, (state, { accountData }) => ({ ...state, ...accountData }))
 );

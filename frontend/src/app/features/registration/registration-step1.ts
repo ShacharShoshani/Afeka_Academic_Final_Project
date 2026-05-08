@@ -1,5 +1,5 @@
 import { Component, computed, inject, signal } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { Store } from '@ngrx/store';
 import { User, UserRole } from '@livin/common';
 import { ProgressBar } from '../../shared/components/progress-bar/progress-bar';
@@ -7,7 +7,7 @@ import { setUserData } from 'src/app/store/user.actions';
 
 @Component({
   selector: 'app-registration-step1',
-  imports: [ProgressBar],
+  imports: [ProgressBar, RouterLink],
   templateUrl: './registration-step1.html',
   styleUrl: './registration-step1.css',
 })

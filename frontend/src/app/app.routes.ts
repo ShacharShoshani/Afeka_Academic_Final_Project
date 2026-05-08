@@ -22,5 +22,17 @@ export const routes: Routes = [
         (m) => m.RegistrationStep3,
       ),
   },
+  {
+    path: 'register/step-4',
+    loadComponent: () =>
+      import('./features/registration/registration-step4').then(
+        (m) => m.RegistrationStep4,
+      ),
+  },
+  {
+    path: 'login',
+    loadComponent: () =>
+      import('./features/login/login').then((m) => m.Login),
+  },
   { path: '', redirectTo: 'register', pathMatch: 'full' },
 ];

@@ -15,3 +15,11 @@ export const setProfileData = createAction(
     availability: Availability[];
   }) => ({ profileData })
 );
+
+export const setAccountData = createAction(
+  '[User] Set Account Data',
+  (accountData: {
+    profilePhoto: string;
+    password: string;
+  }) => ({ accountData })
+);

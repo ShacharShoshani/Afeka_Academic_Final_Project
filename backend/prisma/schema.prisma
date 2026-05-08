@@ -1,0 +1,49 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id           String         @id @default(uuid())
+  name         String
+  email        String         @unique
+  phone        String
+  residence    String
+  role         UserRole
+  bio          String
+  dateOfBirth  String
+  careTypes    CareType[]
+  availability Availability[]
+  profilePhoto String         @default("")
+  passwordHash String
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+}
+
+enum UserRole {
+  owner
+  caretaker
+  admin
+}
+
+enum CareType {
+  dogs
+  cats
+  birds
+  fish
+  rabbits
+  hamsters
+  reptiles
+  plants
+  stray_animals
+}
+
+enum Availability {
+  mornings
+  afternoons
+  evenings
+  weekends
+}
