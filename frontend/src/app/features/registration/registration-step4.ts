@@ -112,7 +112,7 @@ export class RegistrationStep4 {
       }).subscribe({
         next: () => {
           this.loading.set(false);
-          this.router.navigate(['/']);
+          this.router.navigate(['/home']);
         },
         error: (err) => {
           this.loading.set(false);
