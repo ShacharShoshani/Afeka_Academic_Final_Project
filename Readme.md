@@ -30,6 +30,26 @@ cp frontend/src/environments/environment.template.ts frontend/src/environments/e
 
 Replace the google api key place holder with your key
 
+## Database (Prisma)
+
+After installing dependencies, generate the Prisma client:
+
+```(bash)
+cd backend && npx prisma generate
+```
+
+When the schema changes, apply migrations to the database:
+
+```(bash)
+cd backend && npx prisma migrate dev
+```
+
+To inspect the database visually:
+
+```(bash)
+cd backend && npx prisma studio
+```
+
 ## Run the app from terminal
 Open a second terminal. Run in one terminal the backend and in the second the frontend:
 ```(bash)

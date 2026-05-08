@@ -5,7 +5,7 @@ WORKDIR /app
 # Copy root manifests
 COPY package.json package-lock.json ./
 
-# Copy ALL workspace package.json files first. 
+# Copy ALL workspace package.json files first.
 # This is required for npm workspaces to work correctly during 'npm ci'.
 COPY common/package.json ./common/package.json
 COPY frontend/package.json ./frontend/package.json
@@ -22,7 +22,7 @@ RUN npm run build --workspace=common
 COPY frontend/ ./frontend/
 
 # Build with a placeholder — the real key is injected at container startup
-RUN printf "export const environment = {\n  production: true,\n  googleMapsApiKey: '__GOOGLE_MAPS_API_KEY_PLACEHOLDER__',\n};\n" \
+RUN printf "export const environment = {\n  production: true,\n  googleMapsApiKey: '__GOOGLE_MAPS_API_KEY_PLACEHOLDER__',\n apiUrl: 'http://localhost:3000/api',\n};\n" \
     > frontend/src/environments/environment.local.ts
 
 RUN npm run build --workspace=frontend -- --configuration=production

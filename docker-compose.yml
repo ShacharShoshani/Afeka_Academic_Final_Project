@@ -26,9 +26,11 @@ services:
         condition: service_healthy
     environment:
       DATABASE_URL: postgresql://${DB_USER:-livin}:${DB_PASSWORD:-livin_dev_password}@db:5432/${DB_NAME:-livin}
-      PORT: 3000
-      NODE_ENV: production
-      CORS_ORIGIN: http://localhost
+      PORT: ${PORT:-3000}
+      NODE_ENV: ${NODE_ENV:-development}
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost}
+      JWT_SECRET: ${JWT_SECRET:-your_jwt_secret}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-604800}
     ports:
       - "3000:3000"
 
