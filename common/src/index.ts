@@ -19,4 +19,19 @@ type User = {
     password: string;
 }
 
-export { UserRole, CareType, Availability, User };
+// Shape returned by GET /api/users — strips sensitive fields (passwordHash, email, phone).
+type PublicUser = {
+    id: string;
+    name: string;
+    residence: string;
+    role: UserRole;
+    bio: string;
+    dateOfBirth: string;
+    careTypes: CareType[];
+    availability: Availability[];
+    profilePhoto: string;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export { UserRole, CareType, Availability, User, PublicUser };

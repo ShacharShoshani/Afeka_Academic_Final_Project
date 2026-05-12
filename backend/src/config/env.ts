@@ -10,12 +10,13 @@ const envSchema = z.object({
   CORS_ORIGIN: z.string().default('http://localhost'),
   DATABASE_URL: z.string().url(),
   JWT_SECRET: z.string().min(32),
-  JWT_EXPIRES_IN: z.number().default(7 * 24 * 60 * 60), // 7 days in seconds
+  // Whole positive number of seconds. Rejects "7d" loudly instead of silently coercing it to 7.
+  JWT_EXPIRES_IN: z
+    .string()
+    .regex(/^\d+$/, 'JWT_EXPIRES_IN must be a whole number of seconds (e.g. 604800)')
+    .transform(Number)
+    .pipe(z.number().int().positive())
+    .default(7 * 24 * 60 * 60),
 });
 
-const JWT_EXPIRES_IN = parseInt(process.env.JWT_EXPIRES_IN ?? '');
-if (isNaN(JWT_EXPIRES_IN)) {
-  throw new Error('JWT_EXPIRES_IN must be a valid number');
-}
-
-export const env = envSchema.parse({ ...process.env, JWT_EXPIRES_IN });
+export const env = envSchema.parse(process.env);

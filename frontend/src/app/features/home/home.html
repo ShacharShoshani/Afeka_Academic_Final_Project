@@ -1,7 +1,10 @@
 <div class="page">
   <header class="header">
     <span class="brand">Livin</span>
-    <button class="logout-btn" (click)="logout()">Log out</button>
+    <div class="header-actions">
+      <a class="nav-btn" routerLink="/browse">Browse</a>
+      <button class="logout-btn" (click)="logout()">Log out</button>
+    </div>
   </header>
 
   @if (user(); as u) {

@@ -41,5 +41,11 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./features/home/home').then((m) => m.Home),
   },
+  {
+    path: 'browse',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/browse/browse').then((m) => m.Browse),
+  },
   { path: '', redirectTo: 'home', pathMatch: 'full' },
 ];

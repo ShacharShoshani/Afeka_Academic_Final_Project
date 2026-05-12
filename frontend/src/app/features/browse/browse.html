@@ -1,0 +1,77 @@
+<div class="page">
+  <header class="header">
+    <button class="back-btn" (click)="goHome()" aria-label="Back to home">
+      <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" width="20" height="20">
+        <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span>Home</span>
+    </button>
+    <span class="title">Browse</span>
+    <span class="header-spacer"></span>
+  </header>
+
+  <div class="filter-bar">
+    <button
+      class="filter-chip"
+      [class.active]="filter() === 'all'"
+      (click)="setFilter('all')"
+    >All</button>
+    <button
+      class="filter-chip"
+      [class.active]="filter() === 'caretaker'"
+      (click)="setFilter('caretaker')"
+    >Caretakers</button>
+    <button
+      class="filter-chip"
+      [class.active]="filter() === 'owner'"
+      (click)="setFilter('owner')"
+    >Pet Owners</button>
+  </div>
+
+  @if (loading()) {
+    <div class="status-block">Loading…</div>
+  } @else if (error()) {
+    <div class="status-block status-error">{{ error() }}</div>
+  } @else if (users().length === 0) {
+    <div class="status-block">No users to show yet.</div>
+  } @else {
+    <main class="grid">
+      @for (u of users(); track u.id) {
+        <article class="user-card">
+          <div class="avatar-wrap">
+            @if (u.profilePhoto) {
+              <img class="avatar" [src]="u.profilePhoto" [alt]="u.name" />
+            } @else {
+              <div class="avatar avatar-placeholder">
+                <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.5"/>
+                  <path d="M4 20c0-4 3.582-7 8-7s8 3 8 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+              </div>
+            }
+          </div>
+          <h2 class="user-name">{{ u.name }}</h2>
+          <span class="role-badge" [attr.data-role]="u.role">{{ getRoleLabel(u.role) }}</span>
+          <p class="user-meta">{{ u.residence }}</p>
+          @if (u.bio) {
+            <p class="user-bio">{{ u.bio }}</p>
+          }
+          @if (u.careTypes.length) {
+            <div class="chip-list">
+              @for (type of u.careTypes; track type) {
+                <span class="chip">{{ formatCareType(type) }}</span>
+              }
+            </div>
+          }
+          @if (u.role === 'caretaker' && u.availability.length) {
+            <div class="chip-list chip-list-muted">
+              @for (slot of u.availability; track slot) {
+                <span class="chip chip-muted">{{ formatAvailability(slot) }}</span>
+              }
+            </div>
+          }
+        </article>
+      }
+    </main>
+  }
+</div>
