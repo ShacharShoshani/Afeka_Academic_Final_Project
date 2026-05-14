@@ -63,26 +63,41 @@ export class HomeDataService {
   }
 
   private loadList<T>(url: string, signal: WritableSignal<T[]>) {
-    this.http.get<T[]>(url, { withCredentials: true }).subscribe((data) => {
-      signal.set(data);
+    this.http.get<T[]>(url, { withCredentials: true }).subscribe({
+      next: (data) => {
+        signal.set(data);
+      },
+      error: (error) => this.handleError(error),
     });
   }
 
   private addToList<T>(url: string, item: Omit<T, 'id' | 'createdAt' | 'updatedAt'>, signal: WritableSignal<T[]>) {
-    this.http.post<T>(url, item, { withCredentials: true }).subscribe((newItem) => {
-      signal.update((list) => [...list, newItem]);
+    this.http.post<T>(url, item, { withCredentials: true }).subscribe({
+      next: (newItem) => {
+        signal.update((list) => [...list, newItem]);
+      },
+      error: (error) => this.handleError(error),
     });
   }
 
   private editItem<T>(url: string, item: Omit<T, 'id' | 'createdAt' | 'updatedAt'>, signal: WritableSignal<T[]>) {
-    this.http.put<T>(`${url}/${(item as any).id}`, item, { withCredentials: true }).subscribe((updatedItem) => {
-      signal.update((list) => list.map((i) => ((i as any).id === (item as any).id ? updatedItem : i)));
+    this.http.put<T>(`${url}/${(item as any).id}`, item, { withCredentials: true }).subscribe({
+      next: (updatedItem) => {
+        signal.update((list) => list.map((i) => ((i as any).id === (item as any).id ? updatedItem : i)));
+      },
+      error: (error) => this.handleError(error),
     });
   }
 
   private deleteItem<T>(url: string, id: string, signal: WritableSignal<T[]>) {
-    this.http.delete(`${url}/${id}`, { withCredentials: true }).subscribe(() => {
-      signal.update((list) => list.filter((i) => (i as any).id !== id));
+    this.http.delete(`${url}/${id}`, { withCredentials: true }).subscribe({
+      next: () => signal.update((list) => list.filter((i) => (i as any).id !== id)),
+      error: (error) => this.handleError(error),
     });
+  }
+
+  private handleError(error: any) {
+    console.error('API error:', error);
+    alert(error?.message || 'An error occurred while communicating with the server. Please try again later.');
   }
 }

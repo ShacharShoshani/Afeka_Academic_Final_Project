@@ -4,7 +4,12 @@ WORKDIR /app
 
 COPY package.json package-lock.json ./
 COPY backend/package.json ./backend/package.json
+
 RUN npm ci
+
+# Copy common source and build it
+COPY common/ ./common/
+RUN npm run build --workspace=common
 
 COPY backend/prisma/ prisma/
 RUN npx prisma generate

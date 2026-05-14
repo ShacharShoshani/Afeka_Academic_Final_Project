@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { requireAuth } from '../middleware/auth.js';
+import { isPetPlantOwnerOrStrayReporter } from '../middleware/auth.js';
 
 const router = Router();
 
@@ -32,20 +32,26 @@ const STUB_STRAY_ANIMALS = [
   },
 ];
 
-router.get('/', requireAuth, (_req, res) => {
+router.get('/', (_req, res) => {
   res.json(STUB_STRAY_ANIMALS);
 });
 
-router.post('/', requireAuth, (req, res) => {
-  const stray = { id: crypto.randomUUID(), ...req.body, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
+router.post('/', (req, res) => {
+  const reporterId = req.user?.id;
+
+  if (!reporterId) {
+    return res.status(401).json({ message: 'Unauthorized' });
+  }
+
+  const stray = { id: crypto.randomUUID(), ...req.body, reporterId, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
   res.status(201).json(stray);
 });
 
-router.put('/:id', requireAuth, (req, res) => {
+router.put('/:id', isPetPlantOwnerOrStrayReporter, (req, res) => {
   res.json({ ...req.body, id: req.params.id, updatedAt: new Date().toISOString() });
 });
 
-router.delete('/:id', requireAuth, (_req, res) => {
+router.delete('/:id', isPetPlantOwnerOrStrayReporter, (_req, res) => {
   res.status(204).send();
 });
 

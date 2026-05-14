@@ -11,6 +11,7 @@ import { petsRouter } from './routes/pets.routes.js';
 import { plantsRouter } from './routes/plants.routes.js';
 import { strayAnimalsRouter } from './routes/stray-animals.routes.js';
 import { errorHandler } from './middleware/errorHandler.js';
+import { requireAuth } from './middleware/auth.js';
 
 const app = express();
 
@@ -37,9 +38,9 @@ app.use(express.urlencoded({ extended: false, limit: '2mb' }));
 app.use('/api/health', healthRouter);
 app.use('/api/auth', authRouter);
 app.use('/api/users', usersRouter);
-app.use('/api/pets', petsRouter);
-app.use('/api/plants', plantsRouter);
-app.use('/api/stray-animals', strayAnimalsRouter);
+app.use('/api/pets', requireAuth, petsRouter);
+app.use('/api/plants', requireAuth, plantsRouter);
+app.use('/api/stray-animals', requireAuth, strayAnimalsRouter);
 
 // Global error handler (must be registered last)
 app.use(errorHandler);
