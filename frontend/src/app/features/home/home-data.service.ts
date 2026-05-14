@@ -26,39 +26,39 @@ export class HomeDataService {
     this.loadList(this.strayAnimalsUrl, this.strayAnimals);
   }
 
-  addPet(pet: Omit<Pet, 'id'>) {
+  addPet(pet: Omit<Pet, 'id' | 'createdAt' | 'updatedAt'>) {
     this.addToList(this.petsUrl, pet, this.pets);
   }
 
-  addPlant(plant: Omit<Plant, 'id'>) {
+  addPlant(plant: Omit<Plant, 'id' | 'createdAt' | 'updatedAt'>) {
     this.addToList(this.plantsUrl, plant, this.plants);
   }
 
-  addStrayAnimal(strayAnimal: Omit<StrayAnimal, 'id'>) {
+  addStrayAnimal(strayAnimal: Omit<StrayAnimal, 'id' | 'createdAt' | 'updatedAt'>) {
     this.addToList(this.strayAnimalsUrl, strayAnimal, this.strayAnimals);
   }
 
-  editPet(pet: Pet) {
+  editPet(pet: Omit<Pet, 'createdAt' | 'updatedAt'>) {
     this.editItem(this.petsUrl, pet, this.pets);
   }
 
-  editPlant(plant: Plant) {
+  editPlant(plant: Omit<Plant, 'createdAt' | 'updatedAt'>) {
     this.editItem(this.plantsUrl, plant, this.plants);
   }
 
-  editStrayAnimal(strayAnimal: StrayAnimal) {
+  editStrayAnimal(strayAnimal: Omit<StrayAnimal, 'createdAt' | 'updatedAt'>) {
     this.editItem(this.strayAnimalsUrl, strayAnimal, this.strayAnimals);
   }
 
-  deletePet(id: number) {
+  deletePet(id: string) {
     this.deleteItem(this.petsUrl, id, this.pets);
   }
 
-  deletePlant(id: number) {
+  deletePlant(id: string) {
     this.deleteItem(this.plantsUrl, id, this.plants);
   }
 
-  deleteStrayAnimal(id: number) {
+  deleteStrayAnimal(id: string) {
     this.deleteItem(this.strayAnimalsUrl, id, this.strayAnimals);
   }
 
@@ -68,19 +68,19 @@ export class HomeDataService {
     });
   }
 
-  private addToList<T>(url: string, item: Omit<T, 'id'>, signal: WritableSignal<T[]>) {
+  private addToList<T>(url: string, item: Omit<T, 'id' | 'createdAt' | 'updatedAt'>, signal: WritableSignal<T[]>) {
     this.http.post<T>(url, item, { withCredentials: true }).subscribe((newItem) => {
       signal.update((list) => [...list, newItem]);
     });
   }
 
-  private editItem<T>(url: string, item: T, signal: WritableSignal<T[]>) {
+  private editItem<T>(url: string, item: Omit<T, 'id' | 'createdAt' | 'updatedAt'>, signal: WritableSignal<T[]>) {
     this.http.put<T>(`${url}/${(item as any).id}`, item, { withCredentials: true }).subscribe((updatedItem) => {
-      signal.update((list) => list.map((i) => (i === item ? updatedItem : i)));
+      signal.update((list) => list.map((i) => ((i as any).id === (item as any).id ? updatedItem : i)));
     });
   }
 
-  private deleteItem<T>(url: string, id: number, signal: WritableSignal<T[]>) {
+  private deleteItem<T>(url: string, id: string, signal: WritableSignal<T[]>) {
     this.http.delete(`${url}/${id}`, { withCredentials: true }).subscribe(() => {
       signal.update((list) => list.filter((i) => (i as any).id !== id));
     });

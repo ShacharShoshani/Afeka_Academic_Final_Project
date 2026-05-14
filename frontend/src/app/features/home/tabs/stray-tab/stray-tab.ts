@@ -73,24 +73,15 @@ export class StrayTab {
     if (!d.location.trim()) return;
     const now = new Date().toISOString();
     if (d.id) {
-      this.data.strayAnimals.update(list =>
-        list.map(s =>
-          s.id === d.id
-            ? ({ ...s, name: d.name.trim() || null, type: d.type, size: d.size as AnimalSize, location: d.location.trim(), description: d.description.trim(), image: d.image, estimatedBirthDate: d.estimatedBirthDate || null, updatedAt: now } as StrayAnimal)
-            : s
-        )
-      );
+      this.data.editStrayAnimal({ id: d.id, reporterId: this.auth.user()?.id ?? '', name: d.name.trim() || null, type: d.type, size: d.size as AnimalSize, location: d.location.trim(), description: d.description.trim(), image: d.image, estimatedBirthDate: d.estimatedBirthDate || null, createdAt: '', updatedAt: now } as StrayAnimal);
     } else {
-      this.data.strayAnimals.update(list => [
-        ...list,
-        { id: crypto.randomUUID(), reporterId: this.auth.user()?.id ?? '', name: d.name.trim() || null, type: d.type, size: d.size as AnimalSize, location: d.location.trim(), description: d.description.trim(), image: d.image, estimatedBirthDate: d.estimatedBirthDate || null, createdAt: now, updatedAt: now } as StrayAnimal,
-      ]);
+      this.data.addStrayAnimal({ reporterId: this.auth.user()?.id ?? '', name: d.name.trim() || null, type: d.type, size: d.size as AnimalSize, location: d.location.trim(), description: d.description.trim(), image: d.image, estimatedBirthDate: d.estimatedBirthDate || null } as Omit<StrayAnimal, 'id' | 'createdAt' | 'updatedAt'>);
     }
     this.closeForm();
   }
 
   protected delete(id: string): void {
-    this.data.strayAnimals.update(list => list.filter(s => s.id !== id));
+    this.data.deleteStrayAnimal(id);
   }
 
   protected onFileSelected(event: Event): void {

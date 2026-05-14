@@ -60,24 +60,15 @@ export class PlantsTab {
     if (!d.name.trim()) return;
     const now = new Date().toISOString();
     if (d.id) {
-      this.data.plants.update(list =>
-        list.map(p =>
-          p.id === d.id
-            ? { ...p, name: d.name.trim(), specialNeeds: d.specialNeeds.trim(), image: d.image, estimatedBirthDate: d.estimatedBirthDate || null, updatedAt: now }
-            : p
-        )
-      );
+      this.data.editPlant({ id: d.id, ownerId: this.auth.user()?.id ?? '', name: d.name.trim(), specialNeeds: d.specialNeeds.trim(), image: d.image, estimatedBirthDate: d.estimatedBirthDate || null } as Omit<Plant, 'createdAt' | 'updatedAt'>);
     } else {
-      this.data.plants.update(list => [
-        ...list,
-        { id: crypto.randomUUID(), ownerId: this.auth.user()?.id ?? '', name: d.name.trim(), specialNeeds: d.specialNeeds.trim(), image: d.image, estimatedBirthDate: d.estimatedBirthDate || null, createdAt: now, updatedAt: now },
-      ]);
+      this.data.addPlant({ ownerId: this.auth.user()?.id ?? '', name: d.name.trim(), specialNeeds: d.specialNeeds.trim(), image: d.image, estimatedBirthDate: d.estimatedBirthDate || null } as Omit<Plant, 'id' | 'createdAt' | 'updatedAt'>);
     }
     this.closeForm();
   }
 
   protected delete(id: string): void {
-    this.data.plants.update(list => list.filter(p => p.id !== id));
+    this.data.deletePlant(id);
   }
 
   protected onFileSelected(event: Event): void {

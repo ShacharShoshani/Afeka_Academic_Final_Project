@@ -71,24 +71,15 @@ export class PetsTab {
     if (!d.name.trim()) return;
     const now = new Date().toISOString();
     if (d.id) {
-      this.data.pets.update(list =>
-        list.map(p =>
-          p.id === d.id
-            ? ({ ...p, name: d.name.trim(), type: d.type, size: d.size as AnimalSize, specialNeeds: d.specialNeeds.trim(), image: d.image, estimatedBirthDate: d.estimatedBirthDate || null, updatedAt: now } as Pet)
-            : p
-        )
-      );
+      this.data.editPet({ id: d.id, ownerId: this.auth.user()?.id ?? '', name: d.name.trim(), type: d.type, size: d.size as AnimalSize, specialNeeds: d.specialNeeds.trim(), image: d.image, estimatedBirthDate: d.estimatedBirthDate || null } as Omit<Pet, 'createdAt' | 'updatedAt'>);
     } else {
-      this.data.pets.update(list => [
-        ...list,
-        { id: crypto.randomUUID(), ownerId: this.auth.user()?.id ?? '', name: d.name.trim(), type: d.type, size: d.size as AnimalSize, specialNeeds: d.specialNeeds.trim(), image: d.image, estimatedBirthDate: d.estimatedBirthDate || null, createdAt: now, updatedAt: now } as Pet,
-      ]);
+      this.data.addPet({ ownerId: this.auth.user()?.id ?? '', name: d.name.trim(), type: d.type, size: d.size as AnimalSize, specialNeeds: d.specialNeeds.trim(), image: d.image, estimatedBirthDate: d.estimatedBirthDate || null } as Omit<Pet, 'id' | 'createdAt' | 'updatedAt'>);
     }
     this.closeForm();
   }
 
   protected delete(id: string): void {
-    this.data.pets.update(list => list.filter(p => p.id !== id));
+    this.data.deletePet(id);
   }
 
   protected onFileSelected(event: Event): void {
