@@ -19,6 +19,7 @@ type Tab = 'profile' | 'pets' | 'plants' | 'stray';
 export class Home {
   private readonly router = inject(Router);
   protected readonly authService = inject(AuthService);
+  protected readonly homeDataService = inject(HomeDataService);
 
   protected readonly user = this.authService.user;
   protected readonly isOwner = computed(() => this.user()?.role === 'owner');
@@ -29,6 +30,21 @@ export class Home {
   protected readonly formatLastUpdated = formatLastUpdated;
   protected readonly formatCareType = formatCareType;
   protected readonly formatAvailability = formatAvailability;
+
+  constructor() {
+    if (!this.authService.isLoggedIn()) {
+      this.router.navigate(['/login']);
+    }
+    else {
+      this.loadData();
+    }
+  }
+
+  private loadData(): void {
+    this.homeDataService.loadPets();
+    this.homeDataService.loadPlants();
+    this.homeDataService.loadStrayAnimals();
+  }
 
   protected setTab(tab: Tab): void {
     this.activeTab.set(tab);
