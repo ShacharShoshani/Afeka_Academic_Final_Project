@@ -9,20 +9,20 @@
 
   @if (user(); as u) {
     <main class="content">
+
       <div class="profile-card">
         <div class="avatar-wrap">
           @if (u.profilePhoto) {
             <img class="avatar" [src]="u.profilePhoto" [alt]="u.name" />
           } @else {
             <div class="avatar avatar-placeholder">
-              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <svg viewBox="0 0 24 24" fill="none">
                 <circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.5"/>
                 <path d="M4 20c0-4 3.582-7 8-7s8 3 8 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
               </svg>
             </div>
           }
         </div>
-
         <h1 class="name">{{ u.name }}</h1>
         <span class="role-badge" [attr.data-role]="u.role">{{ getRoleLabel(u.role) }}</span>
         <div class="profile-meta">
@@ -32,62 +32,525 @@
         </div>
       </div>
 
-      <section class="info-section">
-        <h2 class="section-title">Contact</h2>
-        <ul class="info-list">
-          <li class="info-item">
-            <svg class="info-icon" viewBox="0 0 24 24" fill="none"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><polyline points="22,6 12,13 2,6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            <span>{{ u.email }}</span>
-          </li>
-          <li class="info-item">
-            <svg class="info-icon" viewBox="0 0 24 24" fill="none"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 10.8 19.79 19.79 0 01.22 2.18 2 2 0 012.18 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 7.91a16 16 0 006.18 6.18l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            <span>{{ u.phone }}</span>
-          </li>
-          <li class="info-item">
-            <svg class="info-icon" viewBox="0 0 24 24" fill="none"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="9" r="2.5" stroke="currentColor" stroke-width="1.5"/></svg>
-            <span>{{ u.residence }}</span>
-          </li>
-          @if (u.dateOfBirth) {
+      @if (isOwner()) {
+        <nav class="tab-bar" role="tablist">
+          <button class="tab-btn" role="tab" [class.tab-btn--active]="activeTab() === 'profile'" (click)="setTab('profile')">
+            Profile
+          </button>
+          <button class="tab-btn" role="tab" [class.tab-btn--active]="activeTab() === 'pets'" (click)="setTab('pets')">
+            <svg class="tab-icon" viewBox="0 0 24 24" fill="none">
+              <path d="M4.5 11C5.88 11 7 9.88 7 8.5S5.88 6 4.5 6 2 7.12 2 8.5 3.12 11 4.5 11z" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M9.5 7C10.88 7 12 5.88 12 4.5S10.88 2 9.5 2 7 3.12 7 4.5 8.12 7 9.5 7z" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M14.5 7C15.88 7 17 5.88 17 4.5S15.88 2 14.5 2 12 3.12 12 4.5 13.12 7 14.5 7z" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M19.5 11C20.88 11 22 9.88 22 8.5S20.88 6 19.5 6 17 7.12 17 8.5 18.12 11 19.5 11z" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M17.34 14.36C16.26 12.5 14.28 11.36 12.14 11.36c-2.28 0-4.22 1.32-5.26 3.3L5.78 17.3A2.5 2.5 0 008.06 21h7.88a2.5 2.5 0 002.28-3.7l-1.1-2.94h.22z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+            </svg>
+            Pets
+          </button>
+          <button class="tab-btn" role="tab" [class.tab-btn--active]="activeTab() === 'plants'" (click)="setTab('plants')">
+            <svg class="tab-icon" viewBox="0 0 24 24" fill="none">
+              <path d="M12 22V12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              <path d="M12 12C12 12 7 10 5 6c4 0 7 2 7 6z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+              <path d="M12 16C12 16 17 14 19 10c-4 0-7 2-7 6z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+            </svg>
+            Plants
+          </button>
+          <button class="tab-btn" role="tab" [class.tab-btn--active]="activeTab() === 'stray'" (click)="setTab('stray')">
+            <svg class="tab-icon" viewBox="0 0 24 24" fill="none">
+              <circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            Stray
+          </button>
+        </nav>
+      }
+
+      <!-- Profile Tab -->
+      @if (activeTab() === 'profile') {
+        <section class="info-section">
+          <h2 class="section-title">Contact</h2>
+          <ul class="info-list">
             <li class="info-item">
-              <svg class="info-icon" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 2v4M8 2v4M3 10h18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              <span>{{ formatDate(u.dateOfBirth) }}</span>
+              <svg class="info-icon" viewBox="0 0 24 24" fill="none"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><polyline points="22,6 12,13 2,6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span>{{ u.email }}</span>
             </li>
-          }
-        </ul>
-      </section>
-
-      @if (u.bio) {
-        <section class="info-section">
-          <h2 class="section-title">About</h2>
-          <p class="bio-text">{{ u.bio }}</p>
+            <li class="info-item">
+              <svg class="info-icon" viewBox="0 0 24 24" fill="none"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 10.8 19.79 19.79 0 01.22 2.18 2 2 0 012.18 0h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.91 7.91a16 16 0 006.18 6.18l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span>{{ u.phone }}</span>
+            </li>
+            <li class="info-item">
+              <svg class="info-icon" viewBox="0 0 24 24" fill="none"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="9" r="2.5" stroke="currentColor" stroke-width="1.5"/></svg>
+              <span>{{ u.residence }}</span>
+            </li>
+            @if (u.dateOfBirth) {
+              <li class="info-item">
+                <svg class="info-icon" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M16 2v4M8 2v4M3 10h18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                <span>{{ formatDate(u.dateOfBirth) }}</span>
+              </li>
+            }
+          </ul>
         </section>
+
+        @if (u.bio) {
+          <section class="info-section">
+            <h2 class="section-title">About</h2>
+            <p class="bio-text">{{ u.bio }}</p>
+          </section>
+        }
+
+        @if (u.careTypes.length) {
+          <section class="info-section">
+            <h2 class="section-title">Care Types</h2>
+            <div class="chip-list">
+              @for (type of u.careTypes; track type) {
+                <span class="chip">{{ formatCareType(type) }}</span>
+              }
+            </div>
+          </section>
+        }
+
+        @if (u.role === 'caretaker' && u.availability.length) {
+          <section class="info-section">
+            <h2 class="section-title">Availability</h2>
+            <div class="chip-list">
+              @for (slot of u.availability; track slot) {
+                <span class="chip">{{ formatAvailability(slot) }}</span>
+              }
+            </div>
+          </section>
+        }
       }
 
-      @if (u.careTypes.length) {
-        <section class="info-section">
-          <h2 class="section-title">{{ u.role === 'owner' ? 'My Pets' : 'Care Types' }}</h2>
-          <div class="chip-list">
-            @for (type of u.careTypes; track type) {
-              <span class="chip">{{ formatCareType(type) }}</span>
+      <!-- Pets Tab -->
+      @if (activeTab() === 'pets') {
+        <div class="list-header">
+          <span class="list-title">
+            My Pets
+            @if (pets().length) {
+              <span class="list-count">({{ pets().length }})</span>
+            }
+          </span>
+          <div class="list-actions">
+            @if (editMode()) {
+              <button class="btn-done" (click)="toggleEditMode()">Done</button>
+            } @else {
+              @if (pets().length) {
+                <button class="btn-secondary" (click)="toggleEditMode()">Edit</button>
+              }
+              <button class="btn-add" (click)="openAddForm('pet')">+ Add</button>
             }
           </div>
-        </section>
-      }
+        </div>
 
-      @if (u.role === 'caretaker' && u.availability.length) {
-        <section class="info-section">
-          <h2 class="section-title">Availability</h2>
-          <div class="chip-list">
-            @for (slot of u.availability; track slot) {
-              <span class="chip">{{ formatAvailability(slot) }}</span>
+        @if (pets().length) {
+          <div class="animal-list">
+            @for (pet of pets(); track pet.id) {
+              <div class="animal-card">
+                <div class="animal-img-wrap">
+                  @if (pet.image) {
+                    <img class="animal-img" [src]="pet.image" [alt]="pet.name" />
+                  } @else {
+                    <div class="animal-img animal-img--placeholder">
+                      <svg viewBox="0 0 24 24" fill="none">
+                        <path d="M4.5 11C5.88 11 7 9.88 7 8.5S5.88 6 4.5 6 2 7.12 2 8.5 3.12 11 4.5 11z" stroke="currentColor" stroke-width="1.5"/>
+                        <path d="M9.5 7C10.88 7 12 5.88 12 4.5S10.88 2 9.5 2 7 3.12 7 4.5 8.12 7 9.5 7z" stroke="currentColor" stroke-width="1.5"/>
+                        <path d="M14.5 7C15.88 7 17 5.88 17 4.5S15.88 2 14.5 2 12 3.12 12 4.5 13.12 7 14.5 7z" stroke="currentColor" stroke-width="1.5"/>
+                        <path d="M19.5 11C20.88 11 22 9.88 22 8.5S20.88 6 19.5 6 17 7.12 17 8.5 18.12 11 19.5 11z" stroke="currentColor" stroke-width="1.5"/>
+                        <path d="M17.34 14.36C16.26 12.5 14.28 11.36 12.14 11.36c-2.28 0-4.22 1.32-5.26 3.3L5.78 17.3A2.5 2.5 0 008.06 21h7.88a2.5 2.5 0 002.28-3.7l-1.1-2.94h.22z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+                      </svg>
+                    </div>
+                  }
+                </div>
+                <div class="animal-info">
+                  <span class="animal-name">{{ pet.name }}</span>
+                  <div class="animal-meta">
+                    <span class="animal-badge">{{ formatAnimalType(pet.type) }}</span>
+                    <span class="animal-badge animal-badge--size">{{ formatSize(pet.size) }}</span>
+                  </div>
+                  @if (pet.specialNeeds) {
+                    <p class="animal-needs">{{ pet.specialNeeds }}</p>
+                  }
+                  @if (pet.estimatedBirthDate) {
+                    <span class="animal-dob">Born approx. {{ formatDate(pet.estimatedBirthDate) }}</span>
+                  }
+                </div>
+                @if (editMode()) {
+                  <div class="card-actions">
+                    <button class="card-action card-action--edit" (click)="openEditPet(pet)" title="Edit">
+                      <svg viewBox="0 0 24 24" fill="none"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                    <button class="card-action card-action--delete" (click)="deletePet(pet.id)" title="Delete">
+                      <svg viewBox="0 0 24 24" fill="none"><polyline points="3,6 5,6 21,6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6M10 11v6M14 11v6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                  </div>
+                }
+              </div>
             }
           </div>
-        </section>
+        } @else {
+          <div class="tab-empty">
+            <div class="tab-empty-icon">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M4.5 11C5.88 11 7 9.88 7 8.5S5.88 6 4.5 6 2 7.12 2 8.5 3.12 11 4.5 11z" stroke="currentColor" stroke-width="1.5"/><path d="M9.5 7C10.88 7 12 5.88 12 4.5S10.88 2 9.5 2 7 3.12 7 4.5 8.12 7 9.5 7z" stroke="currentColor" stroke-width="1.5"/><path d="M14.5 7C15.88 7 17 5.88 17 4.5S15.88 2 14.5 2 12 3.12 12 4.5 13.12 7 14.5 7z" stroke="currentColor" stroke-width="1.5"/><path d="M19.5 11C20.88 11 22 9.88 22 8.5S20.88 6 19.5 6 17 7.12 17 8.5 18.12 11 19.5 11z" stroke="currentColor" stroke-width="1.5"/><path d="M17.34 14.36C16.26 12.5 14.28 11.36 12.14 11.36c-2.28 0-4.22 1.32-5.26 3.3L5.78 17.3A2.5 2.5 0 008.06 21h7.88a2.5 2.5 0 002.28-3.7l-1.1-2.94h.22z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+            </div>
+            <p class="tab-empty-title">No pets yet</p>
+            <p class="tab-empty-sub">Your pets will appear here once added.</p>
+          </div>
+        }
       }
+
+      <!-- Plants Tab -->
+      @if (activeTab() === 'plants') {
+        <div class="list-header">
+          <span class="list-title">
+            My Plants
+            @if (plants().length) {
+              <span class="list-count">({{ plants().length }})</span>
+            }
+          </span>
+          <div class="list-actions">
+            @if (editMode()) {
+              <button class="btn-done" (click)="toggleEditMode()">Done</button>
+            } @else {
+              @if (plants().length) {
+                <button class="btn-secondary" (click)="toggleEditMode()">Edit</button>
+              }
+              <button class="btn-add" (click)="openAddForm('plant')">+ Add</button>
+            }
+          </div>
+        </div>
+
+        @if (plants().length) {
+          <div class="animal-list">
+            @for (plant of plants(); track plant.id) {
+              <div class="animal-card">
+                <div class="animal-img-wrap">
+                  @if (plant.image) {
+                    <img class="animal-img" [src]="plant.image" [alt]="plant.name" />
+                  } @else {
+                    <div class="animal-img animal-img--placeholder">
+                      <svg viewBox="0 0 24 24" fill="none">
+                        <path d="M12 22V12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                        <path d="M12 12C12 12 7 10 5 6c4 0 7 2 7 6z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+                        <path d="M12 16C12 16 17 14 19 10c-4 0-7 2-7 6z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+                      </svg>
+                    </div>
+                  }
+                </div>
+                <div class="animal-info">
+                  <span class="animal-name">{{ plant.name }}</span>
+                  @if (plant.specialNeeds) {
+                    <p class="animal-needs">{{ plant.specialNeeds }}</p>
+                  }
+                  @if (plant.estimatedBirthDate) {
+                    <span class="animal-dob">Planted approx. {{ formatDate(plant.estimatedBirthDate) }}</span>
+                  }
+                </div>
+                @if (editMode()) {
+                  <div class="card-actions">
+                    <button class="card-action card-action--edit" (click)="openEditPlant(plant)" title="Edit">
+                      <svg viewBox="0 0 24 24" fill="none"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                    <button class="card-action card-action--delete" (click)="deletePlant(plant.id)" title="Delete">
+                      <svg viewBox="0 0 24 24" fill="none"><polyline points="3,6 5,6 21,6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6M10 11v6M14 11v6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        } @else {
+          <div class="tab-empty">
+            <div class="tab-empty-icon">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M12 22V12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M12 12C12 12 7 10 5 6c4 0 7 2 7 6z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M12 16C12 16 17 14 19 10c-4 0-7 2-7 6z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+            </div>
+            <p class="tab-empty-title">No plants yet</p>
+            <p class="tab-empty-sub">Your plants will appear here once added.</p>
+          </div>
+        }
+      }
+
+      <!-- Stray Tab -->
+      @if (activeTab() === 'stray') {
+        <div class="list-header">
+          <span class="list-title">
+            Reported Strays
+            @if (strayAnimals().length) {
+              <span class="list-count">({{ strayAnimals().length }})</span>
+            }
+          </span>
+          <div class="list-actions">
+            @if (editMode()) {
+              <button class="btn-done" (click)="toggleEditMode()">Done</button>
+            } @else {
+              @if (strayAnimals().length) {
+                <button class="btn-secondary" (click)="toggleEditMode()">Edit</button>
+              }
+              <button class="btn-add" (click)="openAddForm('stray')">+ Report</button>
+            }
+          </div>
+        </div>
+
+        @if (strayAnimals().length) {
+          <div class="animal-list">
+            @for (stray of strayAnimals(); track stray.id) {
+              <div class="animal-card">
+                <div class="animal-img-wrap">
+                  @if (stray.image) {
+                    <img class="animal-img" [src]="stray.image" [alt]="stray.name ?? 'Stray animal'" />
+                  } @else {
+                    <div class="animal-img animal-img--placeholder">
+                      <svg viewBox="0 0 24 24" fill="none">
+                        <circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="1.5"/>
+                        <path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                      </svg>
+                    </div>
+                  }
+                </div>
+                <div class="animal-info">
+                  <span class="animal-name">{{ stray.name ?? 'Unknown' }}</span>
+                  <div class="animal-meta">
+                    <span class="animal-badge">{{ formatAnimalType(stray.type) }}</span>
+                    <span class="animal-badge animal-badge--size">{{ formatSize(stray.size) }}</span>
+                  </div>
+                  @if (stray.location) {
+                    <div class="stray-location">
+                      <svg class="info-icon" viewBox="0 0 24 24" fill="none"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" stroke="currentColor" stroke-width="1.5"/><circle cx="12" cy="9" r="2.5" stroke="currentColor" stroke-width="1.5"/></svg>
+                      <span>{{ stray.location }}</span>
+                    </div>
+                  }
+                  @if (stray.description) {
+                    <p class="animal-needs">{{ stray.description }}</p>
+                  }
+                </div>
+                @if (editMode()) {
+                  <div class="card-actions">
+                    <button class="card-action card-action--edit" (click)="openEditStray(stray)" title="Edit">
+                      <svg viewBox="0 0 24 24" fill="none"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                    <button class="card-action card-action--delete" (click)="deleteStray(stray.id)" title="Delete">
+                      <svg viewBox="0 0 24 24" fill="none"><polyline points="3,6 5,6 21,6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6M10 11v6M14 11v6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        } @else {
+          <div class="tab-empty">
+            <div class="tab-empty-icon">
+              <svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="1.5"/><path d="M21 21l-4.35-4.35" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            </div>
+            <p class="tab-empty-title">No strays reported</p>
+            <p class="tab-empty-sub">Stray animals you report will appear here.</p>
+          </div>
+        }
+      }
+
     </main>
   } @else {
     <div class="empty-state">
       <p>No profile data available.</p>
+    </div>
+  }
+
+  <!-- Bottom sheet forms (fixed overlay, outside main scroll) -->
+  @if (formKind() !== 'none') {
+    <div class="sheet-backdrop" (click)="closeForm()"></div>
+    <div class="sheet" (click)="$event.stopPropagation()">
+
+      @if (formKind() === 'pet') {
+        <div class="sheet-header">
+          <h2 class="sheet-title">{{ petDraft.id ? 'Edit Pet' : 'Add Pet' }}</h2>
+          <button class="sheet-close" (click)="closeForm()">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          </button>
+        </div>
+        <div class="sheet-body">
+          <div class="form-group">
+            <label class="form-label" for="pet-name">Name <span class="form-required">*</span></label>
+            <input class="form-input" id="pet-name" type="text" placeholder="e.g. Max" [(ngModel)]="petDraft.name" />
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="pet-type">Type <span class="form-required">*</span></label>
+              <select class="form-select" id="pet-type" [(ngModel)]="petDraft.type">
+                @for (t of petTypes; track t) {
+                  <option [value]="t">{{ formatAnimalType(t) }}</option>
+                }
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="pet-size">Size <span class="form-required">*</span></label>
+              <select class="form-select" id="pet-size" [(ngModel)]="petDraft.size">
+                @for (s of animalSizes; track s) {
+                  <option [value]="s">{{ formatSize(s) }}</option>
+                }
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="pet-needs">Special needs</label>
+            <textarea class="form-textarea" id="pet-needs" placeholder="Any special care requirements..." [(ngModel)]="petDraft.specialNeeds" rows="3"></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="pet-dob">Estimated birth date</label>
+            <input class="form-input" id="pet-dob" type="date" [(ngModel)]="petDraft.estimatedBirthDate" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Photo</label>
+            <input #petFileInput type="file" accept="image/*" hidden (change)="onFileSelected($event, petDraft)" />
+            <div class="photo-field">
+              <div class="photo-thumb" (click)="petFileInput.click()">
+                @if (petDraft.image) {
+                  <img class="photo-thumb-img" [src]="petDraft.image" alt="Preview" />
+                  <div class="photo-thumb-overlay">
+                    <svg viewBox="0 0 24 24" fill="none"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="13" r="4" stroke="currentColor" stroke-width="1.5"/></svg>
+                  </div>
+                } @else {
+                  <div class="photo-thumb-empty">
+                    <svg viewBox="0 0 24 24" fill="none"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><polyline points="17,8 12,3 7,8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><line x1="12" y1="3" x2="12" y2="15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                  </div>
+                }
+              </div>
+              <div class="photo-field-meta">
+                <button class="photo-choose-btn" type="button" (click)="petFileInput.click()">Choose photo</button>
+                @if (petDraft.image) {
+                  <button class="photo-remove" type="button" (click)="clearImage(petDraft, $event)">Remove</button>
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="sheet-footer">
+          <button class="sheet-cancel" (click)="closeForm()">Cancel</button>
+          <button class="sheet-save" (click)="savePet()" [disabled]="!petDraft.name.trim()">Save</button>
+        </div>
+      }
+
+      @if (formKind() === 'plant') {
+        <div class="sheet-header">
+          <h2 class="sheet-title">{{ plantDraft.id ? 'Edit Plant' : 'Add Plant' }}</h2>
+          <button class="sheet-close" (click)="closeForm()">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          </button>
+        </div>
+        <div class="sheet-body">
+          <div class="form-group">
+            <label class="form-label" for="plant-name">Name <span class="form-required">*</span></label>
+            <input class="form-input" id="plant-name" type="text" placeholder="e.g. Monstera" [(ngModel)]="plantDraft.name" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="plant-needs">Special needs</label>
+            <textarea class="form-textarea" id="plant-needs" placeholder="e.g. Water twice a week..." [(ngModel)]="plantDraft.specialNeeds" rows="3"></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="plant-dob">Estimated planting date</label>
+            <input class="form-input" id="plant-dob" type="date" [(ngModel)]="plantDraft.estimatedBirthDate" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Photo</label>
+            <input #plantFileInput type="file" accept="image/*" hidden (change)="onFileSelected($event, plantDraft)" />
+            <div class="photo-field">
+              <div class="photo-thumb" (click)="plantFileInput.click()">
+                @if (plantDraft.image) {
+                  <img class="photo-thumb-img" [src]="plantDraft.image" alt="Preview" />
+                  <div class="photo-thumb-overlay">
+                    <svg viewBox="0 0 24 24" fill="none"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="13" r="4" stroke="currentColor" stroke-width="1.5"/></svg>
+                  </div>
+                } @else {
+                  <div class="photo-thumb-empty">
+                    <svg viewBox="0 0 24 24" fill="none"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><polyline points="17,8 12,3 7,8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><line x1="12" y1="3" x2="12" y2="15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                  </div>
+                }
+              </div>
+              <div class="photo-field-meta">
+                <button class="photo-choose-btn" type="button" (click)="plantFileInput.click()">Choose photo</button>
+                @if (plantDraft.image) {
+                  <button class="photo-remove" type="button" (click)="clearImage(plantDraft, $event)">Remove</button>
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="sheet-footer">
+          <button class="sheet-cancel" (click)="closeForm()">Cancel</button>
+          <button class="sheet-save" (click)="savePlant()" [disabled]="!plantDraft.name.trim()">Save</button>
+        </div>
+      }
+
+      @if (formKind() === 'stray') {
+        <div class="sheet-header">
+          <h2 class="sheet-title">{{ strayDraft.id ? 'Edit Report' : 'Report Stray' }}</h2>
+          <button class="sheet-close" (click)="closeForm()">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+          </button>
+        </div>
+        <div class="sheet-body">
+          <div class="form-group">
+            <label class="form-label" for="stray-name">Name</label>
+            <input class="form-input" id="stray-name" type="text" placeholder="Optional name" [(ngModel)]="strayDraft.name" />
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="stray-type">Type <span class="form-required">*</span></label>
+              <select class="form-select" id="stray-type" [(ngModel)]="strayDraft.type">
+                @for (t of strayTypes; track t) {
+                  <option [value]="t">{{ formatAnimalType(t) }}</option>
+                }
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="stray-size">Size <span class="form-required">*</span></label>
+              <select class="form-select" id="stray-size" [(ngModel)]="strayDraft.size">
+                @for (s of animalSizes; track s) {
+                  <option [value]="s">{{ formatSize(s) }}</option>
+                }
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="stray-location">Location <span class="form-required">*</span></label>
+            <input class="form-input" id="stray-location" type="text" placeholder="Where was it spotted?" [(ngModel)]="strayDraft.location" />
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="stray-desc">Description</label>
+            <textarea class="form-textarea" id="stray-desc" placeholder="Any identifying features..." [(ngModel)]="strayDraft.description" rows="3"></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="stray-dob">Estimated birth date</label>
+            <input class="form-input" id="stray-dob" type="date" [(ngModel)]="strayDraft.estimatedBirthDate" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Photo</label>
+            <input #strayFileInput type="file" accept="image/*" hidden (change)="onFileSelected($event, strayDraft)" />
+            <div class="photo-field">
+              <div class="photo-thumb" (click)="strayFileInput.click()">
+                @if (strayDraft.image) {
+                  <img class="photo-thumb-img" [src]="strayDraft.image" alt="Preview" />
+                  <div class="photo-thumb-overlay">
+                    <svg viewBox="0 0 24 24" fill="none"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="13" r="4" stroke="currentColor" stroke-width="1.5"/></svg>
+                  </div>
+                } @else {
+                  <div class="photo-thumb-empty">
+                    <svg viewBox="0 0 24 24" fill="none"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><polyline points="17,8 12,3 7,8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><line x1="12" y1="3" x2="12" y2="15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                  </div>
+                }
+              </div>
+              <div class="photo-field-meta">
+                <button class="photo-choose-btn" type="button" (click)="strayFileInput.click()">Choose photo</button>
+                @if (strayDraft.image) {
+                  <button class="photo-remove" type="button" (click)="clearImage(strayDraft, $event)">Remove</button>
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="sheet-footer">
+          <button class="sheet-cancel" (click)="closeForm()">Cancel</button>
+          <button class="sheet-save" (click)="saveStray()" [disabled]="!strayDraft.location.trim()">Save</button>
+        </div>
+      }
+
     </div>
   }
 </div>
