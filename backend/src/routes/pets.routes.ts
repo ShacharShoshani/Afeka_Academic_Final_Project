@@ -2,57 +2,61 @@ import { Router } from 'express';
 import { ownershipGuard } from '../middleware/auth.js';
 
 const petOwner = ownershipGuard('pet');
-import { Pet } from '@livin/common'
+import { prisma } from '../lib/prisma.js';
 
 const router = Router();
 
-const STUB_PETS = [
-  {
-    id: 'pet-stub-1',
-    ownerId: 'stub-owner',
-    name: 'Max',
-    type: 'dogs',
-    size: 'large',
-    specialNeeds: 'Needs a 30-minute walk every morning',
-    image: '',
-    estimatedBirthDate: '2020-04-10',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    id: 'pet-stub-2',
-    ownerId: 'stub-owner',
-    name: 'Luna',
-    type: 'cats',
-    size: 'small',
-    specialNeeds: '',
-    image: '',
-    estimatedBirthDate: '2021-08-22',
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-];
-
-router.get('/', (_req, res) => {
-  res.json(STUB_PETS);
+router.get('/', async (req, res) => {
+  const myPets = await prisma.pet.findMany({ where: { ownerId: req.user?.id } });
+  res.json(myPets);
 });
 
-router.post('/', (req, res) => {
+router.post('/', async (req, res) => {
   const ownerId = req.user?.id;
 
   if (!ownerId) {
     return res.status(401).json({ message: 'Unauthorized' });
   }
 
-  const pet: Pet = { id: crypto.randomUUID(), ...req.body, ownerId, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString() };
-  res.status(201).json(pet);
+  const newPet = await prisma.pet.create({
+    data: {
+      ...req.body,
+      ownerId,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString()
+    }
+  });
+  res.status(201).json(newPet);
 });
 
-router.put('/:id', petOwner, (req, res) => {
-  res.json({ ...req.body, id: req.params.id, updatedAt: new Date().toISOString() });
+router.put('/:id', petOwner, async (req, res) => {
+  const id = req.params.id as string;
+
+  if (!id) {
+    return res.status(400).json({ message: 'Pet ID is required' });
+  }
+
+  delete req.body.createdAt;
+  delete req.body.ownerId;
+
+  const updatedPet = await prisma.pet.update({
+    where: { id },
+    data: { ...req.body, updatedAt: new Date().toISOString() },
+  });
+  res.json(updatedPet);
 });
 
-router.delete('/:id', petOwner, (_req, res) => {
+router.delete('/:id', petOwner, async (req, res) => {
+  const id = req.params.id as string;
+
+  if (!id) {
+    return res.status(400).json({ message: 'Pet ID is required' });
+  }
+
+  await prisma.pet.delete({
+    where: { id }
+  });
+
   res.status(204).send();
 });
 
