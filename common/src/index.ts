@@ -4,6 +4,8 @@ type CareType = "dogs" | "cats" | "birds" | "fish" | "rabbits" | "hamsters" | "r
 
 type Availability = "mornings" | "afternoons" | "evenings" | "weekends"
 
+type AnimalSize = "small" | "medium" | "large"
+
 type User = {
     id: string;
     name: string;
@@ -39,10 +41,10 @@ type Pet = {
     ownerId: string;
     name: string;
     type: Omit<CareType, "plants" | "stray_animals">;
-    size: "small" | "medium" | "large";
+    size: AnimalSize;
     specialNeeds: string;
     image: string;
-    dateOfBirth: string | null;
+    estimatedBirthDate: string | null;
     createdAt: string;
     updatedAt: string;
 }
@@ -50,10 +52,10 @@ type Pet = {
 type Plant = {
     id: string;
     ownerId: string;
-    kind: string;
+    name: string;
     specialNeeds: string;
     image: string;
-    dateOfBirth: string | null;
+    estimatedBirthDate: string | null;
     createdAt: string;
     updatedAt: string;
 }
@@ -61,14 +63,15 @@ type Plant = {
 type StrayAnimal = {
     id: string;
     name: string | null;
+    size: AnimalSize;
     reporterId: string;
     type: Omit<CareType, "plants" | "stray_animals" | "fish" | "hamsters">;
     location: string;
     description: string;
     image: string;
-    dateOfBirth: string | null;
+    estimatedBirthDate: string | null;
     createdAt: string;
     updatedAt: string;
 }
 
-export { UserRole, CareType, Availability, User, PublicUser, Pet, Plant, StrayAnimal };
+export { UserRole, CareType, Availability, User, PublicUser, Pet, Plant, StrayAnimal, AnimalSize };
