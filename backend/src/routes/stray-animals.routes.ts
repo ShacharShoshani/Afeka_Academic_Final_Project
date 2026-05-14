@@ -1,5 +1,7 @@
 import { Router } from 'express';
-import { isPetPlantOwnerOrStrayReporter } from '../middleware/auth.js';
+import { ownershipGuard } from '../middleware/auth.js';
+
+const strayReporter = ownershipGuard('strayAnimal');
 
 const router = Router();
 
@@ -47,11 +49,11 @@ router.post('/', (req, res) => {
   res.status(201).json(stray);
 });
 
-router.put('/:id', isPetPlantOwnerOrStrayReporter, (req, res) => {
+router.put('/:id', strayReporter, (req, res) => {
   res.json({ ...req.body, id: req.params.id, updatedAt: new Date().toISOString() });
 });
 
-router.delete('/:id', isPetPlantOwnerOrStrayReporter, (_req, res) => {
+router.delete('/:id', strayReporter, (_req, res) => {
   res.status(204).send();
 });
 

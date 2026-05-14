@@ -49,21 +49,43 @@ export async function requireAuth(req: Request, res: Response, next: NextFunctio
   }
 }
 
-export function isPetPlantOwnerOrStrayReporter(req: Request, res: Response, next: NextFunction): void {
-  const userId = req.user?.id;
-  const petOrPlantId = req.params.id;
+export function ownershipGuard(model: 'pet' | 'plant' | 'strayAnimal') {
+  return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    const userId = req.user?.id;
+    const id = req.params.id as string;
 
-  if (!userId) {
-    res.status(401).json({ error: 'Not authenticated' });
-    return;
-  }
+    if (!userId) {
+      res.status(401).json({ error: 'Not authenticated' });
+      return;
+    }
 
-  const isOwner = true; // Placeholder for actual ownership check logic
+    try {
+      let ownerId: string | null = null;
 
-  if (!isOwner) {
-    res.status(403).json({ error: 'Forbidden: You do not own this resource' });
-    return;
-  }
+      if (model === 'pet') {
+        const record = await prisma.pet.findUnique({ where: { id }, select: { ownerId: true } });
+        ownerId = record?.ownerId ?? null;
+      } else if (model === 'plant') {
+        const record = await prisma.plant.findUnique({ where: { id }, select: { ownerId: true } });
+        ownerId = record?.ownerId ?? null;
+      } else {
+        const record = await prisma.strayAnimal.findUnique({ where: { id }, select: { reporterId: true } });
+        ownerId = record?.reporterId ?? null;
+      }
 
-  next();
+      if (ownerId === null) {
+        res.status(404).json({ error: 'Not found' });
+        return;
+      }
+
+      if (ownerId !== userId) {
+        res.status(403).json({ error: 'Forbidden' });
+        return;
+      }
+
+      next();
+    } catch {
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  };
 }
