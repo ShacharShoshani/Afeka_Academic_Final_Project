@@ -248,6 +248,12 @@ body {
   color: var(--color-text-secondary);
 }
 
+.stray-location svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
 /* Card edit/delete actions */
 .card-actions {
   display: flex;
