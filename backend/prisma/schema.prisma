@@ -21,6 +21,50 @@ model User {
   passwordHash String
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @updatedAt
+  pets         Pet[]
+  plants       Plant[]
+  strayAnimals StrayAnimal[]
+}
+
+model Pet {
+  id                 String     @id @default(uuid())
+  name               String
+  type               PetType
+  size               AnimalSize
+  specialNeeds       String
+  image              String
+  estimatedBirthDate String?
+  ownerId            String
+  owner              User       @relation(fields: [ownerId], references: [id])
+  createdAt          DateTime   @default(now())
+  updatedAt          DateTime   @updatedAt
+}
+
+model Plant {
+  id                 String   @id @default(uuid())
+  name               String
+  specialNeeds       String
+  image              String
+  estimatedBirthDate String?
+  ownerId            String
+  owner              User     @relation(fields: [ownerId], references: [id])
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+
+model StrayAnimal {
+  id                 String          @id @default(uuid())
+  name               String?
+  type               StrayAnimalType
+  size               AnimalSize
+  location           String
+  description        String
+  image              String
+  estimatedBirthDate String?
+  reporterId         String
+  reporter           User            @relation(fields: [reporterId], references: [id])
+  createdAt          DateTime        @default(now())
+  updatedAt          DateTime        @updatedAt
 }
 
 enum UserRole {
@@ -41,9 +85,33 @@ enum CareType {
   stray_animals
 }
 
+enum StrayAnimalType {
+  dogs
+  cats
+  birds
+  rabbits
+  reptiles
+}
+
 enum Availability {
   mornings
   afternoons
   evenings
   weekends
+}
+
+enum PetType {
+  dogs
+  cats
+  birds
+  fish
+  rabbits
+  hamsters
+  reptiles
+}
+
+enum AnimalSize {
+  small
+  medium
+  large
 }
