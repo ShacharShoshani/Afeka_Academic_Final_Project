@@ -1,56 +1,60 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal, computed } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { HomeDataService } from './home-data.service';
+import { PetsTab } from './tabs/pets-tab/pets-tab';
+import { PlantsTab } from './tabs/plants-tab/plants-tab';
+import { StrayTab } from './tabs/stray-tab/stray-tab';
+import { formatDate, formatJoinDate, formatLastUpdated, formatCareType, formatAvailability } from '../../shared/utils/format';
+
+type Tab = 'profile' | 'pets' | 'plants' | 'stray';
 
 @Component({
   selector: 'app-home',
-  imports: [RouterLink],
+  imports: [RouterLink, PetsTab, PlantsTab, StrayTab],
   templateUrl: './home.html',
   styleUrl: './home.css',
+  providers: [HomeDataService],
 })
 export class Home {
   private readonly router = inject(Router);
   protected readonly authService = inject(AuthService);
+  protected readonly homeDataService = inject(HomeDataService);
 
   protected readonly user = this.authService.user;
+  protected readonly isOwner = computed(() => this.user()?.role === 'owner');
+  protected readonly activeTab = signal<Tab>('profile');
+
+  protected readonly formatDate = formatDate;
+  protected readonly formatJoinDate = formatJoinDate;
+  protected readonly formatLastUpdated = formatLastUpdated;
+  protected readonly formatCareType = formatCareType;
+  protected readonly formatAvailability = formatAvailability;
+
+  constructor() {
+    if (!this.authService.isLoggedIn()) {
+      this.router.navigate(['/login']);
+    }
+    else {
+      this.loadData();
+    }
+  }
+
+  private loadData(): void {
+    this.homeDataService.loadPets();
+    this.homeDataService.loadPlants();
+    this.homeDataService.loadStrayAnimals();
+  }
+
+  protected setTab(tab: Tab): void {
+    this.activeTab.set(tab);
+  }
 
   protected getRoleLabel(role: string | undefined): string {
     if (role === 'owner') return 'Pet Owner';
     if (role === 'caretaker') return 'Caretaker';
     if (role === 'admin') return 'Admin';
     return '';
-  }
-
-  protected formatDate(dateStr: string): string {
-    if (!dateStr) return '';
-    const d = new Date(dateStr);
-    return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
-  }
-
-  protected formatJoinDate(dateStr: string): string {
-    if (!dateStr) return '';
-    const d = new Date(dateStr);
-    return d.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
-  }
-
-  protected formatLastUpdated(dateStr: string): string {
-    if (!dateStr) return '';
-    const d = new Date(dateStr);
-    const now = new Date();
-    const diffMs = now.getTime() - d.getTime();
-    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-    if (diffDays === 0) return 'today';
-    if (diffDays === 1) return 'yesterday';
-    if (diffDays < 30) return `${diffDays} days ago`;
-    return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
-  }
-
-  protected formatCareType(type: string): string {
-    return type.charAt(0).toUpperCase() + type.slice(1).replace('_', ' ');
-  }
-
-  protected formatAvailability(slot: string): string {
-    return slot.charAt(0).toUpperCase() + slot.slice(1);
   }
 
   protected logout(): void {

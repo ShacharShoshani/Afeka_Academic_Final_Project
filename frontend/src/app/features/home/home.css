@@ -168,7 +168,6 @@
   letter-spacing: 0.05em;
 }
 
-/* Contact list */
 .info-list {
   list-style: none;
   display: flex;
@@ -191,14 +190,12 @@
   color: var(--color-primary);
 }
 
-/* Bio */
 .bio-text {
   color: var(--color-text-primary);
   font-size: 0.9375rem;
   line-height: 1.6;
 }
 
-/* Chips */
 .chip-list {
   display: flex;
   flex-wrap: wrap;
@@ -221,4 +218,52 @@
   align-items: center;
   justify-content: center;
   color: var(--color-text-secondary);
+}
+
+/* Tab bar */
+.tab-bar {
+  display: flex;
+  background: var(--color-white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: 6px;
+  gap: 4px;
+}
+
+.tab-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 9px 8px;
+  border: none;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    background var(--transition-fast),
+    color var(--transition-fast);
+  white-space: nowrap;
+}
+
+.tab-btn:hover:not(.tab-btn--active) {
+  background: var(--color-gray-100);
+  color: var(--color-text-primary);
+}
+
+.tab-btn--active {
+  background: var(--color-gradient-primary);
+  color: var(--color-white);
+  font-weight: 600;
+}
+
+.tab-icon {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
 }

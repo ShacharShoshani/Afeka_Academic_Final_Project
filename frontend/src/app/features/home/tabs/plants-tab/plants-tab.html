@@ -1,0 +1,121 @@
+<div class="list-header">
+  <span class="list-title">
+    My Plants
+    @if (plants().length) {
+      <span class="list-count">({{ plants().length }})</span>
+    }
+  </span>
+  <div class="list-actions">
+    @if (editMode()) {
+      <button class="btn-done" (click)="toggleEditMode()">Done</button>
+    } @else {
+      @if (plants().length) {
+        <button class="btn-secondary" (click)="toggleEditMode()">Edit</button>
+      }
+      <button class="btn-add" (click)="openAdd()">+ Add</button>
+    }
+  </div>
+</div>
+
+@if (plants().length) {
+  <div class="animal-list">
+    @for (plant of plants(); track plant.id) {
+      <div class="animal-card">
+        <div class="animal-img-wrap">
+          @if (plant.image) {
+            <img class="animal-img" [src]="plant.image" [alt]="plant.name" />
+          } @else {
+            <div class="animal-img animal-img--placeholder">
+              <svg viewBox="0 0 24 24" fill="none">
+                <path d="M12 22V12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                <path d="M12 12C12 12 7 10 5 6c4 0 7 2 7 6z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+                <path d="M12 16C12 16 17 14 19 10c-4 0-7 2-7 6z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+              </svg>
+            </div>
+          }
+        </div>
+        <div class="animal-info">
+          <span class="animal-name">{{ plant.name }}</span>
+          @if (plant.specialNeeds) {
+            <p class="animal-needs">{{ plant.specialNeeds }}</p>
+          }
+          @if (plant.estimatedBirthDate) {
+            <span class="animal-dob">Planted approx. {{ formatDate(plant.estimatedBirthDate) }}</span>
+          }
+        </div>
+        @if (editMode()) {
+          <div class="card-actions">
+            <button class="card-action card-action--edit" (click)="openEdit(plant)" title="Edit">
+              <svg viewBox="0 0 24 24" fill="none"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            <button class="card-action card-action--delete" (click)="delete(plant.id)" title="Delete">
+              <svg viewBox="0 0 24 24" fill="none"><polyline points="3,6 5,6 21,6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6M10 11v6M14 11v6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+          </div>
+        }
+      </div>
+    }
+  </div>
+} @else {
+  <div class="tab-empty">
+    <div class="tab-empty-icon">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M12 22V12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M12 12C12 12 7 10 5 6c4 0 7 2 7 6z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M12 16C12 16 17 14 19 10c-4 0-7 2-7 6z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+    </div>
+    <p class="tab-empty-title">No plants yet</p>
+    <p class="tab-empty-sub">Your plants will appear here once added.</p>
+  </div>
+}
+
+@if (formOpen()) {
+  <div class="sheet-backdrop" (click)="closeForm()"></div>
+  <div class="sheet" (click)="$event.stopPropagation()">
+    <div class="sheet-header">
+      <h2 class="sheet-title">{{ draft.id ? 'Edit Plant' : 'Add Plant' }}</h2>
+      <button class="sheet-close" (click)="closeForm()">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="sheet-body">
+      <div class="form-group">
+        <label class="form-label" for="plant-name">Name <span class="form-required">*</span></label>
+        <input class="form-input" id="plant-name" type="text" placeholder="e.g. Monstera" [(ngModel)]="draft.name" />
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="plant-needs">Special needs</label>
+        <textarea class="form-textarea" id="plant-needs" placeholder="e.g. Water twice a week..." [(ngModel)]="draft.specialNeeds" rows="3"></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="plant-dob">Estimated planting date</label>
+        <input class="form-input" id="plant-dob" type="date" [(ngModel)]="draft.estimatedBirthDate" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Photo</label>
+        <input #fileInput type="file" accept="image/*" hidden (change)="onFileSelected($event)" />
+        <div class="photo-field">
+          <div class="photo-thumb" (click)="fileInput.click()">
+            @if (draft.image) {
+              <img class="photo-thumb-img" [src]="draft.image" alt="Preview" />
+              <div class="photo-thumb-overlay">
+                <svg viewBox="0 0 24 24" fill="none"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="13" r="4" stroke="currentColor" stroke-width="1.5"/></svg>
+              </div>
+            } @else {
+              <div class="photo-thumb-empty">
+                <svg viewBox="0 0 24 24" fill="none"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><polyline points="17,8 12,3 7,8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><line x1="12" y1="3" x2="12" y2="15" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+              </div>
+            }
+          </div>
+          <div class="photo-field-meta">
+            <button class="photo-choose-btn" type="button" (click)="fileInput.click()">Choose photo</button>
+            @if (draft.image) {
+              <button class="photo-remove" type="button" (click)="clearImage($event)">Remove</button>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sheet-footer">
+      <button class="sheet-cancel" (click)="closeForm()">Cancel</button>
+      <button class="sheet-save" (click)="save()" [disabled]="!draft.name.trim()">Save</button>
+    </div>
+  </div>
+}
