@@ -47,5 +47,11 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./features/browse/browse').then((m) => m.Browse),
   },
+  {
+    path: 'users/:id',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/user-profile/user-profile').then((m) => m.UserProfile),
+  },
   { path: '', redirectTo: 'home', pathMatch: 'full' },
 ];

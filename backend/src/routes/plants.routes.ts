@@ -3,7 +3,6 @@ import { ownershipGuard } from '../middleware/auth.js';
 
 const plantOwner = ownershipGuard('plant');
 import { prisma } from '../lib/prisma.js';
-import de from 'zod/v4/locales/de.js';
 
 const router = Router();
 
