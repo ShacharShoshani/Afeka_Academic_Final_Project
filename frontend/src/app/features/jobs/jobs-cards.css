@@ -1,0 +1,249 @@
+/* ── Job list ───────────────────────────────────────────────────────────────── */
+.job-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 4px 16px 40px;
+  max-width: 640px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.job-card {
+  display: flex;
+  gap: 12px;
+  background: var(--color-white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: 16px;
+  transition: box-shadow var(--transition-fast);
+}
+
+.job-card:hover {
+  box-shadow: var(--shadow-card-hover);
+}
+
+.job-card-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  cursor: pointer;
+}
+
+.job-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.job-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  line-height: 1.3;
+}
+
+/* ── Status badge ───────────────────────────────────────────────────────────── */
+.status-badge {
+  flex-shrink: 0;
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.status-badge[data-status='pending'] {
+  background: #fef9c3;
+  color: #854d0e;
+}
+
+.status-badge[data-status='accepted'] {
+  background: var(--color-primary-light);
+  color: var(--color-primary-dark);
+}
+
+.status-badge[data-status='completed'] {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.status-badge[data-status='cancelled'] {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+/* ── Job body ───────────────────────────────────────────────────────────────── */
+.job-desc {
+  font-size: 0.9375rem;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+
+.job-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 2px;
+}
+
+.job-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+}
+
+.job-meta-item svg {
+  flex-shrink: 0;
+  color: var(--color-primary);
+}
+
+.job-footer {
+  margin-top: 4px;
+}
+
+.job-owner-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.job-owner-link:hover {
+  color: var(--color-primary);
+}
+
+.job-owner-link svg {
+  flex-shrink: 0;
+}
+
+/* ── Card edit/delete actions ───────────────────────────────────────────────── */
+.card-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-self: center;
+  flex-shrink: 0;
+}
+
+.card-action {
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--transition-fast);
+}
+
+.card-action svg {
+  width: 15px;
+  height: 15px;
+}
+
+.card-action--edit {
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+}
+
+.card-action--edit:hover {
+  background: #ccfbf1;
+}
+
+.card-action--delete {
+  background: #fee2e2;
+  color: #ef4444;
+}
+
+.card-action--delete:hover {
+  background: #fecaca;
+}
+
+/* ── Selected card highlight ────────────────────────────────────────────────── */
+.job-card--selected {
+  box-shadow:
+    0 0 0 2px var(--color-primary),
+    var(--shadow-card-hover);
+}
+
+/* ── Location meta chip ─────────────────────────────────────────────────────── */
+.job-meta-item--location {
+  color: var(--color-primary);
+  font-weight: 500;
+}
+
+.job-meta-item--location svg {
+  color: var(--color-primary);
+}
+
+/* ── List section headers ───────────────────────────────────────────────────── */
+.list-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 2px 4px;
+}
+
+.list-section-header--gap {
+  margin-top: 16px;
+}
+
+.list-section-header__label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+}
+
+.list-section-header__label svg {
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.list-section-header__count {
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  background: var(--color-gray-200);
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+}
+
+/* ── Own-job card accent ─────────────────────────────────────────────────────── */
+.job-card--mine {
+  border-left: 3px solid var(--color-primary);
+}
+
+/* ── "Your post" label in own card footer ───────────────────────────────────── */
+.job-mine-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.job-mine-label svg {
+  flex-shrink: 0;
+}

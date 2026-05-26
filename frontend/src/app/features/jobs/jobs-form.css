@@ -1,0 +1,141 @@
+/* ── Location search in form ────────────────────────────────────────────────── */
+.location-search-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.location-search-icon {
+  position: absolute;
+  left: 12px;
+  color: var(--color-primary);
+  pointer-events: none;
+  flex-shrink: 0;
+}
+
+.location-input {
+  padding-left: 36px;
+  padding-right: 36px;
+}
+
+.location-clear-btn {
+  position: absolute;
+  right: 10px;
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--color-gray-200);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.location-clear-btn:hover {
+  background: var(--color-gray-400);
+  color: var(--color-white);
+}
+
+/* ── Location preview (address + mini-map) ──────────────────────────────────── */
+.location-preview {
+  margin-top: 8px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1.5px solid var(--color-gray-200);
+}
+
+.location-address-text {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+  padding: 8px 10px;
+  background: var(--color-gray-100);
+  border-bottom: 1px solid var(--color-gray-200);
+}
+
+.location-address-text svg {
+  flex-shrink: 0;
+  color: var(--color-primary);
+}
+
+/* ── Care subjects picker ───────────────────────────────────────────────────── */
+.subjects-loading,
+.subjects-empty {
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+  padding: 8px 0;
+}
+
+.subjects-section-label {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 10px 0 6px;
+}
+
+.subjects-section-label:first-child {
+  margin-top: 4px;
+}
+
+.subjects-section-label svg {
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.subjects-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.subject-chip {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px 6px 10px;
+  border: 1.5px solid var(--color-gray-200);
+  border-radius: var(--radius-full);
+  background: var(--color-white);
+  cursor: pointer;
+  font-family: inherit;
+  transition:
+    border-color var(--transition-fast),
+    background var(--transition-fast);
+}
+
+.subject-chip:hover {
+  border-color: var(--color-primary);
+  background: var(--color-primary-light);
+}
+
+.subject-chip--selected {
+  border-color: var(--color-primary);
+  background: var(--color-primary-light);
+}
+
+.subject-check {
+  color: var(--color-primary);
+  flex-shrink: 0;
+}
+
+.subject-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.subject-meta {
+  font-size: 0.75rem;
+  color: var(--color-text-secondary);
+}

@@ -72,9 +72,43 @@
     </div>
   } @else {
     <main class="job-list">
-      @for (job of filteredJobs(); track job.id) {
+      @for (job of sortedFilteredJobs(); track job.id; let i = $index) {
+
+        <!-- ── Section header: My Posts (before the very first own-job) ── -->
+        @if (i === 0 && isMyJob(job)) {
+          <div class="list-section-header">
+            <span class="list-section-header__label">
+              <svg viewBox="0 0 24 24" fill="none" width="14" height="14">
+                <circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M4 20c0-4 3.582-7 8-7s8 3 8 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+              My Posts
+            </span>
+            <span class="list-section-header__count">{{ myJobs().length }}</span>
+          </div>
+        }
+
+        <!-- ── Section header: Community / Available Jobs ──
+             Fires at i=0 when no own jobs exist, or at the transition point
+             when the previous card was mine and this one is not.            ── -->
+        @if (!isMyJob(job) && (i === 0 || isMyJob(sortedFilteredJobs()[i - 1]))) {
+          <div class="list-section-header" [class.list-section-header--gap]="i > 0">
+            <span class="list-section-header__label">
+              <svg viewBox="0 0 24 24" fill="none" width="14" height="14">
+                <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M23 21v-2a4 4 0 00-3-3.87" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M16 3.13a4 4 0 010 7.75" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              {{ myJobs().length > 0 ? 'Community Jobs' : 'Available Jobs' }}
+            </span>
+            <span class="list-section-header__count">{{ communityJobs().length }}</span>
+          </div>
+        }
+
         <article
           class="job-card"
+          [class.job-card--mine]="isMyJob(job)"
           [class.job-card--selected]="selectedJobId() === job.id"
         >
           <!-- Clicking the main body selects/deselects the job on the map -->
@@ -135,13 +169,23 @@
             </div>
 
             <div class="job-footer">
-              <a class="job-owner-link" [routerLink]="['/users', job.ownerId]" (click)="$event.stopPropagation()">
-                <svg viewBox="0 0 24 24" fill="none" width="14" height="14">
-                  <circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.5"/>
-                  <path d="M4 20c0-4 3.582-7 8-7s8 3 8 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                </svg>
-                {{ job.owner?.name ?? 'Owner' }}
-              </a>
+              @if (isMyJob(job)) {
+                <span class="job-mine-label">
+                  <svg viewBox="0 0 24 24" fill="none" width="13" height="13">
+                    <circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.5"/>
+                    <path d="M4 20c0-4 3.582-7 8-7s8 3 8 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                  </svg>
+                  Your post
+                </span>
+              } @else {
+                <a class="job-owner-link" [routerLink]="['/users', job.ownerId]" (click)="$event.stopPropagation()">
+                  <svg viewBox="0 0 24 24" fill="none" width="14" height="14">
+                    <circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.5"/>
+                    <path d="M4 20c0-4 3.582-7 8-7s8 3 8 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                  </svg>
+                  {{ job.owner?.name ?? 'Owner' }}
+                </a>
+              }
             </div>
           </div>
 

@@ -15,7 +15,7 @@ const ALL_AVAILABILITY: Availability[] = ['mornings', 'afternoons', 'evenings', 
   selector: 'app-browse',
   imports: [RouterLink, FormsModule],
   templateUrl: './browse.html',
-  styleUrl: './browse.css',
+  styleUrls: ['./browse.css', './browse-cards.css'],
 })
 export class Browse implements OnInit {
   private readonly router = inject(Router);

@@ -13,7 +13,7 @@ import { AuthService } from '../../services/auth.service';
   selector: 'app-registration-step4',
   imports: [ProgressBar, ReactiveFormsModule],
   templateUrl: './registration-step4.html',
-  styleUrl: './registration-step4.css',
+  styleUrls: ['./registration-step4.css', './registration-step4-form.css'],
 })
 export class RegistrationStep4 {
   private readonly router = inject(Router);

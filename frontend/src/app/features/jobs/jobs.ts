@@ -50,7 +50,7 @@ const DEFAULT_CENTER: google.maps.LatLngLiteral = { lat: 32.0853, lng: 34.7818 }
   selector: 'app-jobs',
   imports: [RouterLink, FormsModule, GoogleMap, MapMarker],
   templateUrl: './jobs.html',
-  styleUrl: './jobs.css',
+  styleUrls: ['./jobs.css', './jobs-cards.css', './jobs-form.css'],
 })
 export class Jobs implements OnInit {
   /** Template ref for the Places Autocomplete input inside the form sheet. */
@@ -103,6 +103,20 @@ export class Jobs implements OnInit {
     const jobs = this.allJobs();
     return filter === 'all' ? jobs : jobs.filter((j) => j.status === filter);
   });
+
+  protected readonly myJobs = computed(() =>
+    this.filteredJobs().filter((j) => this.isMyJob(j)),
+  );
+
+  protected readonly communityJobs = computed(() =>
+    this.filteredJobs().filter((j) => !this.isMyJob(j)),
+  );
+
+  /** Own jobs first, then community jobs — drives the section-aware list. */
+  protected readonly sortedFilteredJobs = computed(() => [
+    ...this.myJobs(),
+    ...this.communityJobs(),
+  ]);
 
   /** Only the jobs that carry valid coordinates — used to render map markers. */
   protected readonly jobsWithLocation = computed(() =>
