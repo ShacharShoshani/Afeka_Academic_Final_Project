@@ -1,110 +1,73 @@
 import { z } from 'zod';
-import { Job, JobStatus } from '@livin/common';
+import { JobStatus } from '@livin/common';
 
-const jobStatuses: JobStatus[] = ["pending", "accepted", "completed", "cancelled"] as const;
+const jobStatuses: [JobStatus, ...JobStatus[]] = ["pending", "accepted", "completed", "cancelled"];
 
 export const createJobSchema = z.object({
-    type: "object",
-    properties: {
-        title: { type: "string", minLength: 1 },
-        description: { type: "string", minLength: 1 },
-        startDate: { type: "string", format: "date-time" },
-        endDate: { type: "string", format: "date-time" },
-        locationLat: { type: "number" },
-        locationLng: { type: "number" },
-        paymentMethod: { type: "string", minLength: 1 },
-        paymentAmount: { type: "number", minimum: 0 },
-        paymentCurrency: { type: "string", minLength: 1 },
-        petIds: {
-            type: "array",
-            items: { type: "string" },
-            uniqueItems: true,
-        },
-        plantIds: {
-            type: "array",
-            items: { type: "string" },
-            uniqueItems: true,
-        },
-        strayAnimalIds: {
-            type: "array",
-            items: { type: "string" },
-            uniqueItems: true,
-        },
-    },
-    required: ["title", "description"],
-    additionalProperties: false,
+    title: z.string().min(1),
+    description: z.string().min(1),
+    startDate: z.iso.datetime(),
+    endDate: z.iso.datetime(),
+    locationLat: z.number(),
+    locationLng: z.number(),
+    paymentMethod: z.string().min(1),
+    paymentAmount: z.number().min(0),
+    paymentCurrency: z.string().min(1),
+    petIds: z.array(z.string()).refine((arr) => new Set(arr).size === arr.length, {
+        message: "petIds must contain unique values",
+    }).optional(),
+    plantIds: z.array(z.string()).refine((arr) => new Set(arr).size === arr.length, {
+        message: "plantIds must contain unique values",
+    }).optional(),
+    strayAnimalIds: z.array(z.string()).refine((arr) => new Set(arr).size === arr.length, {
+        message: "strayAnimalIds must contain unique values",
+    }).optional(),
 });
 
 export type CreateJobInput = z.infer<typeof createJobSchema>;
 
 export const updateJobSchema = z.object({
-    type: "object",
-    properties: {
-        title: { type: "string", minLength: 1, optional: true },
-        description: { type: "string", minLength: 1, optional: true },
-        startDate: { type: "string", format: "date-time", optional: true },
-        endDate: { type: "string", format: "date-time", optional: true },
-        locationLat: { type: "number", optional: true },
-        locationLng: { type: "number", optional: true },
-        paymentMethod: { type: "string", minLength: 1, optional: true },
-        paymentAmount: { type: "number", minimum: 0, optional: true },
-        paymentCurrency: { type: "string", minLength: 1, optional: true },
-        petIds: {
-            type: "array",
-            items: { type: "string" },
-            uniqueItems: true,
-            optional: true
-        },
-        plantIds: {
-            type: "array",
-            items: { type: "string" },
-            uniqueItems: true,
-            optional: true
-        },
-        strayAnimalIds: {
-            type: "array",
-            items: { type: "string" },
-            uniqueItems: true,
-            optional: true
-        },
-    },
-    additionalProperties: false,
+    title: z.string().min(1).optional(),
+    description: z.string().min(1).optional(),
+    startDate: z.iso.datetime().optional(),
+    endDate: z.iso.datetime().optional(),
+    locationLat: z.number().optional(),
+    locationLng: z.number().optional(),
+    paymentMethod: z.string().min(1).optional(),
+    paymentAmount: z.number().min(0).optional(),
+    paymentCurrency: z.string().min(1).optional(),
+    petIds: z.array(z.string()).refine((arr) => new Set(arr).size === arr.length, {
+        message: "petIds must contain unique values",
+    }).optional(),
+    plantIds: z.array(z.string()).refine((arr) => new Set(arr).size === arr.length, {
+        message: "plantIds must contain unique values",
+    }).optional(),
+    strayAnimalIds: z.array(z.string()).refine((arr) => new Set(arr).size === arr.length, {
+        message: "strayAnimalIds must contain unique values",
+    }).optional(),
 });
 
 export type UpdateJobInput = z.infer<typeof updateJobSchema>;
 
 export const jobFilterSchema = z.object({
-    type: "object",
-    properties: {
-        status: { type: "string", enum: jobStatuses, optional: true },
-        search: { type: "string", minLength: 1, optional: true },
-        page: { type: "number", minimum: 1, optional: true },
-        limit: { type: "number", minimum: 1, maximum: 100, optional: true },
-        petTypes: {
-            type: "array",
-            items: { type: "string" },
-            uniqueItems: true,
-            optional: true
-        },
-        plantTypes: {
-            type: "array",
-            items: { type: "string" },
-            uniqueItems: true,
-            optional: true
-        },
-        strayAnimalTypes: {
-            type: "array",
-            items: { type: "string" },
-            uniqueItems: true,
-            optional: true
-        },
-        startDateFrom: { type: "string", format: "date-time", optional: true },
-        startDateTo: { type: "string", format: "date-time", optional: true },
-        endDateFrom: { type: "string", format: "date-time", optional: true },
-        endDateTo: { type: "string", format: "date-time", optional: true },
-        locationLat: { type: "number", optional: true },
-        locationLng: { type: "number", optional: true },
-        locationRadius: { type: "number", minimum: 0, optional: true },
-    },
-    additionalProperties: false,
+    status: z.enum(jobStatuses).optional(),
+    search: z.string().min(1).optional(),
+    page: z.number().min(1).optional(),
+    limit: z.number().min(1).max(100).optional(),
+    petTypes: z.array(z.string()).refine((arr) => new Set(arr).size === arr.length, {
+        message: "petTypes must contain unique values",
+    }).optional(),
+    plantTypes: z.array(z.string()).refine((arr) => new Set(arr).size === arr.length, {
+        message: "plantTypes must contain unique values",
+    }).optional(),
+    strayAnimalTypes: z.array(z.string()).refine((arr) => new Set(arr).size === arr.length, {
+        message: "strayAnimalTypes must contain unique values",
+    }).optional(),
+    startDateFrom: z.iso.datetime().optional(),
+    startDateTo: z.iso.datetime().optional(),
+    endDateFrom: z.iso.datetime().optional(),
+    endDateTo: z.iso.datetime().optional(),
+    locationLat: z.number().optional(),
+    locationLng: z.number().optional(),
+    locationRadius: z.number().min(0).optional(),
 });
