@@ -74,7 +74,7 @@ type StrayAnimal = {
     updatedAt: string;
 }
 
-type JobStatus = "open" | "in_progress" | "completed" | "cancelled"
+type JobStatus = "pending" | "accepted" | "completed" | "cancelled"
 
 type Job = {
     id: string;

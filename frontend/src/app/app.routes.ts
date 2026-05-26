@@ -48,6 +48,12 @@ export const routes: Routes = [
       import('./features/browse/browse').then((m) => m.Browse),
   },
   {
+    path: 'jobs',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/jobs/jobs').then((m) => m.Jobs),
+  },
+  {
     path: 'users/:id',
     canActivate: [authGuard],
     loadComponent: () =>

@@ -1,0 +1,434 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  background: var(--color-gray-100);
+}
+
+/* ── Header ─────────────────────────────────────────────────────────────────── */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 20px;
+  background: var(--color-white);
+  border-bottom: 1px solid var(--color-gray-200);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.back-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 0;
+  border: none;
+  background: none;
+  color: var(--color-text-secondary);
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color var(--transition-fast);
+  min-width: 72px;
+}
+
+.back-btn:hover {
+  color: var(--color-primary);
+}
+
+.title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.header-spacer {
+  min-width: 72px;
+}
+
+.btn-add {
+  padding: 8px 16px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--color-gradient-primary);
+  color: var(--color-white);
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity var(--transition-fast);
+  white-space: nowrap;
+}
+
+.btn-add:hover {
+  opacity: 0.88;
+}
+
+/* ── Map section ────────────────────────────────────────────────────────────── */
+.map-section {
+  position: sticky;
+  top: 57px; /* matches header height */
+  z-index: 5;
+  border-bottom: 1px solid var(--color-gray-200);
+}
+
+.map-no-location {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-size: 0.75rem;
+  padding: 4px 12px;
+  border-radius: var(--radius-full);
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+/* ── Filter bar ─────────────────────────────────────────────────────────────── */
+.filter-bar {
+  display: flex;
+  gap: 8px;
+  padding: 14px 16px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.filter-bar::-webkit-scrollbar {
+  display: none;
+}
+
+.filter-chip {
+  flex-shrink: 0;
+  padding: 7px 16px;
+  border: 1.5px solid var(--color-gray-200);
+  border-radius: var(--radius-full);
+  background: var(--color-white);
+  color: var(--color-text-secondary);
+  font-family: inherit;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color var(--transition-fast), color var(--transition-fast), background var(--transition-fast);
+}
+
+.filter-chip.active {
+  border-color: var(--color-primary);
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+/* ── Status / empty ─────────────────────────────────────────────────────────── */
+.status-block {
+  text-align: center;
+  padding: 48px 24px;
+  color: var(--color-text-secondary);
+  font-size: 0.9375rem;
+}
+
+.status-error {
+  color: #ef4444;
+}
+
+.empty-state {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 64px 24px;
+  text-align: center;
+}
+
+.empty-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: var(--radius-full);
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.empty-icon svg {
+  width: 28px;
+  height: 28px;
+}
+
+.empty-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.empty-sub {
+  font-size: 0.875rem;
+  color: var(--color-text-secondary);
+  max-width: 280px;
+}
+
+/* ── Job list ───────────────────────────────────────────────────────────────── */
+.job-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 4px 16px 40px;
+  max-width: 640px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.job-card {
+  display: flex;
+  gap: 12px;
+  background: var(--color-white);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: 16px;
+  transition: box-shadow var(--transition-fast);
+}
+
+.job-card:hover {
+  box-shadow: var(--shadow-card-hover);
+}
+
+.job-card-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.job-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.job-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  line-height: 1.3;
+}
+
+/* ── Status badge ───────────────────────────────────────────────────────────── */
+.status-badge {
+  flex-shrink: 0;
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.status-badge[data-status="pending"] {
+  background: #fef9c3;
+  color: #854d0e;
+}
+
+.status-badge[data-status="accepted"] {
+  background: var(--color-primary-light);
+  color: var(--color-primary-dark);
+}
+
+.status-badge[data-status="completed"] {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.status-badge[data-status="cancelled"] {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+/* ── Job body ───────────────────────────────────────────────────────────────── */
+.job-desc {
+  font-size: 0.9375rem;
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.job-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 2px;
+}
+
+.job-meta-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+}
+
+.job-meta-item svg {
+  flex-shrink: 0;
+  color: var(--color-primary);
+}
+
+.job-footer {
+  margin-top: 4px;
+}
+
+.job-owner-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+.job-owner-link:hover {
+  color: var(--color-primary);
+}
+
+.job-owner-link svg {
+  flex-shrink: 0;
+}
+
+/* ── Card edit/delete actions (shared with other tabs) ──────────────────────── */
+.card-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-self: center;
+  flex-shrink: 0;
+}
+
+.card-action {
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--transition-fast);
+}
+
+.card-action svg {
+  width: 15px;
+  height: 15px;
+}
+
+.card-action--edit {
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+}
+
+.card-action--edit:hover {
+  background: #ccfbf1;
+}
+
+.card-action--delete {
+  background: #fee2e2;
+  color: #ef4444;
+}
+
+.card-action--delete:hover {
+  background: #fecaca;
+}
+
+/* ── Selected card highlight ────────────────────────────────────────────────── */
+.job-card-main {
+  cursor: pointer;
+}
+
+.job-card--selected {
+  box-shadow: 0 0 0 2px var(--color-primary), var(--shadow-card-hover);
+}
+
+/* ── Location meta chip ─────────────────────────────────────────────────────── */
+.job-meta-item--location {
+  color: var(--color-primary);
+  font-weight: 500;
+}
+
+.job-meta-item--location svg {
+  color: var(--color-primary);
+}
+
+/* ── Location search in form ────────────────────────────────────────────────── */
+.location-search-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.location-search-icon {
+  position: absolute;
+  left: 12px;
+  color: var(--color-primary);
+  pointer-events: none;
+  flex-shrink: 0;
+}
+
+.location-input {
+  padding-left: 36px;
+  padding-right: 36px;
+}
+
+.location-clear-btn {
+  position: absolute;
+  right: 10px;
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--color-gray-200);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.location-clear-btn:hover {
+  background: var(--color-gray-400);
+  color: var(--color-white);
+}
+
+/* ── Location preview (address + mini-map) ──────────────────────────────────── */
+.location-preview {
+  margin-top: 8px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  border: 1.5px solid var(--color-gray-200);
+}
+
+.location-address-text {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.8125rem;
+  color: var(--color-text-secondary);
+  padding: 8px 10px;
+  background: var(--color-gray-100);
+  border-bottom: 1px solid var(--color-gray-200);
+}
+
+.location-address-text svg {
+  flex-shrink: 0;
+  color: var(--color-primary);
+}

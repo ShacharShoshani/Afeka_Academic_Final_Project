@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { Job, JobStatus } from '@livin/common';
 
-const jobStatuses: JobStatus[] = ["open", "in_progress", "completed", "cancelled"] as const;
+const jobStatuses: JobStatus[] = ["pending", "accepted", "completed", "cancelled"] as const;
 
 export const createJobSchema = z.object({
     type: "object",

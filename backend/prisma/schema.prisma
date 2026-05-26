@@ -78,6 +78,8 @@ model Job {
   caretaker       User?                @relation(fields: [caretakerId], references: [id], name: "CaretakerJobs")
   ownerId         String
   owner           User                 @relation(fields: [ownerId], references: [id], name: "OwnerJobs")
+  title           String
+  description     String
   startDate       DateTime
   endDate         DateTime
   status          JobStatus            @default(pending)
