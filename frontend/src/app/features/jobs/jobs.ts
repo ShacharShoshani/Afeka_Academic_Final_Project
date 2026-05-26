@@ -11,9 +11,10 @@ import {
 import { Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { GoogleMap, MapMarker } from '@angular/google-maps';
-import type { JobStatus } from '@livin/common';
+import type { JobStatus, Pet, Plant, StrayAnimal } from '@livin/common';
 import { AuthService } from '../../services/auth.service';
 import { JobService, JobWithOwner } from '../../services/job.service';
+import { UsersService } from '../../services/users.service';
 import { formatDate } from '../../shared/utils/format';
 
 type StatusFilter = 'all' | JobStatus;
@@ -30,6 +31,9 @@ interface JobDraft {
   locationLat: number | null;
   locationLng: number | null;
   locationAddress: string;
+  petIds: Set<string>;
+  plantIds: Set<string>;
+  strayAnimalIds: Set<string>;
 }
 
 const STATUS_FILTERS: { value: StatusFilter; label: string }[] = [
@@ -55,6 +59,7 @@ export class Jobs implements OnInit {
   private readonly router = inject(Router);
   private readonly authService = inject(AuthService);
   private readonly jobService = inject(JobService);
+  private readonly usersService = inject(UsersService);
   private readonly cdr = inject(ChangeDetectorRef);
 
   private autocomplete?: google.maps.places.Autocomplete;
@@ -67,6 +72,17 @@ export class Jobs implements OnInit {
   protected readonly error = signal('');
   protected readonly statusFilter = signal<StatusFilter>('all');
   protected readonly formOpen = signal(false);
+
+  /** Owner's pets / plants / strays available for selection in the form. */
+  protected readonly availablePets = signal<Pet[]>([]);
+  protected readonly availablePlants = signal<Plant[]>([]);
+  protected readonly availableStrays = signal<StrayAnimal[]>([]);
+  protected readonly loadingSubjects = signal(false);
+
+  /** IDs currently selected in the draft form. */
+  protected readonly selectedPetIds = signal<Set<string>>(new Set());
+  protected readonly selectedPlantIds = signal<Set<string>>(new Set());
+  protected readonly selectedStrayIds = signal<Set<string>>(new Set());
 
   /** ID of the job card / map marker the user has tapped to highlight. */
   protected readonly selectedJobId = signal<string | null>(null);
@@ -108,6 +124,14 @@ export class Jobs implements OnInit {
 
   /** Zoom in slightly when a specific job is selected. */
   protected readonly mapZoom = computed(() => (this.selectedJobId() ? 14 : 12));
+
+  /** True when there are any pets/plants/strays to select from. */
+  protected readonly hasAnySubjects = computed(
+    () =>
+      this.availablePets().length > 0 ||
+      this.availablePlants().length > 0 ||
+      this.availableStrays().length > 0,
+  );
 
   // ── Map options ──────────────────────────────────────────────────────────────
 
@@ -175,7 +199,11 @@ export class Jobs implements OnInit {
     this.draft = this.emptyDraft();
     this.hasFormLocation.set(false);
     this.formMapCenter.set(DEFAULT_CENTER);
+    this.selectedPetIds.set(new Set());
+    this.selectedPlantIds.set(new Set());
+    this.selectedStrayIds.set(new Set());
     this.formOpen.set(true);
+    this.fetchOwnerSubjects();
     // Wait one tick for the @if block to render before attaching autocomplete
     setTimeout(() => this.initAutocomplete(), 0);
   }
@@ -193,13 +221,23 @@ export class Jobs implements OnInit {
       locationLat: job.locationLat ?? null,
       locationLng: job.locationLng ?? null,
       locationAddress: '',
+      petIds: new Set(job.pets?.map((p) => p.id) ?? []),
+      plantIds: new Set(job.plants?.map((p) => p.id) ?? []),
+      strayAnimalIds: new Set(job.strayAnimals?.map((s) => s.id) ?? []),
     };
+
+    // Sync selection signals with the existing associations
+    this.selectedPetIds.set(new Set(job.pets?.map((p) => p.id) ?? []));
+    this.selectedPlantIds.set(new Set(job.plants?.map((p) => p.id) ?? []));
+    this.selectedStrayIds.set(new Set(job.strayAnimals?.map((s) => s.id) ?? []));
+
     const hasLoc = this.hasLocation(job);
     this.hasFormLocation.set(hasLoc);
     this.formMapCenter.set(
       hasLoc ? { lat: job.locationLat!, lng: job.locationLng! } : DEFAULT_CENTER,
     );
     this.formOpen.set(true);
+    this.fetchOwnerSubjects();
     setTimeout(() => this.initAutocomplete(), 0);
   }
 
@@ -219,6 +257,44 @@ export class Jobs implements OnInit {
     }
   }
 
+  // ── Subject selection toggles ────────────────────────────────────────────────
+
+  protected togglePet(id: string): void {
+    this.selectedPetIds.update((set) => {
+      const next = new Set(set);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  }
+
+  protected togglePlant(id: string): void {
+    this.selectedPlantIds.update((set) => {
+      const next = new Set(set);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  }
+
+  protected toggleStray(id: string): void {
+    this.selectedStrayIds.update((set) => {
+      const next = new Set(set);
+      next.has(id) ? next.delete(id) : next.add(id);
+      return next;
+    });
+  }
+
+  protected isPetSelected(id: string): boolean {
+    return this.selectedPetIds().has(id);
+  }
+
+  protected isPlantSelected(id: string): boolean {
+    return this.selectedPlantIds().has(id);
+  }
+
+  protected isStraySelected(id: string): boolean {
+    return this.selectedStrayIds().has(id);
+  }
+
   protected save(): void {
     const d = this.draft;
     if (!d.title.trim() || !d.description.trim()) return;
@@ -233,6 +309,9 @@ export class Jobs implements OnInit {
       paymentCurrency: d.paymentCurrency || undefined,
       locationLat: d.locationLat ?? undefined,
       locationLng: d.locationLng ?? undefined,
+      petIds: [...this.selectedPetIds()],
+      plantIds: [...this.selectedPlantIds()],
+      strayAnimalIds: [...this.selectedStrayIds()],
     };
 
     if (d.id) {
@@ -278,6 +357,10 @@ export class Jobs implements OnInit {
     return map[status] ?? status;
   }
 
+  protected truncate(text: string, max: number): string {
+    return text.length > max ? text.slice(0, max) + '…' : text;
+  }
+
   protected petsCount(job: JobWithOwner): number {
     return (job.pets?.length ?? 0) + (job.plants?.length ?? 0) + (job.strayAnimals?.length ?? 0);
   }
@@ -296,6 +379,35 @@ export class Jobs implements OnInit {
         this.error.set(err?.error?.error || 'Failed to load jobs');
         this.loading.set(false);
       },
+    });
+  }
+
+  /** Fetch the current owner's pets, plants, and stray animals for the form picker. */
+  private fetchOwnerSubjects(): void {
+    const userId = this.user()?.id;
+    if (!userId) return;
+
+    this.loadingSubjects.set(true);
+    let remaining = 3;
+
+    const done = () => {
+      remaining--;
+      if (remaining === 0) this.loadingSubjects.set(false);
+    };
+
+    this.usersService.getPets(userId).subscribe({
+      next: (pets) => { this.availablePets.set(pets); done(); },
+      error: () => done(),
+    });
+
+    this.usersService.getPlants(userId).subscribe({
+      next: (plants) => { this.availablePlants.set(plants); done(); },
+      error: () => done(),
+    });
+
+    this.usersService.getStrays(userId).subscribe({
+      next: (strays) => { this.availableStrays.set(strays); done(); },
+      error: () => done(),
     });
   }
 
@@ -344,6 +456,9 @@ export class Jobs implements OnInit {
       locationLat: null,
       locationLng: null,
       locationAddress: '',
+      petIds: new Set(),
+      plantIds: new Set(),
+      strayAnimalIds: new Set(),
     };
   }
 }

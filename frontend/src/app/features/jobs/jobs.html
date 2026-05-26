@@ -265,6 +265,96 @@
         }
       </div>
 
+      <!-- ── Care subjects picker ── -->
+      <div class="form-group">
+        <label class="form-label">Care subjects</label>
+
+        @if (loadingSubjects()) {
+          <div class="subjects-loading">Loading your pets &amp; plants…</div>
+        } @else if (!hasAnySubjects()) {
+          <p class="subjects-empty">You have no pets, plants, or stray animals yet. Add them from the home screen first.</p>
+        } @else {
+
+          @if (availablePets().length > 0) {
+            <p class="subjects-section-label">
+              <svg viewBox="0 0 24 24" fill="none" width="13" height="13"><path d="M4.5 11C5.88 11 7 9.88 7 8.5S5.88 6 4.5 6 2 7.12 2 8.5 3.12 11 4.5 11z" stroke="currentColor" stroke-width="1.5"/><path d="M9.5 7C10.88 7 12 5.88 12 4.5S10.88 2 9.5 2 7 3.12 7 4.5 8.12 7 9.5 7z" stroke="currentColor" stroke-width="1.5"/><path d="M14.5 7C15.88 7 17 5.88 17 4.5S15.88 2 14.5 2 12 3.12 12 4.5 13.12 7 14.5 7z" stroke="currentColor" stroke-width="1.5"/><path d="M19.5 11C20.88 11 22 9.88 22 8.5S20.88 6 19.5 6 17 7.12 17 8.5 18.12 11 19.5 11z" stroke="currentColor" stroke-width="1.5"/><path d="M17.34 14.36C16.26 12.5 14.28 11.36 12.14 11.36c-2.28 0-4.22 1.32-5.26 3.3L5.78 17.3A2.5 2.5 0 008.06 21h7.88a2.5 2.5 0 002.28-3.7l-1.1-2.94h.22z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+              Pets
+            </p>
+            <div class="subjects-grid">
+              @for (pet of availablePets(); track pet.id) {
+                <button
+                  type="button"
+                  class="subject-chip"
+                  [class.subject-chip--selected]="isPetSelected(pet.id)"
+                  (click)="togglePet(pet.id)"
+                >
+                  @if (isPetSelected(pet.id)) {
+                    <svg class="subject-check" viewBox="0 0 24 24" fill="none" width="12" height="12">
+                      <path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  }
+                  <span class="subject-name">{{ pet.name }}</span>
+                  <span class="subject-meta">{{ pet.type }} · {{ pet.size }}</span>
+                </button>
+              }
+            </div>
+          }
+
+          @if (availablePlants().length > 0) {
+            <p class="subjects-section-label">
+              <svg viewBox="0 0 24 24" fill="none" width="13" height="13"><path d="M12 22V12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M12 12C12 12 7 9 7 5a5 5 0 0110 0c0 4-5 7-5 7z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M12 16c0 0-4 .5-5-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+              Plants
+            </p>
+            <div class="subjects-grid">
+              @for (plant of availablePlants(); track plant.id) {
+                <button
+                  type="button"
+                  class="subject-chip"
+                  [class.subject-chip--selected]="isPlantSelected(plant.id)"
+                  (click)="togglePlant(plant.id)"
+                >
+                  @if (isPlantSelected(plant.id)) {
+                    <svg class="subject-check" viewBox="0 0 24 24" fill="none" width="12" height="12">
+                      <path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  }
+                  <span class="subject-name">{{ plant.name }}</span>
+                  @if (plant.specialNeeds) {
+                    <span class="subject-meta">{{ truncate(plant.specialNeeds, 24) }}</span>
+                  }
+                </button>
+              }
+            </div>
+          }
+
+          @if (availableStrays().length > 0) {
+            <p class="subjects-section-label">
+              <svg viewBox="0 0 24 24" fill="none" width="13" height="13"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5"/><path d="M12 8v4l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+              Stray animals
+            </p>
+            <div class="subjects-grid">
+              @for (stray of availableStrays(); track stray.id) {
+                <button
+                  type="button"
+                  class="subject-chip"
+                  [class.subject-chip--selected]="isStraySelected(stray.id)"
+                  (click)="toggleStray(stray.id)"
+                >
+                  @if (isStraySelected(stray.id)) {
+                    <svg class="subject-check" viewBox="0 0 24 24" fill="none" width="12" height="12">
+                      <path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  }
+                  <span class="subject-name">{{ stray.name ?? 'Unnamed' }}</span>
+                  <span class="subject-meta">{{ stray.type }} · {{ stray.size }}</span>
+                </button>
+              }
+            </div>
+          }
+
+        }
+      </div>
+
       <!-- Date range -->
       <div class="form-row">
         <div class="form-group">
