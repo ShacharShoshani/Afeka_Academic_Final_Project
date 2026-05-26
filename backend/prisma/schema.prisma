@@ -7,27 +7,29 @@ datasource db {
 }
 
 model User {
-  id           String         @id @default(uuid())
-  name         String
-  email        String         @unique
-  phone        String
-  residence    String
-  role         UserRole
-  bio          String
-  dateOfBirth  String
-  careTypes    CareType[]
-  availability Availability[]
-  profilePhoto String         @default("")
-  passwordHash String
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
-  pets         Pet[]
-  plants       Plant[]
-  strayAnimals StrayAnimal[]
+  id            String         @id @default(uuid())
+  name          String
+  email         String         @unique
+  phone         String
+  residence     String
+  role          UserRole
+  bio           String
+  dateOfBirth   String
+  careTypes     CareType[]
+  availability  Availability[]
+  profilePhoto  String         @default("")
+  passwordHash  String
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  pets          Pet[]
+  plants        Plant[]
+  strayAnimals  StrayAnimal[]
+  caretakerJobs Job[]          @relation("CaretakerJobs")
+  ownerJobs     Job[]          @relation("OwnerJobs")
 }
 
 model Pet {
-  id                 String     @id @default(uuid())
+  id                 String       @id @default(uuid())
   name               String
   type               PetType
   size               AnimalSize
@@ -35,36 +37,84 @@ model Pet {
   image              String
   estimatedBirthDate String?
   ownerId            String
-  owner              User       @relation(fields: [ownerId], references: [id])
-  createdAt          DateTime   @default(now())
-  updatedAt          DateTime   @updatedAt
+  owner              User         @relation(fields: [ownerId], references: [id])
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+  petsPerJobs        PetsPerJob[]
 }
 
 model Plant {
-  id                 String   @id @default(uuid())
+  id                 String         @id @default(uuid())
   name               String
   specialNeeds       String
   image              String
   estimatedBirthDate String?
   ownerId            String
-  owner              User     @relation(fields: [ownerId], references: [id])
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
+  owner              User           @relation(fields: [ownerId], references: [id])
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+  plantsPerJobs      PlantsPerJob[]
 }
 
 model StrayAnimal {
-  id                 String          @id @default(uuid())
-  name               String?
-  type               StrayAnimalType
-  size               AnimalSize
-  location           String
-  description        String
-  image              String
-  estimatedBirthDate String?
-  reporterId         String
-  reporter           User            @relation(fields: [reporterId], references: [id])
-  createdAt          DateTime        @default(now())
-  updatedAt          DateTime        @updatedAt
+  id                  String               @id @default(uuid())
+  name                String?
+  type                StrayAnimalType
+  size                AnimalSize
+  location            String
+  description         String
+  image               String
+  estimatedBirthDate  String?
+  reporterId          String
+  reporter            User                 @relation(fields: [reporterId], references: [id])
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+  strayAnimalsPerJobs StrayAnimalsPerJob[]
+}
+
+model Job {
+  id              String               @id @default(uuid())
+  caretakerId     String?
+  caretaker       User?                @relation(fields: [caretakerId], references: [id], name: "CaretakerJobs")
+  ownerId         String
+  owner           User                 @relation(fields: [ownerId], references: [id], name: "OwnerJobs")
+  startDate       DateTime
+  endDate         DateTime
+  status          JobStatus            @default(pending)
+  locationLat     Float
+  locationLng     Float
+  paymentAmount   Float
+  paymentCurrency String
+  paymentMethod   String
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+  pets            PetsPerJob[]
+  plants          PlantsPerJob[]
+  strayAnimals    StrayAnimalsPerJob[]
+}
+
+model PetsPerJob {
+  id    String @id @default(uuid())
+  jobId String
+  job   Job    @relation(fields: [jobId], references: [id])
+  petId String
+  pet   Pet    @relation(fields: [petId], references: [id])
+}
+
+model PlantsPerJob {
+  id      String @id @default(uuid())
+  jobId   String
+  job     Job    @relation(fields: [jobId], references: [id])
+  plantId String
+  plant   Plant  @relation(fields: [plantId], references: [id])
+}
+
+model StrayAnimalsPerJob {
+  id            String      @id @default(uuid())
+  jobId         String
+  job           Job         @relation(fields: [jobId], references: [id])
+  strayAnimalId String
+  strayAnimal   StrayAnimal @relation(fields: [strayAnimalId], references: [id])
 }
 
 enum UserRole {
@@ -114,4 +164,11 @@ enum AnimalSize {
   small
   medium
   large
+}
+
+enum JobStatus {
+  pending
+  accepted
+  completed
+  cancelled
 }
