@@ -16,7 +16,11 @@ export class App {
   protected showMap = toSignal(
     this.router.events.pipe(
       filter((e) => e instanceof NavigationEnd),
-      map((e) => !e.urlAfterRedirects.startsWith('/register')),
+      map((e) => {
+        const url = e.urlAfterRedirects;
+        // /jobs manages its own map; /register has no map at all
+        return !url.startsWith('/register') && !url.startsWith('/jobs');
+      }),
     ),
     { initialValue: false },
   );

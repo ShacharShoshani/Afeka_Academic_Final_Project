@@ -74,4 +74,39 @@ type StrayAnimal = {
     updatedAt: string;
 }
 
-export { UserRole, CareType, Availability, User, PublicUser, Pet, Plant, StrayAnimal, AnimalSize };
+type JobStatus = "pending" | "accepted" | "completed" | "cancelled"
+
+type Job = {
+    id: string;
+    ownerId: string;
+    caretakerId: string | null;
+    title: string;
+    description: string;
+    startDate: string;
+    endDate: string;
+    locationLat: number;
+    locationLng: number;
+    paymentMethod: string;
+    paymentAmount: number;
+    paymentCurrency: string;
+    status: JobStatus;
+    pets: Pet[];
+    plants: Plant[];
+    strayAnimals: StrayAnimal[];
+    createdAt: string;
+    updatedAt: string;
+}
+
+export {
+    AnimalSize,
+    Availability,
+    CareType,
+    Job,
+    JobStatus,
+    Pet,
+    Plant,
+    PublicUser,
+    StrayAnimal,
+    User,
+    UserRole,
+};

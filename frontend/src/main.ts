@@ -12,7 +12,7 @@ function loadGoogleMapsScript(): Promise<void> {
     }
     const script = document.createElement('script');
     script.id = 'google-maps-script';
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${environment.googleMapsApiKey}`;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${environment.googleMapsApiKey}&libraries=places`;
     script.async = true;
     script.defer = true;
     script.onload = () => resolve();

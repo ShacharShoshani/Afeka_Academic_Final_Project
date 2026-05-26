@@ -10,7 +10,9 @@ It is an app for posting and searching jobs of pet and plant sitters, and it wil
 
 - [NVM](https://github.com/nvm-sh/nvm?tab=readme-ov-file#installing-and-updating) (Mac\Linux) or [NVM For Windows](https://github.com/coreybutler/nvm-windows/releases)
 
-- Google Maps API Key from [Google Cloud Console](https://console.cloud.google.com/) enabled for Maps JavaScript API
+- Google Maps API Key from [Google Cloud Console](https://console.cloud.google.com/) with the following APIs enabled:
+  - **Maps JavaScript API** — renders the map
+  - **Places API** (the classic version, *not* "Places API (New)") — powers the location search autocomplete on the jobs screen
 
 - [Docker Desktop](https://www.docker.com/products/docker-desktop/)
 

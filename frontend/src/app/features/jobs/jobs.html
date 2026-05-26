@@ -1,0 +1,469 @@
+<div class="page">
+
+  <!-- ── Header ── -->
+  <header class="header">
+    <button class="back-btn" (click)="goHome()" aria-label="Back to home">
+      <svg viewBox="0 0 24 24" fill="none" width="20" height="20">
+        <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span>Home</span>
+    </button>
+    <span class="title">Jobs</span>
+    @if (isOwner()) {
+      <button class="btn-add" (click)="openAdd()">+ Post job</button>
+    } @else {
+      <span class="header-spacer"></span>
+    }
+  </header>
+
+  <!-- ── Map with per-job markers ── -->
+  <section class="map-section">
+    <google-map
+      width="100%"
+      height="280px"
+      [center]="mapCenter()"
+      [zoom]="mapZoom()"
+      [options]="mapOptions"
+    >
+      @for (job of jobsWithLocation(); track job.id) {
+        <map-marker
+          [position]="markerPosition(job)"
+          [options]="markerOptions(job)"
+          (mapClick)="selectJob(job)"
+        />
+      }
+    </google-map>
+
+    @if (jobsWithLocation().length === 0 && !loading()) {
+      <div class="map-no-location">No jobs with a location yet</div>
+    }
+  </section>
+
+  <!-- ── Status filter chips ── -->
+  <div class="filter-bar">
+    @for (f of statusFilters; track f.value) {
+      <button
+        class="filter-chip"
+        [class.active]="statusFilter() === f.value"
+        (click)="setStatusFilter(f.value)"
+      >{{ f.label }}</button>
+    }
+  </div>
+
+  <!-- ── Job list ── -->
+  @if (loading()) {
+    <div class="status-block">Loading…</div>
+  } @else if (error()) {
+    <div class="status-block status-error">{{ error() }}</div>
+  } @else if (filteredJobs().length === 0) {
+    <div class="empty-state">
+      <div class="empty-icon">
+        <svg viewBox="0 0 24 24" fill="none">
+          <rect x="2" y="7" width="20" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/>
+          <path d="M16 7V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <p class="empty-title">No jobs here yet</p>
+      @if (isOwner()) {
+        <p class="empty-sub">Post a job to find a caretaker for your pets or plants.</p>
+      } @else {
+        <p class="empty-sub">Check back soon for new care opportunities.</p>
+      }
+    </div>
+  } @else {
+    <main class="job-list">
+      @for (job of sortedFilteredJobs(); track job.id; let i = $index) {
+
+        <!-- ── Section header: My Posts (before the very first own-job) ── -->
+        @if (i === 0 && isMyJob(job)) {
+          <div class="list-section-header">
+            <span class="list-section-header__label">
+              <svg viewBox="0 0 24 24" fill="none" width="14" height="14">
+                <circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M4 20c0-4 3.582-7 8-7s8 3 8 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+              My Posts
+            </span>
+            <span class="list-section-header__count">{{ myJobs().length }}</span>
+          </div>
+        }
+
+        <!-- ── Section header: Community / Available Jobs ──
+             Fires at i=0 when no own jobs exist, or at the transition point
+             when the previous card was mine and this one is not.            ── -->
+        @if (!isMyJob(job) && (i === 0 || isMyJob(sortedFilteredJobs()[i - 1]))) {
+          <div class="list-section-header" [class.list-section-header--gap]="i > 0">
+            <span class="list-section-header__label">
+              <svg viewBox="0 0 24 24" fill="none" width="14" height="14">
+                <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M23 21v-2a4 4 0 00-3-3.87" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M16 3.13a4 4 0 010 7.75" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              {{ myJobs().length > 0 ? 'Community Jobs' : 'Available Jobs' }}
+            </span>
+            <span class="list-section-header__count">{{ communityJobs().length }}</span>
+          </div>
+        }
+
+        <article
+          class="job-card"
+          [class.job-card--mine]="isMyJob(job)"
+          [class.job-card--selected]="selectedJobId() === job.id"
+        >
+          <!-- Clicking the main body selects/deselects the job on the map -->
+          <div class="job-card-main" (click)="selectJob(job)">
+            <div class="job-header">
+              <h2 class="job-title">{{ job.title }}</h2>
+              <span class="status-badge" [attr.data-status]="job.status">{{ statusLabel(job.status) }}</span>
+            </div>
+
+            <p class="job-desc">{{ job.description }}</p>
+
+            <div class="job-meta-row">
+              @if (job.startDate) {
+                <span class="job-meta-item">
+                  <svg viewBox="0 0 24 24" fill="none" width="14" height="14">
+                    <rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" stroke-width="1.5"/>
+                    <path d="M16 2v4M8 2v4M3 10h18" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                  </svg>
+                  {{ formatDate(job.startDate) }}
+                  @if (job.endDate) { → {{ formatDate(job.endDate) }} }
+                </span>
+              }
+
+              @if (job.paymentAmount) {
+                <span class="job-meta-item">
+                  <svg viewBox="0 0 24 24" fill="none" width="14" height="14">
+                    <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5"/>
+                    <path d="M12 7v10M9.5 9.5A2.5 2.5 0 0112 7h.5a2 2 0 010 4H12a2 2 0 000 4h.5a2.5 2.5 0 002.5-2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                  </svg>
+                  {{ job.paymentAmount }} {{ job.paymentCurrency }}
+                  @if (job.paymentMethod) { · {{ job.paymentMethod }} }
+                </span>
+              }
+
+              @if (petsCount(job) > 0) {
+                <span class="job-meta-item">
+                  <svg viewBox="0 0 24 24" fill="none" width="14" height="14">
+                    <path d="M4.5 11C5.88 11 7 9.88 7 8.5S5.88 6 4.5 6 2 7.12 2 8.5 3.12 11 4.5 11z" stroke="currentColor" stroke-width="1.5"/>
+                    <path d="M9.5 7C10.88 7 12 5.88 12 4.5S10.88 2 9.5 2 7 3.12 7 4.5 8.12 7 9.5 7z" stroke="currentColor" stroke-width="1.5"/>
+                    <path d="M14.5 7C15.88 7 17 5.88 17 4.5S15.88 2 14.5 2 12 3.12 12 4.5 13.12 7 14.5 7z" stroke="currentColor" stroke-width="1.5"/>
+                    <path d="M19.5 11C20.88 11 22 9.88 22 8.5S20.88 6 19.5 6 17 7.12 17 8.5 18.12 11 19.5 11z" stroke="currentColor" stroke-width="1.5"/>
+                    <path d="M17.34 14.36C16.26 12.5 14.28 11.36 12.14 11.36c-2.28 0-4.22 1.32-5.26 3.3L5.78 17.3A2.5 2.5 0 008.06 21h7.88a2.5 2.5 0 002.28-3.7l-1.1-2.94h.22z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+                  </svg>
+                  {{ petsCount(job) }} animal{{ petsCount(job) === 1 ? '' : 's' }}
+                </span>
+              }
+
+              <!-- Location chip — shown when this job has a pinned location -->
+              @if (hasLocation(job)) {
+                <span class="job-meta-item job-meta-item--location">
+                  <svg viewBox="0 0 24 24" fill="none" width="14" height="14">
+                    <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <circle cx="12" cy="9" r="2.5" stroke="currentColor" stroke-width="1.5"/>
+                  </svg>
+                  On map
+                </span>
+              }
+            </div>
+
+            <div class="job-footer">
+              @if (isMyJob(job)) {
+                <span class="job-mine-label">
+                  <svg viewBox="0 0 24 24" fill="none" width="13" height="13">
+                    <circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.5"/>
+                    <path d="M4 20c0-4 3.582-7 8-7s8 3 8 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                  </svg>
+                  Your post
+                </span>
+              } @else {
+                <a class="job-owner-link" [routerLink]="['/users', job.ownerId]" (click)="$event.stopPropagation()">
+                  <svg viewBox="0 0 24 24" fill="none" width="14" height="14">
+                    <circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.5"/>
+                    <path d="M4 20c0-4 3.582-7 8-7s8 3 8 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                  </svg>
+                  {{ job.owner?.name ?? 'Owner' }}
+                </a>
+              }
+            </div>
+          </div>
+
+          <!-- Edit / Delete actions — stop propagation so they don't fire selectJob -->
+          @if (isMyJob(job)) {
+            <div class="card-actions" (click)="$event.stopPropagation()">
+              <button class="card-action card-action--edit" (click)="openEdit(job)" aria-label="Edit job">
+                <svg viewBox="0 0 24 24" fill="none">
+                  <path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+              <button class="card-action card-action--delete" (click)="delete(job.id)" aria-label="Delete job">
+                <svg viewBox="0 0 24 24" fill="none">
+                  <polyline points="3 6 5 6 21 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  <path d="M10 11v6M14 11v6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                  <path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+              </button>
+            </div>
+          }
+        </article>
+      }
+    </main>
+  }
+
+</div>
+
+<!-- ── Create / Edit bottom sheet ── -->
+@if (formOpen()) {
+  <div class="sheet-backdrop" (click)="closeForm()"></div>
+  <div class="sheet" role="dialog" aria-modal="true">
+    <div class="sheet-header">
+      <span class="sheet-title">{{ draft.id ? 'Edit job' : 'Post a job' }}</span>
+      <button class="sheet-close" (click)="closeForm()" aria-label="Close">
+        <svg viewBox="0 0 24 24" fill="none">
+          <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="sheet-body">
+
+      <!-- Title -->
+      <div class="form-group">
+        <label class="form-label" for="job-title">Title <span class="form-required">*</span></label>
+        <input
+          id="job-title"
+          class="form-input"
+          type="text"
+          placeholder="e.g. Dog sitter needed for the weekend"
+          [(ngModel)]="draft.title"
+        />
+      </div>
+
+      <!-- Description -->
+      <div class="form-group">
+        <label class="form-label" for="job-desc">Description <span class="form-required">*</span></label>
+        <textarea
+          id="job-desc"
+          class="form-textarea"
+          placeholder="Describe what you need…"
+          rows="3"
+          [(ngModel)]="draft.description"
+        ></textarea>
+      </div>
+
+      <!-- Location search + mini-map preview -->
+      <div class="form-group">
+        <label class="form-label" for="job-location">Location</label>
+        <div class="location-search-wrap">
+          <svg class="location-search-icon" viewBox="0 0 24 24" fill="none" width="16" height="16">
+            <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="12" cy="9" r="2.5" stroke="currentColor" stroke-width="1.5"/>
+          </svg>
+          <input
+            #locationInput
+            id="job-location"
+            class="form-input location-input"
+            type="text"
+            placeholder="Search for an address or place…"
+            autocomplete="off"
+          />
+          @if (hasFormLocation()) {
+            <button
+              class="location-clear-btn"
+              type="button"
+              (click)="clearFormLocation()"
+              aria-label="Clear location"
+            >
+              <svg viewBox="0 0 24 24" fill="none" width="14" height="14">
+                <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+            </button>
+          }
+        </div>
+
+        <!-- Mini-map preview — appears once a place is selected -->
+        @if (hasFormLocation()) {
+          <div class="location-preview">
+            @if (draft.locationAddress) {
+              <p class="location-address-text">
+                <svg viewBox="0 0 24 24" fill="none" width="13" height="13">
+                  <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z" stroke="currentColor" stroke-width="1.5"/>
+                  <circle cx="12" cy="9" r="2.5" stroke="currentColor" stroke-width="1.5"/>
+                </svg>
+                {{ draft.locationAddress }}
+              </p>
+            }
+            <google-map
+              width="100%"
+              height="150px"
+              [center]="formMapCenter()"
+              [zoom]="15"
+              [options]="formMapOptions"
+            >
+              <map-marker [position]="formMapCenter()" />
+            </google-map>
+          </div>
+        }
+      </div>
+
+      <!-- ── Care subjects picker ── -->
+      <div class="form-group">
+        <label class="form-label">Care subjects</label>
+
+        @if (loadingSubjects()) {
+          <div class="subjects-loading">Loading your pets &amp; plants…</div>
+        } @else if (!hasAnySubjects()) {
+          <p class="subjects-empty">You have no pets, plants, or stray animals yet. Add them from the home screen first.</p>
+        } @else {
+
+          @if (availablePets().length > 0) {
+            <p class="subjects-section-label">
+              <svg viewBox="0 0 24 24" fill="none" width="13" height="13"><path d="M4.5 11C5.88 11 7 9.88 7 8.5S5.88 6 4.5 6 2 7.12 2 8.5 3.12 11 4.5 11z" stroke="currentColor" stroke-width="1.5"/><path d="M9.5 7C10.88 7 12 5.88 12 4.5S10.88 2 9.5 2 7 3.12 7 4.5 8.12 7 9.5 7z" stroke="currentColor" stroke-width="1.5"/><path d="M14.5 7C15.88 7 17 5.88 17 4.5S15.88 2 14.5 2 12 3.12 12 4.5 13.12 7 14.5 7z" stroke="currentColor" stroke-width="1.5"/><path d="M19.5 11C20.88 11 22 9.88 22 8.5S20.88 6 19.5 6 17 7.12 17 8.5 18.12 11 19.5 11z" stroke="currentColor" stroke-width="1.5"/><path d="M17.34 14.36C16.26 12.5 14.28 11.36 12.14 11.36c-2.28 0-4.22 1.32-5.26 3.3L5.78 17.3A2.5 2.5 0 008.06 21h7.88a2.5 2.5 0 002.28-3.7l-1.1-2.94h.22z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+              Pets
+            </p>
+            <div class="subjects-grid">
+              @for (pet of availablePets(); track pet.id) {
+                <button
+                  type="button"
+                  class="subject-chip"
+                  [class.subject-chip--selected]="isPetSelected(pet.id)"
+                  (click)="togglePet(pet.id)"
+                >
+                  @if (isPetSelected(pet.id)) {
+                    <svg class="subject-check" viewBox="0 0 24 24" fill="none" width="12" height="12">
+                      <path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  }
+                  <span class="subject-name">{{ pet.name }}</span>
+                  <span class="subject-meta">{{ pet.type }} · {{ pet.size }}</span>
+                </button>
+              }
+            </div>
+          }
+
+          @if (availablePlants().length > 0) {
+            <p class="subjects-section-label">
+              <svg viewBox="0 0 24 24" fill="none" width="13" height="13"><path d="M12 22V12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/><path d="M12 12C12 12 7 9 7 5a5 5 0 0110 0c0 4-5 7-5 7z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M12 16c0 0-4 .5-5-3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+              Plants
+            </p>
+            <div class="subjects-grid">
+              @for (plant of availablePlants(); track plant.id) {
+                <button
+                  type="button"
+                  class="subject-chip"
+                  [class.subject-chip--selected]="isPlantSelected(plant.id)"
+                  (click)="togglePlant(plant.id)"
+                >
+                  @if (isPlantSelected(plant.id)) {
+                    <svg class="subject-check" viewBox="0 0 24 24" fill="none" width="12" height="12">
+                      <path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  }
+                  <span class="subject-name">{{ plant.name }}</span>
+                  @if (plant.specialNeeds) {
+                    <span class="subject-meta">{{ truncate(plant.specialNeeds, 24) }}</span>
+                  }
+                </button>
+              }
+            </div>
+          }
+
+          @if (availableStrays().length > 0) {
+            <p class="subjects-section-label">
+              <svg viewBox="0 0 24 24" fill="none" width="13" height="13"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5"/><path d="M12 8v4l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+              Stray animals
+            </p>
+            <div class="subjects-grid">
+              @for (stray of availableStrays(); track stray.id) {
+                <button
+                  type="button"
+                  class="subject-chip"
+                  [class.subject-chip--selected]="isStraySelected(stray.id)"
+                  (click)="toggleStray(stray.id)"
+                >
+                  @if (isStraySelected(stray.id)) {
+                    <svg class="subject-check" viewBox="0 0 24 24" fill="none" width="12" height="12">
+                      <path d="M20 6L9 17l-5-5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                  }
+                  <span class="subject-name">{{ stray.name ?? 'Unnamed' }}</span>
+                  <span class="subject-meta">{{ stray.type }} · {{ stray.size }}</span>
+                </button>
+              }
+            </div>
+          }
+
+        }
+      </div>
+
+      <!-- Date range -->
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="job-start">Start date</label>
+          <input
+            id="job-start"
+            class="form-input"
+            type="date"
+            [(ngModel)]="draft.startDate"
+          />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="job-end">End date</label>
+          <input
+            id="job-end"
+            class="form-input"
+            type="date"
+            [(ngModel)]="draft.endDate"
+          />
+        </div>
+      </div>
+
+      <!-- Payment -->
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label" for="job-amount">Payment amount</label>
+          <input
+            id="job-amount"
+            class="form-input"
+            type="number"
+            min="0"
+            placeholder="0"
+            [(ngModel)]="draft.paymentAmount"
+          />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="job-currency">Currency</label>
+          <select id="job-currency" class="form-select" [(ngModel)]="draft.paymentCurrency">
+            <option value="ILS">ILS ₪</option>
+            <option value="USD">USD $</option>
+            <option value="EUR">EUR €</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label" for="job-method">Payment method</label>
+        <input
+          id="job-method"
+          class="form-input"
+          type="text"
+          placeholder="e.g. Cash, Bank transfer…"
+          [(ngModel)]="draft.paymentMethod"
+        />
+      </div>
+
+    </div>
+
+    <div class="sheet-footer">
+      <button class="sheet-cancel" (click)="closeForm()">Cancel</button>
+      <button
+        class="sheet-save"
+        [disabled]="!draft.title.trim() || !draft.description.trim()"
+        (click)="save()"
+      >{{ draft.id ? 'Save changes' : 'Post job' }}</button>
+    </div>
+  </div>
+}

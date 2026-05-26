@@ -18,7 +18,7 @@ import {
   selector: 'app-user-profile',
   imports: [],
   templateUrl: './user-profile.html',
-  styleUrl: './user-profile.css',
+  styleUrls: ['./user-profile.css', './user-profile-records.css'],
 })
 export class UserProfile implements OnInit {
   private readonly route = inject(ActivatedRoute);
