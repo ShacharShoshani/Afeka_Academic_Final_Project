@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import type { Job, PublicUser } from '@livin/common';
+import type { Job, PaymentMethod, PaymentRateType, PublicUser } from '@livin/common';
 import { environment } from '../../environments/environment.local';
 
 // The API includes the hydrated `owner` relation on every Job response
@@ -14,7 +14,8 @@ export interface CreateJobPayload {
   endDate?: string;
   locationLat?: number;
   locationLng?: number;
-  paymentMethod?: string;
+  paymentMethod?: PaymentMethod;
+  paymentRateType?: PaymentRateType;
   paymentAmount?: number;
   paymentCurrency?: string;
   petIds?: string[];
@@ -29,7 +30,8 @@ export interface UpdateJobPayload {
   endDate?: string;
   locationLat?: number;
   locationLng?: number;
-  paymentMethod?: string;
+  paymentMethod?: PaymentMethod;
+  paymentRateType?: PaymentRateType;
   paymentAmount?: number;
   paymentCurrency?: string;
   status?: string;

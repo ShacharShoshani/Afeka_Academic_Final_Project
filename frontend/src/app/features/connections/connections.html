@@ -1,0 +1,52 @@
+<div class="page">
+  <header class="header">
+    <button class="back-btn" (click)="goHome()">
+      <svg viewBox="0 0 24 24" fill="none" width="20" height="20">
+        <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span>Home</span>
+    </button>
+    <span class="title">Connections</span>
+    <span class="header-spacer"></span>
+  </header>
+
+  @if (loading()) {
+    <div class="status-block">Loading…</div>
+  } @else if (error()) {
+    <div class="status-block status-error">{{ error() }}</div>
+  } @else if (connections().length === 0) {
+    <div class="status-block">
+      <p>No connections yet.</p>
+      <p class="hint">Swipe right on a profile and get a mutual match to start chatting.</p>
+    </div>
+  } @else {
+    <ul class="conn-list">
+      @for (conn of connections(); track conn.id) {
+        <li class="conn-item" (click)="openChat(conn.id)">
+          @if (conn.otherUser?.profilePhoto) {
+            <img class="avatar" [src]="conn.otherUser!.profilePhoto" [alt]="conn.otherUser!.name" />
+          } @else {
+            <div class="avatar avatar-placeholder">
+              <svg viewBox="0 0 24 24" fill="none" width="24" height="24">
+                <circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M4 20c0-4 3.582-7 8-7s8 3 8 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+            </div>
+          }
+          <div class="conn-body">
+            <div class="conn-top">
+              <span class="conn-name">{{ conn.otherUser?.name ?? 'Unknown' }}</span>
+              @if (conn.messages && conn.messages.length > 0) {
+                <span class="conn-time">{{ formatTime(conn.messages[conn.messages.length - 1].sentAt) }}</span>
+              }
+            </div>
+            <span class="conn-preview">{{ lastMessage(conn) }}</span>
+          </div>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" width="16" height="16">
+            <path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </li>
+      }
+    </ul>
+  }
+</div>

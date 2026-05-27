@@ -1,7 +1,7 @@
 import { Injectable, inject, signal, computed } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, tap } from 'rxjs';
-import type { User } from '@livin/common';
+import type { DisplayMode, User } from '@livin/common';
 import { environment } from '../../environments/environment.local';
 
 type SafeUser = Omit<User, 'password'> & { createdAt: string; updatedAt: string };
@@ -38,5 +38,11 @@ export class AuthService {
     return this.http
       .post<{ message: string }>(`${this.baseUrl}/logout`, {}, { withCredentials: true })
       .pipe(tap(() => this.currentUser.set(null)));
+  }
+
+  updateDisplayMode(mode: DisplayMode): Observable<SafeUser> {
+    return this.http
+      .patch<SafeUser>(`${environment.apiUrl}/users/me`, { displayMode: mode }, { withCredentials: true })
+      .pipe(tap(user => this.currentUser.set(user)));
   }
 }

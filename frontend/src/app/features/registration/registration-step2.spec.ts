@@ -28,12 +28,15 @@ describe('RegistrationStep2', () => {
     const fixture = TestBed.createComponent(RegistrationStep2);
     const component = fixture.componentInstance as any;
 
+    // Form now has firstName/lastName/email/phoneNumber (residence is signal-based via Places)
     component.personalForm.setValue({
-      name: 'John Doe',
+      firstName: 'John',
+      lastName: 'Doe',
       email: 'john@example.com',
-      phone: '+972501234567',
-      residence: 'Tel Aviv',
+      phoneNumber: '501234567',
     });
+    // Simulate a confirmed Places selection (required when Maps is available or not yet checked)
+    component.residenceConfirmed.set(true);
     fixture.detectChanges();
 
     const button = fixture.nativeElement.querySelector('.continue-btn') as HTMLButtonElement;
@@ -45,10 +48,10 @@ describe('RegistrationStep2', () => {
     const component = fixture.componentInstance as any;
 
     component.personalForm.setValue({
-      name: 'John Doe',
+      firstName: 'John',
+      lastName: 'Doe',
       email: 'not-an-email',
-      phone: '+972501234567',
-      residence: 'Tel Aviv',
+      phoneNumber: '501234567',
     });
     fixture.detectChanges();
 
@@ -56,11 +59,12 @@ describe('RegistrationStep2', () => {
     expect(button.disabled).toBe(true);
   });
 
-  it('should render all four form fields', () => {
+  it('should render all five form fields', () => {
+    // firstName, lastName, email, phoneNumber (reactive) + residence (unbound, Places-driven)
     const fixture = TestBed.createComponent(RegistrationStep2);
     fixture.detectChanges();
     const inputs = fixture.nativeElement.querySelectorAll('.form-field input');
-    expect(inputs.length).toBe(4);
+    expect(inputs.length).toBe(5);
   });
 
   it('should render progress bar', () => {

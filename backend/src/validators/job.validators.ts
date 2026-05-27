@@ -3,25 +3,28 @@ import { JobStatus } from '@livin/common';
 
 const jobStatuses: [JobStatus, ...JobStatus[]] = ["pending", "accepted", "completed", "cancelled"];
 
+const paymentMethods = ['Cash', 'Bank Transfer', 'PayPal', 'Bit', 'PayBox'] as const;
+const paymentRateTypes = ['hourly', 'daily', 'weekly'] as const;
+
+const uniqueStringArray = z.array(z.string()).refine(
+    (arr) => new Set(arr).size === arr.length,
+    { message: 'Array must contain unique values' },
+);
+
 export const createJobSchema = z.object({
     title: z.string().min(1),
     description: z.string().min(1),
-    startDate: z.iso.datetime(),
-    endDate: z.iso.datetime(),
-    locationLat: z.number(),
-    locationLng: z.number(),
-    paymentMethod: z.string().min(1),
-    paymentAmount: z.number().min(0),
-    paymentCurrency: z.string().min(1),
-    petIds: z.array(z.string()).refine((arr) => new Set(arr).size === arr.length, {
-        message: "petIds must contain unique values",
-    }).optional(),
-    plantIds: z.array(z.string()).refine((arr) => new Set(arr).size === arr.length, {
-        message: "plantIds must contain unique values",
-    }).optional(),
-    strayAnimalIds: z.array(z.string()).refine((arr) => new Set(arr).size === arr.length, {
-        message: "strayAnimalIds must contain unique values",
-    }).optional(),
+    startDate: z.iso.datetime().optional(),
+    endDate: z.iso.datetime().optional(),
+    locationLat: z.number().optional(),
+    locationLng: z.number().optional(),
+    paymentMethod: z.enum(paymentMethods).optional(),
+    paymentRateType: z.enum(paymentRateTypes).optional(),
+    paymentAmount: z.number().min(0).optional(),
+    paymentCurrency: z.string().min(1).optional(),
+    petIds: uniqueStringArray.optional(),
+    plantIds: uniqueStringArray.optional(),
+    strayAnimalIds: uniqueStringArray.optional(),
 });
 
 export type CreateJobInput = z.infer<typeof createJobSchema>;
@@ -33,18 +36,13 @@ export const updateJobSchema = z.object({
     endDate: z.iso.datetime().optional(),
     locationLat: z.number().optional(),
     locationLng: z.number().optional(),
-    paymentMethod: z.string().min(1).optional(),
+    paymentMethod: z.enum(paymentMethods).optional(),
+    paymentRateType: z.enum(paymentRateTypes).optional(),
     paymentAmount: z.number().min(0).optional(),
     paymentCurrency: z.string().min(1).optional(),
-    petIds: z.array(z.string()).refine((arr) => new Set(arr).size === arr.length, {
-        message: "petIds must contain unique values",
-    }).optional(),
-    plantIds: z.array(z.string()).refine((arr) => new Set(arr).size === arr.length, {
-        message: "plantIds must contain unique values",
-    }).optional(),
-    strayAnimalIds: z.array(z.string()).refine((arr) => new Set(arr).size === arr.length, {
-        message: "strayAnimalIds must contain unique values",
-    }).optional(),
+    petIds: uniqueStringArray.optional(),
+    plantIds: uniqueStringArray.optional(),
+    strayAnimalIds: uniqueStringArray.optional(),
 });
 
 export type UpdateJobInput = z.infer<typeof updateJobSchema>;

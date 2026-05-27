@@ -7,25 +7,31 @@ datasource db {
 }
 
 model User {
-  id            String         @id @default(uuid())
-  name          String
-  email         String         @unique
-  phone         String
-  residence     String
-  role          UserRole
-  bio           String
-  dateOfBirth   String
-  careTypes     CareType[]
-  availability  Availability[]
-  profilePhoto  String         @default("")
-  passwordHash  String
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  pets          Pet[]
-  plants        Plant[]
-  strayAnimals  StrayAnimal[]
-  caretakerJobs Job[]          @relation("CaretakerJobs")
-  ownerJobs     Job[]          @relation("OwnerJobs")
+  id                 String               @id @default(uuid())
+  name               String
+  email              String               @unique
+  phone              String
+  residence          String
+  role               UserRole
+  bio                String
+  dateOfBirth        String
+  careTypes          CareType[]
+  availability       Availability[]
+  profilePhoto       String               @default("")
+  passwordHash       String
+  displayMode        DisplayMode          @default(social)
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+  pets               Pet[]
+  plants             Plant[]
+  strayAnimals       StrayAnimal[]
+  caretakerJobs      Job[]                @relation("CaretakerJobs")
+  ownerJobs          Job[]                @relation("OwnerJobs")
+  sentInterests      UserInterest[]       @relation("SentInterests")
+  receivedInterests  UserInterest[]       @relation("ReceivedInterests")
+  connectionsAsUser1 UserConnection[]     @relation("ConnectionUser1")
+  connectionsAsUser2 UserConnection[]     @relation("ConnectionUser2")
+  sentConnMessages   ConnectionMessage[]  @relation("SentConnMessages")
 }
 
 model Pet {
@@ -73,26 +79,27 @@ model StrayAnimal {
 }
 
 model Job {
-  id              String               @id @default(uuid())
-  caretakerId     String?
-  caretaker       User?                @relation(fields: [caretakerId], references: [id], name: "CaretakerJobs")
-  ownerId         String
-  owner           User                 @relation(fields: [ownerId], references: [id], name: "OwnerJobs")
-  title           String
-  description     String
-  startDate       DateTime
-  endDate         DateTime
-  status          JobStatus            @default(pending)
-  locationLat     Float
-  locationLng     Float
-  paymentAmount   Float
-  paymentCurrency String
-  paymentMethod   String
-  createdAt       DateTime             @default(now())
-  updatedAt       DateTime             @updatedAt
-  pets            PetsPerJob[]
-  plants          PlantsPerJob[]
-  strayAnimals    StrayAnimalsPerJob[]
+  id               String               @id @default(uuid())
+  caretakerId      String?
+  caretaker        User?                @relation(fields: [caretakerId], references: [id], name: "CaretakerJobs")
+  ownerId          String
+  owner            User                 @relation(fields: [ownerId], references: [id], name: "OwnerJobs")
+  title            String
+  description      String
+  startDate        DateTime
+  endDate          DateTime
+  status           JobStatus            @default(pending)
+  locationLat      Float
+  locationLng      Float
+  paymentAmount    Float
+  paymentCurrency  String
+  paymentMethod    String
+  paymentRateType  PaymentRateType?
+  createdAt        DateTime             @default(now())
+  updatedAt        DateTime             @updatedAt
+  pets             PetsPerJob[]
+  plants           PlantsPerJob[]
+  strayAnimals     StrayAnimalsPerJob[]
 }
 
 model PetsPerJob {
@@ -117,6 +124,45 @@ model StrayAnimalsPerJob {
   job           Job         @relation(fields: [jobId], references: [id])
   strayAnimalId String
   strayAnimal   StrayAnimal @relation(fields: [strayAnimalId], references: [id])
+}
+
+model UserInterest {
+  id         String   @id @default(uuid())
+  fromUserId String
+  toUserId   String
+  liked      Boolean
+  createdAt  DateTime @default(now())
+  fromUser   User     @relation("SentInterests", fields: [fromUserId], references: [id])
+  toUser     User     @relation("ReceivedInterests", fields: [toUserId], references: [id])
+
+  @@unique([fromUserId, toUserId])
+}
+
+model UserConnection {
+  id        String              @id @default(uuid())
+  user1Id   String
+  user2Id   String
+  createdAt DateTime            @default(now())
+  user1     User                @relation("ConnectionUser1", fields: [user1Id], references: [id])
+  user2     User                @relation("ConnectionUser2", fields: [user2Id], references: [id])
+  messages  ConnectionMessage[]
+
+  @@unique([user1Id, user2Id])
+}
+
+model ConnectionMessage {
+  id           String         @id @default(uuid())
+  connectionId String
+  senderId     String
+  content      String
+  sentAt       DateTime       @default(now())
+  connection   UserConnection @relation(fields: [connectionId], references: [id])
+  sender       User           @relation("SentConnMessages", fields: [senderId], references: [id])
+}
+
+enum DisplayMode {
+  social
+  swipe
 }
 
 enum UserRole {
@@ -173,4 +219,10 @@ enum JobStatus {
   accepted
   completed
   cancelled
+}
+
+enum PaymentRateType {
+  hourly
+  daily
+  weekly
 }

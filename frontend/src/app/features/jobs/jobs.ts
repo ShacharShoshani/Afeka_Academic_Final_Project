@@ -26,6 +26,7 @@ interface JobDraft {
   startDate: string;
   endDate: string;
   paymentMethod: string;
+  paymentRateType: string;
   paymentAmount: number | null;
   paymentCurrency: string;
   locationLat: number | null;
@@ -35,6 +36,14 @@ interface JobDraft {
   plantIds: Set<string>;
   strayAnimalIds: Set<string>;
 }
+
+const PAYMENT_METHODS = ['Cash', 'Bank Transfer', 'PayPal', 'Bit', 'PayBox'] as const;
+
+const RATE_TYPES: { value: string; label: string }[] = [
+  { value: 'hourly', label: 'Hourly' },
+  { value: 'daily', label: 'Daily' },
+  { value: 'weekly', label: 'Weekly' },
+];
 
 const STATUS_FILTERS: { value: StatusFilter; label: string }[] = [
   { value: 'all', label: 'All' },
@@ -66,6 +75,8 @@ export class Jobs implements OnInit {
 
   // ── Signals ─────────────────────────────────────────────────────────────────
 
+  protected readonly paymentMethods = PAYMENT_METHODS;
+  protected readonly rateTypes = RATE_TYPES;
   protected readonly statusFilters = STATUS_FILTERS;
   protected readonly allJobs = signal<JobWithOwner[]>([]);
   protected readonly loading = signal(false);
@@ -92,6 +103,9 @@ export class Jobs implements OnInit {
 
   /** True once the user has selected a place via autocomplete (or the job already had coords). */
   protected readonly hasFormLocation = signal(false);
+
+  /** True while reverse-geocoding the device's live location. */
+  protected readonly locationLoading = signal(false);
 
   // ── Computed ─────────────────────────────────────────────────────────────────
 
@@ -216,6 +230,7 @@ export class Jobs implements OnInit {
     this.selectedPetIds.set(new Set());
     this.selectedPlantIds.set(new Set());
     this.selectedStrayIds.set(new Set());
+    this.error.set('');
     this.formOpen.set(true);
     this.fetchOwnerSubjects();
     // Wait one tick for the @if block to render before attaching autocomplete
@@ -230,6 +245,7 @@ export class Jobs implements OnInit {
       startDate: job.startDate ? job.startDate.slice(0, 10) : '',
       endDate: job.endDate ? job.endDate.slice(0, 10) : '',
       paymentMethod: job.paymentMethod,
+      paymentRateType: job.paymentRateType ?? '',
       paymentAmount: job.paymentAmount,
       paymentCurrency: job.paymentCurrency,
       locationLat: job.locationLat ?? null,
@@ -257,6 +273,7 @@ export class Jobs implements OnInit {
 
   protected closeForm(): void {
     this.formOpen.set(false);
+    this.error.set('');
     this.cleanupAutocomplete();
   }
 
@@ -318,7 +335,8 @@ export class Jobs implements OnInit {
       description: d.description.trim(),
       startDate: d.startDate ? new Date(d.startDate).toISOString() : undefined,
       endDate: d.endDate ? new Date(d.endDate).toISOString() : undefined,
-      paymentMethod: d.paymentMethod || undefined,
+      paymentMethod: (d.paymentMethod || undefined) as import('@livin/common').PaymentMethod | undefined,
+      paymentRateType: (d.paymentRateType || undefined) as import('@livin/common').PaymentRateType | undefined,
       paymentAmount: d.paymentAmount ?? undefined,
       paymentCurrency: d.paymentCurrency || undefined,
       locationLat: d.locationLat ?? undefined,
@@ -425,6 +443,45 @@ export class Jobs implements OnInit {
     });
   }
 
+  /** Clears the input text if the user typed but never confirmed a place from autocomplete. */
+  protected onLocationBlur(): void {
+    if (!this.hasFormLocation() && this.locationInputRef?.nativeElement) {
+      this.locationInputRef.nativeElement.value = '';
+    }
+  }
+
+  /** Reverse-geocodes the device's live position and fills the location fields. */
+  protected requestLiveLocation(): void {
+    if (!navigator.geolocation) return;
+    this.locationLoading.set(true);
+
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        const geocoder = new google.maps.Geocoder();
+        geocoder.geocode({ location: { lat, lng } }, (results, status) => {
+          this.locationLoading.set(false);
+          if (status !== 'OK' || !results?.[0]) return;
+
+          const address = results[0].formatted_address;
+          this.draft.locationLat = lat;
+          this.draft.locationLng = lng;
+          this.draft.locationAddress = address;
+          this.formMapCenter.set({ lat, lng });
+          this.hasFormLocation.set(true);
+          if (this.locationInputRef?.nativeElement) {
+            this.locationInputRef.nativeElement.value = address;
+          }
+          this.cdr.detectChanges();
+        });
+      },
+      () => {
+        this.locationLoading.set(false);
+      },
+    );
+  }
+
   private initAutocomplete(): void {
     const input = this.locationInputRef?.nativeElement;
     if (!input || typeof google === 'undefined' || !google.maps?.places) return;
@@ -465,6 +522,7 @@ export class Jobs implements OnInit {
       startDate: '',
       endDate: '',
       paymentMethod: '',
+      paymentRateType: '',
       paymentAmount: null,
       paymentCurrency: 'ILS',
       locationLat: null,

@@ -1,5 +1,5 @@
 import { Component, computed, inject, signal } from '@angular/core';
-import { ReactiveFormsModule, FormControl, FormGroup, Validators } from '@angular/forms';
+import { AbstractControl, ReactiveFormsModule, FormControl, FormGroup, ValidationErrors, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
@@ -22,10 +22,37 @@ export class RegistrationStep3 {
     this.store.select('user').pipe(map((u) => u.role)),
   );
 
+  protected readonly maxDob = computed(() => {
+    const d = new Date();
+    d.setFullYear(d.getFullYear() - 16);
+    return d.toISOString().split('T')[0];
+  });
+
+  protected readonly minDob = computed(() => {
+    const d = new Date();
+    d.setFullYear(d.getFullYear() - 120);
+    return d.toISOString().split('T')[0];
+  });
+
   protected profileForm = new FormGroup({
     bio: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
-    dateOfBirth: new FormControl('', { nonNullable: true, validators: [Validators.required] }),
+    dateOfBirth: new FormControl('', { nonNullable: true, validators: [Validators.required, RegistrationStep3.dateOfBirthValidator] }),
   });
+
+  private static dateOfBirthValidator(control: AbstractControl): ValidationErrors | null {
+    const val = control.value as string;
+    if (!val) return null;
+    const date = new Date(val);
+    if (isNaN(date.getTime())) return { invalidDate: true };
+    const now = new Date();
+    if (date >= now) return { future: true };
+    const age = now.getFullYear() - date.getFullYear() - (
+      now.getMonth() < date.getMonth() || (now.getMonth() === date.getMonth() && now.getDate() < date.getDate()) ? 1 : 0
+    );
+    if (age < 16) return { tooYoung: true };
+    if (age > 120) return { tooOld: true };
+    return null;
+  }
 
   protected selectedCareTypes = signal<CareType[]>([]);
   protected selectedAvailability = signal<Availability[]>([]);

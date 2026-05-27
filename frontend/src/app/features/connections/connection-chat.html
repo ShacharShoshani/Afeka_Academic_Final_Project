@@ -1,0 +1,48 @@
+<div class="page">
+  <header class="header">
+    <button class="back-btn" (click)="goBack()">
+      <svg viewBox="0 0 24 24" fill="none" width="20" height="20">
+        <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span>Connections</span>
+    </button>
+    <span class="title">{{ connection()?.otherUser?.name ?? 'Chat' }}</span>
+    <span class="header-spacer"></span>
+  </header>
+
+  @if (loading()) {
+    <div class="status-block">Loading…</div>
+  } @else if (error()) {
+    <div class="status-block status-error">{{ error() }}</div>
+  } @else {
+    <ul class="message-list" #messageList>
+      @if (messages().length === 0) {
+        <li class="msg-empty">No messages yet. Say hello!</li>
+      }
+      @for (msg of messages(); track msg.id) {
+        <li class="msg-row" [class.msg-own]="isOwn(msg)">
+          <div class="bubble">
+            <span class="bubble-text">{{ msg.content }}</span>
+            <span class="bubble-time">{{ formatTime(msg.sentAt) }}</span>
+          </div>
+        </li>
+      }
+    </ul>
+
+    <div class="compose">
+      <input
+        class="compose-input"
+        type="text"
+        placeholder="Type a message…"
+        [ngModel]="draft()"
+        (ngModelChange)="draft.set($event)"
+        (keydown.enter)="send()"
+      />
+      <button class="send-btn" (click)="send()" [disabled]="!draft().trim()">
+        <svg viewBox="0 0 24 24" fill="none" width="20" height="20">
+          <path d="M22 2L11 13M22 2L15 22l-4-9-9-4 20-7z" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
+  }
+</div>

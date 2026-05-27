@@ -139,6 +139,7 @@
                     <path d="M12 7v10M9.5 9.5A2.5 2.5 0 0112 7h.5a2 2 0 010 4H12a2 2 0 000 4h.5a2.5 2.5 0 002.5-2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
                   </svg>
                   {{ job.paymentAmount }} {{ job.paymentCurrency }}
+                  @if (job.paymentRateType) { / {{ job.paymentRateType }} }
                   @if (job.paymentMethod) { · {{ job.paymentMethod }} }
                 </span>
               }
@@ -254,7 +255,7 @@
         ></textarea>
       </div>
 
-      <!-- Location search + mini-map preview -->
+      <!-- Location search + live location + mini-map preview -->
       <div class="form-group">
         <label class="form-label" for="job-location">Location</label>
         <div class="location-search-wrap">
@@ -269,6 +270,7 @@
             type="text"
             placeholder="Search for an address or place…"
             autocomplete="off"
+            (blur)="onLocationBlur()"
           />
           @if (hasFormLocation()) {
             <button
@@ -283,6 +285,26 @@
             </button>
           }
         </div>
+
+        <!-- "Use my location" pill -->
+        <button
+          type="button"
+          class="live-location-btn"
+          [disabled]="locationLoading()"
+          (click)="requestLiveLocation()"
+        >
+          @if (locationLoading()) {
+            <span class="live-location-spinner"></span>
+            <span>Getting location…</span>
+          } @else {
+            <svg viewBox="0 0 24 24" fill="none" width="14" height="14">
+              <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M12 2v3M12 19v3M2 12h3M19 12h3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              <path d="M12 5a7 7 0 100 14A7 7 0 0012 5z" stroke="currentColor" stroke-width="1.5" opacity=".35"/>
+            </svg>
+            <span>Use my current location</span>
+          }
+        </button>
 
         <!-- Mini-map preview — appears once a place is selected -->
         @if (hasFormLocation()) {
@@ -421,7 +443,7 @@
         </div>
       </div>
 
-      <!-- Payment -->
+      <!-- Payment amount + currency -->
       <div class="form-row">
         <div class="form-group">
           <label class="form-label" for="job-amount">Payment amount</label>
@@ -444,15 +466,30 @@
         </div>
       </div>
 
+      <!-- Payment rate type -->
+      <div class="form-group">
+        <label class="form-label">Rate type</label>
+        <div class="rate-type-group">
+          @for (rate of rateTypes; track rate.value) {
+            <button
+              type="button"
+              class="rate-type-btn"
+              [class.rate-type-btn--active]="draft.paymentRateType === rate.value"
+              (click)="draft.paymentRateType = draft.paymentRateType === rate.value ? '' : rate.value"
+            >{{ rate.label }}</button>
+          }
+        </div>
+      </div>
+
+      <!-- Payment method -->
       <div class="form-group">
         <label class="form-label" for="job-method">Payment method</label>
-        <input
-          id="job-method"
-          class="form-input"
-          type="text"
-          placeholder="e.g. Cash, Bank transfer…"
-          [(ngModel)]="draft.paymentMethod"
-        />
+        <select id="job-method" class="form-select" [(ngModel)]="draft.paymentMethod">
+          <option value="">— Select —</option>
+          @for (m of paymentMethods; track m) {
+            <option [value]="m">{{ m }}</option>
+          }
+        </select>
       </div>
 
     </div>

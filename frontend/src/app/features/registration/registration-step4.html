@@ -63,8 +63,21 @@
             }
           </button>
         </div>
-        @if (passwordForm.get('password')?.touched && passwordForm.get('password')?.hasError('minlength')) {
-          <span class="field-error">Password must be at least 8 characters</span>
+        @if (showStrengthRules()) {
+          <ul class="strength-rules">
+            @for (rule of passwordRules(); track rule.label) {
+              <li class="strength-rule" [class.strength-rule--ok]="rule.ok">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                  @if (rule.ok) {
+                    <polyline points="20 6 9 17 4 12"/>
+                  } @else {
+                    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                  }
+                </svg>
+                {{ rule.label }}
+              </li>
+            }
+          </ul>
         }
       </div>
 

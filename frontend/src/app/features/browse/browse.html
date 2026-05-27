@@ -1,3 +1,6 @@
+@if (swipeMode()) {
+  <app-swipe-deck />
+} @else {
 <div class="page">
   <header class="header">
     <button class="back-btn" (click)="goHome()" aria-label="Back to home">
@@ -136,3 +139,4 @@
     </main>
   }
 </div>
+}

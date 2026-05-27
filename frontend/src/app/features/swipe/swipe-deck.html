@@ -1,0 +1,95 @@
+@if (matched(); as m) {
+  <div class="match-overlay">
+    <div class="match-modal">
+      <div class="match-icon">💚</div>
+      <h2 class="match-title">It's a Match!</h2>
+      <p class="match-sub">You and {{ m.name }} both swiped right.</p>
+      <button class="btn-primary" (click)="openChat()">Open Chat</button>
+      <button class="btn-ghost" (click)="dismissMatch()">Keep Swiping</button>
+    </div>
+  </div>
+}
+
+@if (empty() && !currentCard()) {
+  <div class="empty-state">
+    <p>No more profiles to show right now.</p>
+    <p class="empty-hint">Check back later or switch to Social mode in Settings.</p>
+  </div>
+} @else if (currentCard(); as top) {
+  <div class="deck-container">
+    @if (nextCard(); as behind) {
+      <div class="swipe-card swipe-card-behind">
+        <div class="card-inner">
+          @if (behind.profilePhoto) {
+            <img class="card-photo" [src]="behind.profilePhoto" [alt]="behind.name" />
+          } @else {
+            <div class="card-photo card-photo-placeholder">
+              <svg viewBox="0 0 24 24" fill="none" width="48" height="48">
+                <circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M4 20c0-4 3.582-7 8-7s8 3 8 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+            </div>
+          }
+          <div class="card-info">
+            <h2 class="card-name">{{ behind.name }}</h2>
+            <span class="card-residence">{{ behind.residence }}</span>
+          </div>
+        </div>
+      </div>
+    }
+
+    <div
+      class="swipe-card swipe-card-top"
+      [class.is-dragging]="dragging()"
+      [style.transform]="cardTransform()"
+      (pointerdown)="onPointerDown($event)"
+      (pointermove)="onPointerMove($event)"
+      (pointerup)="onPointerUp($event)"
+      (pointercancel)="onPointerUp($event)"
+    >
+      <div class="like-indicator" [style.opacity]="likeOpacity()">LIKE</div>
+      <div class="pass-indicator" [style.opacity]="passOpacity()">PASS</div>
+
+      <div class="card-inner">
+        @if (top.profilePhoto) {
+          <img class="card-photo" [src]="top.profilePhoto" [alt]="top.name" draggable="false" />
+        } @else {
+          <div class="card-photo card-photo-placeholder">
+            <svg viewBox="0 0 24 24" fill="none" width="48" height="48">
+              <circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M4 20c0-4 3.582-7 8-7s8 3 8 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+        }
+
+        <div class="card-info">
+          <h2 class="card-name">{{ top.name }}</h2>
+          <span class="card-residence">{{ top.residence }}</span>
+          @if (top.bio) {
+            <p class="card-bio">{{ top.bio }}</p>
+          }
+          @if (top.careTypes.length) {
+            <div class="card-chips">
+              @for (t of top.careTypes; track t) {
+                <span class="chip">{{ formatCareType(t) }}</span>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <div class="action-row">
+      <button class="action-btn action-pass" (click)="swipeLeft()" aria-label="Pass">
+        <svg viewBox="0 0 24 24" fill="none" width="28" height="28">
+          <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+      </button>
+      <button class="action-btn action-like" (click)="swipeRight()" aria-label="Like">
+        <svg viewBox="0 0 24 24" fill="none" width="28" height="28">
+          <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+}

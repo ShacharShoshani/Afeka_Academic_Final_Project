@@ -17,9 +17,18 @@ function flattenJob(job: any) {
     };
 }
 
+const PUBLIC_USER_SELECT = {
+    id: true,
+    name: true,
+    residence: true,
+    role: true,
+    bio: true,
+    profilePhoto: true,
+} as const;
+
 const jobIncludes = {
-    owner: true,
-    caretaker: true,
+    owner: { select: PUBLIC_USER_SELECT },
+    caretaker: { select: PUBLIC_USER_SELECT },
     pets: { include: { pet: true } },
     plants: { include: { plant: true } },
     strayAnimals: { include: { strayAnimal: true } },
