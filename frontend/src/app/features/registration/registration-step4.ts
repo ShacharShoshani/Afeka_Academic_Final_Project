@@ -1,9 +1,9 @@
 import { Component, computed, inject, signal, ElementRef, viewChild } from '@angular/core';
 import { ReactiveFormsModule, FormControl, FormGroup, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { Router } from '@angular/router';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { Store } from '@ngrx/store';
-import { map, take } from 'rxjs';
+import { map, startWith, take } from 'rxjs';
 import { User } from '@livin/common';
 import { ProgressBar } from '../../shared/components/progress-bar/progress-bar';
 import { setAccountData } from '../../store/user.actions';
@@ -32,7 +32,7 @@ export class RegistrationStep4 {
   protected passwordForm = new FormGroup({
     password: new FormControl('', {
       nonNullable: true,
-      validators: [Validators.required, Validators.minLength(8)],
+      validators: [Validators.required, RegistrationStep4.passwordStrength],
     }),
     confirmPassword: new FormControl('', {
       nonNullable: true,
@@ -41,11 +41,43 @@ export class RegistrationStep4 {
   }, { validators: RegistrationStep4.passwordsMatch });
 
   private formStatus = toSignal(
-    this.passwordForm.statusChanges.pipe(map((s) => s)),
-    { initialValue: this.passwordForm.status },
+    this.passwordForm.statusChanges.pipe(startWith(this.passwordForm.status), takeUntilDestroyed()),
+  );
+
+  private passwordValue = toSignal(
+    this.passwordForm.get('password')!.valueChanges.pipe(startWith(''), takeUntilDestroyed()),
+    { initialValue: '' }
   );
 
   protected canContinue = computed(() => this.formStatus() === 'VALID');
+
+  protected readonly passwordRules = computed(() => {
+    const v = this.passwordValue();
+    return [
+      { label: 'At least 8 characters', ok: v.length >= 8 },
+      { label: 'Uppercase letter', ok: /[A-Z]/.test(v) },
+      { label: 'Lowercase letter', ok: /[a-z]/.test(v) },
+      { label: 'Number', ok: /\d/.test(v) },
+      { label: 'Special character (!@#$…)', ok: /[^A-Za-z0-9]/.test(v) },
+    ];
+  });
+
+  protected readonly showStrengthRules = computed(() => {
+    const v = this.passwordValue();
+    return v.length > 0;
+  });
+
+  private static passwordStrength(control: AbstractControl): ValidationErrors | null {
+    const v = control.value as string;
+    if (!v) return null;
+    const errors: Record<string, boolean> = {};
+    if (v.length < 8) errors['minlength'] = true;
+    if (!/[A-Z]/.test(v)) errors['missingUppercase'] = true;
+    if (!/[a-z]/.test(v)) errors['missingLowercase'] = true;
+    if (!/\d/.test(v)) errors['missingNumber'] = true;
+    if (!/[^A-Za-z0-9]/.test(v)) errors['missingSpecial'] = true;
+    return Object.keys(errors).length > 0 ? errors : null;
+  }
 
   private static passwordsMatch(group: AbstractControl): ValidationErrors | null {
     const password = group.get('password')?.value;
@@ -116,7 +148,13 @@ export class RegistrationStep4 {
         },
         error: (err) => {
           this.loading.set(false);
-          this.apiError.set(err.error?.error || 'Registration failed. Please try again.');
+          const base = err.error?.error || err.error?.message || 'Registration failed. Please try again.';
+          const details: Array<{ path: (string | number)[]; message: string }> | undefined = err.error?.details;
+          const detailText = details?.length
+            ? ' — ' + details.map((d) => `${d.path.join('.') || '(root)'}: ${d.message}`).join('; ')
+            : '';
+          console.error('Registration error:', err.error);
+          this.apiError.set(base + detailText);
         },
       });
     });

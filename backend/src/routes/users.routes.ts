@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { prisma } from '../lib/prisma.js';
 import { requireAuth } from '../middleware/auth.js';
+import { validate } from '../middleware/validate.js';
 
 const router = Router();
 
@@ -15,6 +16,7 @@ const PUBLIC_USER_SELECT = {
   careTypes: true,
   availability: true,
   profilePhoto: true,
+  displayMode: true,
   createdAt: true,
   updatedAt: true,
 } as const;
@@ -128,6 +130,20 @@ router.get('/:id/strays', requireAuth, async (req, res) => {
     orderBy: { createdAt: 'desc' },
   });
   res.json(strays);
+});
+
+const patchMeSchema = z.object({
+  displayMode: z.enum(['social', 'swipe']).optional(),
+});
+
+// PATCH /api/users/me — update caller's own profile fields.
+router.patch('/me', requireAuth, validate(patchMeSchema), async (req, res) => {
+  const updated = await prisma.user.update({
+    where: { id: req.user!.id },
+    data: req.body,
+    select: PUBLIC_USER_SELECT,
+  });
+  res.json(updated);
 });
 
 export { router as usersRouter };

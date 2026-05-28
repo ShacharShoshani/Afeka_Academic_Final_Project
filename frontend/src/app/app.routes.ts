@@ -59,5 +59,23 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./features/user-profile/user-profile').then((m) => m.UserProfile),
   },
+  {
+    path: 'settings',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/settings/settings').then((m) => m.Settings),
+  },
+  {
+    path: 'connections',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/connections/connections').then((m) => m.Connections),
+  },
+  {
+    path: 'connections/:id',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/connections/connection-chat').then((m) => m.ConnectionChat),
+  },
   { path: '', redirectTo: 'home', pathMatch: 'full' },
 ];

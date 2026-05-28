@@ -39,7 +39,8 @@ describe('RegistrationStep4', () => {
     const fixture = TestBed.createComponent(RegistrationStep4);
     const component = fixture.componentInstance as any;
 
-    component.passwordForm.setValue({ password: 'password123', confirmPassword: 'different123' });
+    // Use a password that passes strength rules so the mismatch is the only reason for disabled
+    component.passwordForm.setValue({ password: 'Password1!', confirmPassword: 'Different1!' });
     fixture.detectChanges();
 
     const button = fixture.nativeElement.querySelector('.continue-btn') as HTMLButtonElement;
@@ -50,7 +51,8 @@ describe('RegistrationStep4', () => {
     const fixture = TestBed.createComponent(RegistrationStep4);
     const component = fixture.componentInstance as any;
 
-    component.passwordForm.setValue({ password: 'password123', confirmPassword: 'password123' });
+    // Password must satisfy strength rules: uppercase, lowercase, number, special char, ≥8 chars
+    component.passwordForm.setValue({ password: 'Password1!', confirmPassword: 'Password1!' });
     fixture.detectChanges();
 
     const button = fixture.nativeElement.querySelector('.continue-btn') as HTMLButtonElement;

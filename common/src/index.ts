@@ -1,3 +1,9 @@
+type DisplayMode = "social" | "swipe"
+
+type PaymentMethod = "Cash" | "Bank Transfer" | "PayPal" | "Bit" | "PayBox"
+
+type PaymentRateType = "hourly" | "daily" | "weekly"
+
 type UserRole = "owner" | "caretaker" | "admin"
 
 type CareType = "dogs" | "cats" | "birds" | "fish" | "rabbits" | "hamsters" | "reptiles" | "plants" | "stray_animals"
@@ -18,6 +24,7 @@ type User = {
     careTypes: CareType[];
     availability: Availability[]; // caretaker only
     profilePhoto: string;
+    displayMode: DisplayMode;
     password: string;
 }
 
@@ -32,8 +39,34 @@ type PublicUser = {
     careTypes: CareType[];
     availability: Availability[];
     profilePhoto: string;
+    displayMode: DisplayMode;
     createdAt: string;
     updatedAt: string;
+}
+
+type UserInterest = {
+    id: string;
+    fromUserId: string;
+    toUserId: string;
+    liked: boolean;
+    createdAt: string;
+}
+
+type ConnectionMessage = {
+    id: string;
+    connectionId: string;
+    senderId: string;
+    content: string;
+    sentAt: string;
+}
+
+type UserConnection = {
+    id: string;
+    user1Id: string;
+    user2Id: string;
+    createdAt: string;
+    messages?: ConnectionMessage[];
+    otherUser?: PublicUser;
 }
 
 type Pet = {
@@ -89,6 +122,7 @@ type Job = {
     paymentMethod: string;
     paymentAmount: number;
     paymentCurrency: string;
+    paymentRateType: PaymentRateType | null;
     status: JobStatus;
     pets: Pet[];
     plants: Plant[];
@@ -101,12 +135,18 @@ export {
     AnimalSize,
     Availability,
     CareType,
+    ConnectionMessage,
+    DisplayMode,
     Job,
     JobStatus,
+    PaymentMethod,
+    PaymentRateType,
     Pet,
     Plant,
     PublicUser,
     StrayAnimal,
     User,
+    UserConnection,
+    UserInterest,
     UserRole,
 };

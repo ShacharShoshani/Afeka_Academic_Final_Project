@@ -27,7 +27,22 @@
 
       <div class="form-field">
         <label for="dateOfBirth">Date of Birth</label>
-        <input id="dateOfBirth" type="date" formControlName="dateOfBirth">
+        <input id="dateOfBirth" type="date" formControlName="dateOfBirth"
+               [max]="maxDob()" [min]="minDob()"
+               [class.input-error]="profileForm.get('dateOfBirth')?.invalid && profileForm.get('dateOfBirth')?.touched">
+        @if (profileForm.get('dateOfBirth')?.touched) {
+          @if (profileForm.get('dateOfBirth')?.hasError('required')) {
+            <span class="field-error">Date of birth is required</span>
+          } @else if (profileForm.get('dateOfBirth')?.hasError('invalidDate')) {
+            <span class="field-error">Enter a valid date</span>
+          } @else if (profileForm.get('dateOfBirth')?.hasError('future')) {
+            <span class="field-error">Date of birth cannot be in the future</span>
+          } @else if (profileForm.get('dateOfBirth')?.hasError('tooYoung')) {
+            <span class="field-error">You must be at least 16 years old</span>
+          } @else if (profileForm.get('dateOfBirth')?.hasError('tooOld')) {
+            <span class="field-error">Please enter a valid date of birth</span>
+          }
+        }
       </div>
     </form>
 

@@ -5,6 +5,7 @@ import { Subject, debounceTime } from 'rxjs';
 import type { Availability, CareType, PublicUser, UserRole } from '@livin/common';
 import { AuthService } from '../../services/auth.service';
 import { UsersService } from '../../services/users.service';
+import { SwipeDeck } from '../swipe/swipe-deck';
 
 type RoleFilter = 'all' | 'owner' | 'caretaker';
 
@@ -13,7 +14,7 @@ const ALL_AVAILABILITY: Availability[] = ['mornings', 'afternoons', 'evenings', 
 
 @Component({
   selector: 'app-browse',
-  imports: [RouterLink, FormsModule],
+  imports: [RouterLink, FormsModule, SwipeDeck],
   templateUrl: './browse.html',
   styleUrls: ['./browse.css', './browse-cards.css'],
 })
@@ -21,6 +22,8 @@ export class Browse implements OnInit {
   private readonly router = inject(Router);
   private readonly usersService = inject(UsersService);
   protected readonly authService = inject(AuthService);
+
+  protected readonly swipeMode = computed(() => this.authService.user()?.displayMode === 'swipe');
 
   protected readonly users = signal<PublicUser[]>([]);
   protected readonly loading = signal(false);

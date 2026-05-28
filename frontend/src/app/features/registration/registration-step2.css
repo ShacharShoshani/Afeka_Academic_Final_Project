@@ -107,6 +107,187 @@
   color: var(--color-gray-400);
 }
 
+/* Two-column name row */
+.form-row {
+  display: flex;
+  gap: 12px;
+}
+
+.form-row .form-field {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Phone with country code prefix */
+.phone-wrap {
+  display: flex;
+  gap: 8px;
+}
+
+.phone-code-select {
+  flex-shrink: 0;
+  width: 100px;
+  padding: 12px 8px;
+  border: 2px solid var(--color-gray-200);
+  border-radius: var(--radius-md);
+  font-family: inherit;
+  font-size: 0.9rem;
+  color: var(--color-text-primary);
+  background: var(--color-white);
+  cursor: pointer;
+  appearance: auto;
+  transition: border-color var(--transition-fast);
+}
+
+.phone-code-select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 4px var(--color-primary-light);
+}
+
+.phone-number-input {
+  flex: 1;
+  min-width: 0;
+}
+
+/* Location search wrapper (reuses jobs-form patterns) */
+.location-search-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.location-search-icon {
+  position: absolute;
+  left: 12px;
+  color: var(--color-primary);
+  pointer-events: none;
+  flex-shrink: 0;
+}
+
+.location-input {
+  width: 100%;
+  padding: 12px 40px 12px 36px;
+  border: 2px solid var(--color-gray-200);
+  border-radius: var(--radius-md);
+  font-family: inherit;
+  font-size: 1rem;
+  color: var(--color-text-primary);
+  background: var(--color-white);
+  transition:
+    border-color var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+.location-input:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 4px var(--color-primary-light);
+}
+
+.location-input::placeholder {
+  color: var(--color-gray-400);
+}
+
+.location-clear-btn {
+  position: absolute;
+  right: 10px;
+  width: 24px;
+  height: 24px;
+  border: none;
+  border-radius: var(--radius-full);
+  background: var(--color-gray-200);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--transition-fast);
+  flex-shrink: 0;
+}
+
+.location-clear-btn:hover {
+  background: var(--color-gray-400);
+  color: var(--color-white);
+}
+
+/* Live location button */
+.live-location-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 7px;
+  padding: 5px 12px;
+  border: 1.5px dashed var(--color-primary, #4f46e5);
+  border-radius: var(--radius-full, 999px);
+  background: transparent;
+  color: var(--color-primary, #4f46e5);
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition:
+    background var(--transition-fast, 0.15s),
+    color var(--transition-fast, 0.15s);
+}
+
+.live-location-btn:hover:not(:disabled) {
+  background: var(--color-primary-light, #eef2ff);
+}
+
+.live-location-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.location-error {
+  display: block;
+  margin-top: 5px;
+  font-size: 0.78rem;
+  color: var(--color-error, #dc2626);
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.live-location-spinner {
+  width: 12px;
+  height: 12px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  flex-shrink: 0;
+}
+
+/* Maps unavailable notice */
+.maps-unavailable-msg {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 5px 0 0;
+  font-size: 0.78rem;
+  color: var(--color-text-secondary, #6b7280);
+}
+
+.maps-unavailable-msg svg {
+  flex-shrink: 0;
+  color: var(--color-warning, #d97706);
+}
+
+/* Inline field errors */
+.field-error {
+  font-size: 0.78rem;
+  color: var(--color-error, #dc2626);
+  margin-top: 2px;
+}
+
+.input-error {
+  border-color: var(--color-error, #dc2626) !important;
+}
+
+.input-error:focus {
+  box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.12) !important;
+}
+
 /* Footer / CTA */
 .footer {
   padding: 20px;

@@ -116,6 +116,21 @@
   line-height: 1.5;
 }
 
+/* Inline field errors */
+.field-error {
+  font-size: 0.78rem;
+  color: var(--color-error, #dc2626);
+  margin-top: 2px;
+}
+
+.input-error {
+  border-color: var(--color-error, #dc2626) !important;
+}
+
+.input-error:focus {
+  box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.12) !important;
+}
+
 /* Section Titles */
 .section-title {
   width: 100%;
