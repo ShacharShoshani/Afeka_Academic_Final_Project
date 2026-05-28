@@ -219,10 +219,6 @@ export class Jobs implements OnInit {
     this.selectedJobId.update((curr) => (curr === job.id ? null : job.id));
   }
 
-  protected goHome(): void {
-    this.router.navigate(['/home']);
-  }
-
   protected openAdd(): void {
     this.draft = this.emptyDraft();
     this.hasFormLocation.set(false);

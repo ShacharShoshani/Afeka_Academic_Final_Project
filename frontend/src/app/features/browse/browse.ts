@@ -1,5 +1,5 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Subject, debounceTime } from 'rxjs';
 import type { Availability, CareType, PublicUser, UserRole } from '@livin/common';
@@ -19,7 +19,6 @@ const ALL_AVAILABILITY: Availability[] = ['mornings', 'afternoons', 'evenings', 
   styleUrls: ['./browse.css', './browse-cards.css'],
 })
 export class Browse implements OnInit {
-  private readonly router = inject(Router);
   private readonly usersService = inject(UsersService);
   protected readonly authService = inject(AuthService);
 
@@ -93,10 +92,6 @@ export class Browse implements OnInit {
 
   protected toggleFiltersPanel(): void {
     this.filtersOpen.update((v) => !v);
-  }
-
-  protected goHome(): void {
-    this.router.navigate(['/home']);
   }
 
   protected formatCareType(type: string): string {

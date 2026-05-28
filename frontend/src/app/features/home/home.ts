@@ -1,5 +1,5 @@
 import { Component, inject, signal, computed } from '@angular/core';
-import { Router, RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 import { HomeDataService } from './home-data.service';
 import { PetsTab } from './tabs/pets-tab/pets-tab';
@@ -11,7 +11,7 @@ type Tab = 'profile' | 'pets' | 'plants' | 'stray';
 
 @Component({
   selector: 'app-home',
-  imports: [RouterLink, PetsTab, PlantsTab, StrayTab],
+  imports: [PetsTab, PlantsTab, StrayTab],
   templateUrl: './home.html',
   styleUrl: './home.css',
   providers: [HomeDataService],
@@ -34,8 +34,7 @@ export class Home {
   constructor() {
     if (!this.authService.isLoggedIn()) {
       this.router.navigate(['/login']);
-    }
-    else {
+    } else {
       this.loadData();
     }
   }
@@ -55,12 +54,5 @@ export class Home {
     if (role === 'caretaker') return 'Caretaker';
     if (role === 'admin') return 'Admin';
     return '';
-  }
-
-  protected logout(): void {
-    this.authService.logout().subscribe({
-      next: () => this.router.navigate(['/login']),
-      error: () => this.router.navigate(['/login']),
-    });
   }
 }
