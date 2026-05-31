@@ -1,0 +1,11 @@
+<header class="navbar">
+  <a class="brand" routerLink="/home">Livin</a>
+  <nav class="nav-links">
+    <a class="nav-link" routerLink="/home" routerLinkActive="nav-link--active" [routerLinkActiveOptions]="{ exact: true }">Home</a>
+    <a class="nav-link" routerLink="/browse" routerLinkActive="nav-link--active">Browse</a>
+    <a class="nav-link" routerLink="/jobs" routerLinkActive="nav-link--active">Jobs</a>
+    <a class="nav-link" routerLink="/connections" routerLinkActive="nav-link--active">Connections</a>
+    <a class="nav-link" routerLink="/settings" routerLinkActive="nav-link--active">Settings</a>
+  </nav>
+  <button class="logout-btn" (click)="logout()">Log out</button>
+</header>

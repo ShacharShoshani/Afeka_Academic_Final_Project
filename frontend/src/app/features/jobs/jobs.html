@@ -1,21 +1,5 @@
 <div class="page">
 
-  <!-- ── Header ── -->
-  <header class="header">
-    <button class="back-btn" (click)="goHome()" aria-label="Back to home">
-      <svg viewBox="0 0 24 24" fill="none" width="20" height="20">
-        <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-      </svg>
-      <span>Home</span>
-    </button>
-    <span class="title">Jobs</span>
-    @if (isOwner()) {
-      <button class="btn-add" (click)="openAdd()">+ Post job</button>
-    } @else {
-      <span class="header-spacer"></span>
-    }
-  </header>
-
   <!-- ── Map with per-job markers ── -->
   <section class="map-section">
     <google-map
@@ -47,6 +31,9 @@
         [class.active]="statusFilter() === f.value"
         (click)="setStatusFilter(f.value)"
       >{{ f.label }}</button>
+    }
+    @if (isOwner()) {
+      <button class="btn-add" (click)="openAdd()">+ Post job</button>
     }
   </div>
 

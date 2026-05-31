@@ -34,10 +34,6 @@ export class Connections implements OnInit {
     this.router.navigate(['/connections', id]);
   }
 
-  protected goHome(): void {
-    this.router.navigate(['/home']);
-  }
-
   protected lastMessage(conn: UserConnection): string {
     const msgs = conn.messages;
     if (!msgs || msgs.length === 0) return 'No messages yet';
