@@ -1,10 +1,14 @@
 import { z } from 'zod';
 import { JobStatus } from '@livin/common';
 
-const jobStatuses: [JobStatus, ...JobStatus[]] = ["pending", "accepted", "completed", "cancelled"];
+const jobStatuses: [JobStatus, ...JobStatus[]] = ["pending", "accepted", "in_progress", "completed", "cancelled"];
 
-const paymentMethods = ['Cash', 'Bank Transfer', 'PayPal', 'Bit', 'PayBox'] as const;
+const legacyPaymentMethods = ['Cash', 'Bank Transfer', 'PayPal', 'Bit', 'PayBox'] as const;
+const paymentMethodEnums = ['cash', 'bank_transfer', 'bit', 'paybox', 'check', 'paypal'] as const;
 const paymentRateTypes = ['hourly', 'daily', 'weekly'] as const;
+const currencies = ['ILS', 'USD', 'EUR'] as const;
+const serviceTypes = ['feeding', 'walking', 'watering_plants', 'cleaning', 'stray_care', 'other'] as const;
+const friendlinessValues = ['friendly', 'cautious', 'unknown'] as const;
 
 const uniqueStringArray = z.array(z.string()).refine(
     (arr) => new Set(arr).size === arr.length,
@@ -16,12 +20,29 @@ export const createJobSchema = z.object({
     description: z.string().min(1),
     startDate: z.iso.datetime().optional(),
     endDate: z.iso.datetime().optional(),
+    // Location
     locationLat: z.number().optional(),
     locationLng: z.number().optional(),
-    paymentMethod: z.enum(paymentMethods).optional(),
+    locationAddress: z.string().optional(),
+    locationCity: z.string().optional(),
+    locationCountry: z.string().optional(),
+    // Job Post Mode payment
+    paymentMethod: z.enum(legacyPaymentMethods).optional(),
     paymentRateType: z.enum(paymentRateTypes).optional(),
     paymentAmount: z.number().min(0).optional(),
     paymentCurrency: z.string().min(1).optional(),
+    // Swipe Mode payment
+    paymentMethodList: z.array(z.enum(paymentMethodEnums)).optional(),
+    currency: z.enum(currencies).optional(),
+    minPayment: z.number().min(0).optional(),
+    maxPayment: z.number().min(0).optional(),
+    // Swipe-job-specific
+    isSwipeJob: z.boolean().optional().default(false),
+    services: z.array(z.enum(serviceTypes)).optional(),
+    estimatedHours: z.number().min(0).optional(),
+    behaviorNotes: z.string().optional(),
+    friendliness: z.enum(friendlinessValues).optional(),
+    // Care items
     petIds: uniqueStringArray.optional(),
     plantIds: uniqueStringArray.optional(),
     strayAnimalIds: uniqueStringArray.optional(),
@@ -36,10 +57,22 @@ export const updateJobSchema = z.object({
     endDate: z.iso.datetime().optional(),
     locationLat: z.number().optional(),
     locationLng: z.number().optional(),
-    paymentMethod: z.enum(paymentMethods).optional(),
+    locationAddress: z.string().optional(),
+    locationCity: z.string().optional(),
+    locationCountry: z.string().optional(),
+    paymentMethod: z.enum(legacyPaymentMethods).optional(),
     paymentRateType: z.enum(paymentRateTypes).optional(),
     paymentAmount: z.number().min(0).optional(),
     paymentCurrency: z.string().min(1).optional(),
+    paymentMethodList: z.array(z.enum(paymentMethodEnums)).optional(),
+    currency: z.enum(currencies).optional(),
+    minPayment: z.number().min(0).optional(),
+    maxPayment: z.number().min(0).optional(),
+    services: z.array(z.enum(serviceTypes)).optional(),
+    estimatedHours: z.number().min(0).optional(),
+    behaviorNotes: z.string().optional(),
+    friendliness: z.enum(friendlinessValues).optional(),
+    status: z.enum(jobStatuses).optional(),
     petIds: uniqueStringArray.optional(),
     plantIds: uniqueStringArray.optional(),
     strayAnimalIds: uniqueStringArray.optional(),

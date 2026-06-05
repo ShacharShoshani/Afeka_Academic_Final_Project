@@ -80,7 +80,7 @@
           @if (personalForm.get('phoneNumber')?.hasError('required')) {
             <span class="field-error">Phone number is required</span>
           } @else if (personalForm.get('phoneNumber')?.hasError('invalidPhone')) {
-            <span class="field-error">Enter digits only, 5–15 numbers</span>
+            <span class="field-error">Enter digits only, 5-15 digits</span>
           }
         }
       </div>

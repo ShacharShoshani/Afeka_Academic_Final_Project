@@ -18,6 +18,14 @@ model User {
   careTypes          CareType[]
   availability       Availability[]
   profilePhoto       String               @default("")
+  lat                Float?
+  lng                Float?
+  city               String?
+  country            String?
+  averageRating      Float                @default(0)
+  reviewCount        Int                  @default(0)
+  resetToken         String?              @unique
+  resetTokenExpiry   DateTime?
   passwordHash       String
   displayMode        DisplayMode          @default(social)
   createdAt          DateTime             @default(now())
@@ -32,6 +40,110 @@ model User {
   connectionsAsUser1 UserConnection[]     @relation("ConnectionUser1")
   connectionsAsUser2 UserConnection[]     @relation("ConnectionUser2")
   sentConnMessages   ConnectionMessage[]  @relation("SentConnMessages")
+  matchPreference    MatchPreference?
+  reviewsGiven       Review[]             @relation("ReviewsGiven")
+  reviewsReceived    Review[]             @relation("ReviewsReceived")
+  blocksGiven        BlockedUser[]        @relation("BlocksGiven")
+  blocksReceived     BlockedUser[]        @relation("BlocksReceived")
+  reportsFiled       Report[]             @relation("ReportsFiled")
+  reportsReceived    Report[]             @relation("ReportsReceived")
+  notifications      Notification[]
+  jobInterests       JobInterest[]        @relation("JobInterests")
+}
+
+model BlockedUser {
+  id        String   @id @default(uuid())
+  blockerId String
+  blockedId String
+  createdAt DateTime @default(now())
+  blocker   User     @relation("BlocksGiven", fields: [blockerId], references: [id])
+  blocked   User     @relation("BlocksReceived", fields: [blockedId], references: [id])
+
+  @@unique([blockerId, blockedId])
+}
+
+model Report {
+  id           String         @id @default(uuid())
+  reporterId   String
+  reportedId   String
+  category     ReportCategory
+  description  String
+  connectionId String?
+  status       ReportStatus   @default(open)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+  reporter     User           @relation("ReportsFiled", fields: [reporterId], references: [id])
+  reported     User           @relation("ReportsReceived", fields: [reportedId], references: [id])
+}
+
+enum ReportCategory {
+  harassment
+  unsafe_behavior
+  no_show
+  inappropriate_content
+  abuse_neglect
+  scam
+  other
+}
+
+enum ReportStatus {
+  open
+  under_review
+  resolved
+  dismissed
+}
+
+enum NotificationType {
+  new_match
+  new_message
+  job_confirmed
+  job_declined
+  review_request
+  admin_update
+}
+
+model Notification {
+  id          String           @id @default(uuid())
+  userId      String
+  user        User             @relation(fields: [userId], references: [id])
+  type        NotificationType
+  payloadJson String
+  isRead      Boolean          @default(false)
+  createdAt   DateTime         @default(now())
+}
+
+model Review {
+  id         String   @id @default(uuid())
+  jobId      String
+  job        Job      @relation(fields: [jobId], references: [id])
+  reviewerId String
+  reviewer   User     @relation("ReviewsGiven", fields: [reviewerId], references: [id])
+  targetId   String
+  target     User     @relation("ReviewsReceived", fields: [targetId], references: [id])
+  rating     Int
+  comment    String   @default("")
+  createdAt  DateTime @default(now())
+
+  @@unique([jobId, reviewerId])
+}
+
+model MatchPreference {
+  id                 String            @id @default(uuid())
+  userId             String            @unique
+  user               User              @relation(fields: [userId], references: [id])
+  careTypesWanted    CareType[]
+  services           ServiceType[]
+  availabilityWanted Availability[]
+  canHostAtMine      Boolean           @default(false)
+  canTravelToOther   Boolean           @default(false)
+  workType           WorkType          @default(both)
+  paymentRateTypes   PaymentRateType[]
+  minPayment         Int?
+  maxPayment         Int?
+  maxDistanceKm      Int?
+  residenceFilter    String?
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
 }
 
 model Pet {
@@ -79,27 +191,61 @@ model StrayAnimal {
 }
 
 model Job {
-  id               String               @id @default(uuid())
-  caretakerId      String?
-  caretaker        User?                @relation(fields: [caretakerId], references: [id], name: "CaretakerJobs")
-  ownerId          String
-  owner            User                 @relation(fields: [ownerId], references: [id], name: "OwnerJobs")
-  title            String
-  description      String
-  startDate        DateTime
-  endDate          DateTime
-  status           JobStatus            @default(pending)
-  locationLat      Float
-  locationLng      Float
-  paymentAmount    Float
-  paymentCurrency  String
-  paymentMethod    String
-  paymentRateType  PaymentRateType?
-  createdAt        DateTime             @default(now())
-  updatedAt        DateTime             @updatedAt
-  pets             PetsPerJob[]
-  plants           PlantsPerJob[]
-  strayAnimals     StrayAnimalsPerJob[]
+  id                String               @id @default(uuid())
+  caretakerId       String?
+  caretaker         User?                @relation(fields: [caretakerId], references: [id], name: "CaretakerJobs")
+  ownerId           String
+  owner             User                 @relation(fields: [ownerId], references: [id], name: "OwnerJobs")
+  connectionId      String?              @unique
+  connection        UserConnection?      @relation(fields: [connectionId], references: [id])
+  title             String
+  description       String
+  startDate         DateTime
+  endDate           DateTime
+  status            JobStatus            @default(pending)
+  // Location — Job Post Mode uses only lat/lng; Swipe Mode also stores address text.
+  locationLat       Float
+  locationLng       Float
+  locationAddress   String?
+  locationCity      String?
+  locationCountry   String?
+  // Payment — Job Post Mode uses paymentAmount/paymentCurrency/paymentMethod (single string).
+  // Swipe Mode uses paymentMethodList/currency/minPayment/maxPayment.
+  paymentAmount     Float
+  paymentCurrency   String
+  paymentMethod     String
+  paymentRateType   PaymentRateType?
+  paymentMethodList PaymentMethodEnum[]
+  currency          Currency             @default(ILS)
+  minPayment        Float?
+  maxPayment        Float?
+  // Swipe-job-specific fields
+  isSwipeJob        Boolean              @default(false)
+  services          ServiceType[]
+  estimatedHours    Float?
+  behaviorNotes     String?
+  friendliness      PetFriendliness?
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+  pets              PetsPerJob[]
+  plants            PlantsPerJob[]
+  strayAnimals      StrayAnimalsPerJob[]
+  reviews           Review[]
+  jobInterests      JobInterest[]
+}
+
+model JobInterest {
+  id             String            @id @default(uuid())
+  jobId          String
+  job            Job               @relation(fields: [jobId], references: [id])
+  caretakerId    String
+  caretaker      User              @relation("JobInterests", fields: [caretakerId], references: [id])
+  ownerLiked     Boolean           @default(false)
+  caretakerLiked Boolean           @default(false)
+  status         JobInterestStatus @default(pending)
+  createdAt      DateTime          @default(now())
+
+  @@unique([jobId, caretakerId])
 }
 
 model PetsPerJob {
@@ -139,13 +285,19 @@ model UserInterest {
 }
 
 model UserConnection {
-  id        String              @id @default(uuid())
-  user1Id   String
-  user2Id   String
-  createdAt DateTime            @default(now())
-  user1     User                @relation("ConnectionUser1", fields: [user1Id], references: [id])
-  user2     User                @relation("ConnectionUser2", fields: [user2Id], references: [id])
-  messages  ConnectionMessage[]
+  id             String              @id @default(uuid())
+  user1Id        String
+  user2Id        String
+  user1Confirmed Boolean             @default(false)
+  user2Confirmed Boolean             @default(false)
+  confirmedAt    DateTime?
+  cancelledAt    DateTime?
+  cancelledById  String?
+  createdAt      DateTime            @default(now())
+  user1          User                @relation("ConnectionUser1", fields: [user1Id], references: [id])
+  user2          User                @relation("ConnectionUser2", fields: [user2Id], references: [id])
+  messages       ConnectionMessage[]
+  job            Job?
 
   @@unique([user1Id, user2Id])
 }
@@ -154,7 +306,8 @@ model ConnectionMessage {
   id           String         @id @default(uuid())
   connectionId String
   senderId     String
-  content      String
+  content      String         @default("")
+  imageData    String?
   sentAt       DateTime       @default(now())
   connection   UserConnection @relation(fields: [connectionId], references: [id])
   sender       User           @relation("SentConnMessages", fields: [senderId], references: [id])
@@ -217,6 +370,7 @@ enum AnimalSize {
 enum JobStatus {
   pending
   accepted
+  in_progress
   completed
   cancelled
 }
@@ -225,4 +379,46 @@ enum PaymentRateType {
   hourly
   daily
   weekly
+}
+
+enum ServiceType {
+  feeding
+  walking
+  watering_plants
+  cleaning
+  stray_care
+  other
+}
+
+enum WorkType {
+  paid
+  volunteer
+  both
+}
+
+enum PaymentMethodEnum {
+  cash
+  bank_transfer
+  bit
+  paybox
+  check
+  paypal
+}
+
+enum Currency {
+  ILS
+  USD
+  EUR
+}
+
+enum JobInterestStatus {
+  pending   // one side has acted, waiting for the other
+  matched   // both sides liked - UserConnection created
+  rejected  // either side swiped left
+}
+
+enum PetFriendliness {
+  friendly
+  cautious
+  unknown
 }

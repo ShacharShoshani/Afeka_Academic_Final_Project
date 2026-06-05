@@ -45,4 +45,10 @@ export class AuthService {
       .patch<SafeUser>(`${environment.apiUrl}/users/me`, { displayMode: mode }, { withCredentials: true })
       .pipe(tap(user => this.currentUser.set(user)));
   }
+
+  updateProfile(data: Partial<SafeUser>): Observable<SafeUser> {
+    return this.http
+      .patch<SafeUser>(`${environment.apiUrl}/users/me`, data, { withCredentials: true })
+      .pipe(tap(user => this.currentUser.set(user)));
+  }
 }

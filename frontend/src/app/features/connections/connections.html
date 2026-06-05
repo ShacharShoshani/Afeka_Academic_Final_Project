@@ -1,41 +1,90 @@
 <div class="page">
+  <header class="header">
+    <span class="header-spacer"></span>
+    <span class="title">Chats</span>
+    <span class="header-spacer"></span>
+  </header>
+
   @if (loading()) {
     <div class="status-block">Loading…</div>
   } @else if (error()) {
     <div class="status-block status-error">{{ error() }}</div>
-  } @else if (connections().length === 0) {
-    <div class="status-block">
-      <p>No connections yet.</p>
-      <p class="hint">Swipe right on a profile and get a mutual match to start chatting.</p>
-    </div>
   } @else {
-    <ul class="conn-list">
-      @for (conn of connections(); track conn.id) {
-        <li class="conn-item" (click)="openChat(conn.id)">
-          @if (conn.otherUser?.profilePhoto) {
-            <img class="avatar" [src]="conn.otherUser!.profilePhoto" [alt]="conn.otherUser!.name" />
-          } @else {
-            <div class="avatar avatar-placeholder">
-              <svg viewBox="0 0 24 24" fill="none" width="24" height="24">
-                <circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.5"/>
-                <path d="M4 20c0-4 3.582-7 8-7s8 3 8 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-              </svg>
+
+    @if (active().length === 0 && cancelled().length === 0) {
+      <div class="status-block">
+        <p>No chats yet.</p>
+        <p class="hint">Swipe right on a job and get matched to start chatting.</p>
+      </div>
+    }
+
+    @if (active().length > 0) {
+      <ul class="conn-list">
+        @for (conn of active(); track conn.id) {
+          <li class="conn-item" (click)="openChat(conn.id)">
+            @if (conn.otherUser?.profilePhoto) {
+              <img class="avatar" [src]="conn.otherUser!.profilePhoto" [alt]="conn.otherUser!.name" />
+            } @else {
+              <div class="avatar avatar-placeholder">
+                <svg viewBox="0 0 24 24" fill="none" width="24" height="24">
+                  <circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.5"/>
+                  <path d="M4 20c0-4 3.582-7 8-7s8 3 8 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+              </div>
+            }
+            <div class="conn-body">
+              <div class="conn-top">
+                <span class="conn-name">{{ conn.otherUser?.name ?? 'Unknown' }}</span>
+                @if (conn.messages && conn.messages.length > 0) {
+                  <span class="conn-time">{{ formatTime(conn.messages[conn.messages.length - 1].sentAt) }}</span>
+                }
+              </div>
+              <span class="conn-preview">{{ lastMessage(conn) }}</span>
             </div>
-          }
-          <div class="conn-body">
-            <div class="conn-top">
-              <span class="conn-name">{{ conn.otherUser?.name ?? 'Unknown' }}</span>
-              @if (conn.messages && conn.messages.length > 0) {
-                <span class="conn-time">{{ formatTime(conn.messages[conn.messages.length - 1].sentAt) }}</span>
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" width="16" height="16">
+              <path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </li>
+        }
+      </ul>
+    }
+
+    @if (cancelled().length > 0) {
+      <button class="section-toggle" (click)="toggleCancelled()">
+        <span>Closed matches ({{ cancelled().length }})</span>
+        <svg viewBox="0 0 24 24" fill="none" width="16" height="16" [style.transform]="showCancelled() ? 'rotate(90deg)' : 'none'" style="transition: transform 0.2s">
+          <path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+
+      @if (showCancelled()) {
+        <ul class="conn-list conn-list--muted">
+          @for (conn of cancelled(); track conn.id) {
+            <li class="conn-item conn-item--cancelled" (click)="openChat(conn.id)">
+              @if (conn.otherUser?.profilePhoto) {
+                <img class="avatar avatar--muted" [src]="conn.otherUser!.profilePhoto" [alt]="conn.otherUser!.name" />
+              } @else {
+                <div class="avatar avatar-placeholder avatar--muted">
+                  <svg viewBox="0 0 24 24" fill="none" width="24" height="24">
+                    <circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.5"/>
+                    <path d="M4 20c0-4 3.582-7 8-7s8 3 8 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                  </svg>
+                </div>
               }
-            </div>
-            <span class="conn-preview">{{ lastMessage(conn) }}</span>
-          </div>
-          <svg class="chevron" viewBox="0 0 24 24" fill="none" width="16" height="16">
-            <path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
-        </li>
+              <div class="conn-body">
+                <div class="conn-top">
+                  <span class="conn-name conn-name--muted">{{ conn.otherUser?.name ?? 'Unknown' }}</span>
+                  <span class="conn-badge conn-badge--cancelled">Cancelled</span>
+                </div>
+                <span class="conn-preview">{{ lastMessage(conn) }}</span>
+              </div>
+              <svg class="chevron" viewBox="0 0 24 24" fill="none" width="16" height="16">
+                <path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </li>
+          }
+        </ul>
       }
-    </ul>
+    }
   }
 </div>

@@ -1,95 +1,236 @@
+<!-- Match modal (shared) -->
 @if (matched(); as m) {
   <div class="match-overlay">
     <div class="match-modal">
+      @if (m.photo) {
+        <img class="match-photo" [src]="m.photo" [alt]="m.name" />
+      } @else {
+        <div class="match-photo match-photo-placeholder">
+          <svg viewBox="0 0 24 24" fill="none" width="36" height="36"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.5"/><path d="M4 20c0-4 3.582-7 8-7s8 3 8 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </div>
+      }
       <div class="match-icon">💚</div>
       <h2 class="match-title">It's a Match!</h2>
-      <p class="match-sub">You and {{ m.name }} both swiped right.</p>
+      <p class="match-sub">You and <strong>{{ m.name }}</strong> matched. Start chatting now.</p>
       <button class="btn-primary" (click)="openChat()">Open Chat</button>
-      <button class="btn-ghost" (click)="dismissMatch()">Keep Swiping</button>
+      <button class="btn-ghost" (click)="dismissMatch()">Later</button>
     </div>
   </div>
 }
 
-@if (empty() && !currentCard()) {
-  <div class="empty-state">
-    <p>No more profiles to show right now.</p>
-    <p class="empty-hint">Check back later or switch to Social mode in Settings.</p>
-  </div>
-} @else if (currentCard(); as top) {
-  <div class="deck-container">
-    @if (nextCard(); as behind) {
-      <div class="swipe-card swipe-card-behind">
-        <div class="card-inner">
-          @if (behind.profilePhoto) {
-            <img class="card-photo" [src]="behind.profilePhoto" [alt]="behind.name" />
-          } @else {
-            <div class="card-photo card-photo-placeholder">
-              <svg viewBox="0 0 24 24" fill="none" width="48" height="48">
-                <circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.5"/>
-                <path d="M4 20c0-4 3.582-7 8-7s8 3 8 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-              </svg>
+@if (loading()) {
+  <div class="empty-state"><p>Loading…</p></div>
+
+} @else if (error()) {
+  <div class="empty-state"><p>{{ error() }}</p></div>
+
+} @else if (!isOwner()) {
+  <!-- CARETAKER VIEW: job cards -->
+
+  @if (empty() && !currentJob()) {
+    <div class="empty-state">
+      <p>No matching jobs right now.</p>
+      <p class="empty-hint">Try updating your Matching Preferences or check back later.</p>
+    </div>
+  } @else if (currentJob(); as job) {
+    <div class="deck-container">
+
+      @if (nextJob(); as behind) {
+        <div class="swipe-card swipe-card-behind">
+          <div class="card-scene"><div class="card-flip">
+            <div class="card-front">
+              @if (mainImage(behind); as img) { <img class="card-photo" [src]="img" [alt]="behind.title" /> }
+              @else { <div class="card-photo card-photo-placeholder"><svg viewBox="0 0 24 24" fill="none" width="48" height="48"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.5"/><path d="M4 20c0-4 3.582-7 8-7s8 3 8 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div> }
+              <div class="card-info"><h2 class="card-name">{{ behind.title }}</h2></div>
             </div>
-          }
-          <div class="card-info">
-            <h2 class="card-name">{{ behind.name }}</h2>
-            <span class="card-residence">{{ behind.residence }}</span>
+          </div></div>
+        </div>
+      }
+
+      <div
+        class="swipe-card swipe-card-top"
+        [class.is-dragging]="dragging()"
+        [style.transform]="cardTransform()"
+        (pointerdown)="onPointerDown($event)"
+        (pointermove)="onPointerMove($event)"
+        (pointerup)="onPointerUp($event)"
+        (pointercancel)="onPointerUp($event)"
+      >
+        <div class="like-indicator" [style.opacity]="likeOpacity()">INTERESTED</div>
+        <div class="pass-indicator" [style.opacity]="passOpacity()">PASS</div>
+
+        <div class="card-scene">
+          <div class="card-flip" [class.card-flip--flipped]="flipped()">
+
+            <div class="card-front">
+              @if (mainImage(job); as img) { <img class="card-photo" [src]="img" [alt]="job.title" draggable="false" /> }
+              @else { <div class="card-photo card-photo-placeholder"><svg viewBox="0 0 24 24" fill="none" width="48" height="48"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.5"/><path d="M4 20c0-4 3.582-7 8-7s8 3 8 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div> }
+              <button class="flip-btn" (click)="toggleFlip($event)" aria-label="See owner profile">
+                <svg viewBox="0 0 24 24" fill="none" width="16" height="16"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.6"/><path d="M12 8h.01M12 11v5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                Owner
+              </button>
+              <div class="card-info">
+                <h2 class="card-name">{{ job.title }}</h2>
+                @if (careItemName(job)) {
+                  <div class="care-item-row">
+                    <span class="care-item-name">{{ careItemName(job) }}</span>
+                    @if (job.friendliness) { <span class="friendliness-chip friendliness-chip--{{ job.friendliness }}">{{ job.friendliness }}</span> }
+                  </div>
+                }
+                @if (job.services.length) {
+                  <div class="card-chips">
+                    @for (s of job.services; track s) { <span class="chip chip--service">{{ formatService(s) }}</span> }
+                  </div>
+                }
+                <div class="meta-row">
+                  <span class="meta-item">📅 {{ formatDate(job.startDate) }} to {{ formatDate(job.endDate) }}</span>
+                  @if (job.estimatedHours) { <span class="meta-item">⏱ {{ job.estimatedHours }}h</span> }
+                </div>
+                @if (distanceLabel(job.locationLat, job.locationLng); as dist) {
+                  <div class="meta-row"><span class="meta-item">📍 {{ dist }}</span></div>
+                }
+                <div class="payment-row"><span class="payment-label">{{ paymentSummary(job) }}</span></div>
+              </div>
+            </div>
+
+            <div class="card-back">
+              <button class="flip-btn flip-btn--back" (click)="toggleFlip($event)" aria-label="Back to job">
+                <svg viewBox="0 0 24 24" fill="none" width="16" height="16"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                Job
+              </button>
+              @if (job.owner?.profilePhoto) { <img class="owner-profile-photo" [src]="job.owner!.profilePhoto" [alt]="job.owner!.name" /> }
+              @else { <div class="owner-profile-photo owner-profile-placeholder"><svg viewBox="0 0 24 24" fill="none" width="40" height="40"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.5"/><path d="M4 20c0-4 3.582-7 8-7s8 3 8 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div> }
+              <h3 class="back-name">{{ job.owner?.name }}</h3>
+              @if ((job.owner?.reviewCount ?? 0) > 0) { <span class="back-rating">⭐ {{ job.owner!.averageRating!.toFixed(1) }} · {{ job.owner!.reviewCount }} reviews</span> }
+              @if (job.owner?.residence) { <span class="back-location">📍 {{ job.owner!.residence }}</span> }
+              @if (job.owner?.bio) { <p class="back-bio">{{ job.owner!.bio }}</p> }
+            </div>
+
           </div>
         </div>
+      </div>
+
+      <div class="action-row">
+        <button class="action-btn action-pass" (click)="swipeJobLeft()" aria-label="Pass">
+          <svg viewBox="0 0 24 24" fill="none" width="28" height="28"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+        <button class="action-btn action-like" (click)="swipeJobRight()" aria-label="Interested">
+          <svg viewBox="0 0 24 24" fill="none" width="28" height="28"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+        </button>
+      </div>
+    </div>
+  }
+
+} @else {
+  <!-- OWNER VIEW -->
+
+  @if (ownerPhase() === 'loading') {
+    <div class="empty-state"><p>Loading…</p></div>
+
+  } @else if (ownerPhase() === 'no-jobs') {
+    <div class="empty-state">
+      <p>You have no open jobs.</p>
+      <p class="empty-hint">Go to the Jobs tab to create a job first.</p>
+      <button class="btn-go" (click)="navigateMyJobs()">Go to Jobs</button>
+    </div>
+
+  } @else if (ownerPhase() === 'choose-job') {
+    <div class="chooser">
+      <h2 class="chooser-title">Find helpers for which job?</h2>
+      <div class="chooser-list">
+        @for (j of chooserJobs(); track j.id) {
+          <button class="chooser-btn" (click)="selectJob(j.id)">{{ j.title }}</button>
+        }
+      </div>
+    </div>
+
+  } @else if (ownerPhase() === 'swiping') {
+    @if (activeJob()) {
+      <div class="active-job-bar">
+        <span class="active-job-label">Looking for helpers for:</span>
+        <span class="active-job-title">{{ activeJob()!.title }}</span>
+        <button class="active-job-change" (click)="ownerPhase.set('choose-job')">Change</button>
       </div>
     }
 
-    <div
-      class="swipe-card swipe-card-top"
-      [class.is-dragging]="dragging()"
-      [style.transform]="cardTransform()"
-      (pointerdown)="onPointerDown($event)"
-      (pointermove)="onPointerMove($event)"
-      (pointerup)="onPointerUp($event)"
-      (pointercancel)="onPointerUp($event)"
-    >
-      <div class="like-indicator" [style.opacity]="likeOpacity()">LIKE</div>
-      <div class="pass-indicator" [style.opacity]="passOpacity()">PASS</div>
+    @if (caretakerEmpty()) {
+      <div class="empty-state">
+        <p>No more helpers to show.</p>
+        <p class="empty-hint">Check back later or adjust your Matching Preferences.</p>
+      </div>
+    } @else if (currentCaretaker(); as ct) {
+      <div class="deck-container">
 
-      <div class="card-inner">
-        @if (top.profilePhoto) {
-          <img class="card-photo" [src]="top.profilePhoto" [alt]="top.name" draggable="false" />
-        } @else {
-          <div class="card-photo card-photo-placeholder">
-            <svg viewBox="0 0 24 24" fill="none" width="48" height="48">
-              <circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.5"/>
-              <path d="M4 20c0-4 3.582-7 8-7s8 3 8 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-            </svg>
+        @if (nextCaretaker(); as next) {
+          <div class="swipe-card swipe-card-behind">
+            <div class="card-scene"><div class="card-flip">
+              <div class="card-front">
+                @if (next.profilePhoto) { <img class="card-photo" [src]="next.profilePhoto" [alt]="next.name" /> }
+                @else { <div class="card-photo card-photo-placeholder"><svg viewBox="0 0 24 24" fill="none" width="48" height="48"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.5"/><path d="M4 20c0-4 3.582-7 8-7s8 3 8 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div> }
+                <div class="card-info"><h2 class="card-name">{{ next.name }}</h2></div>
+              </div>
+            </div></div>
           </div>
         }
 
-        <div class="card-info">
-          <h2 class="card-name">{{ top.name }}</h2>
-          <span class="card-residence">{{ top.residence }}</span>
-          @if (top.bio) {
-            <p class="card-bio">{{ top.bio }}</p>
-          }
-          @if (top.careTypes.length) {
-            <div class="card-chips">
-              @for (t of top.careTypes; track t) {
-                <span class="chip">{{ formatCareType(t) }}</span>
-              }
+        <div class="swipe-card swipe-card-top">
+          <div class="card-scene">
+            <div class="card-flip" [class.card-flip--flipped]="caretakerFlipped()">
+
+              <div class="card-front">
+                @if (ct.profilePhoto) { <img class="card-photo" [src]="ct.profilePhoto" [alt]="ct.name" draggable="false" /> }
+                @else { <div class="card-photo card-photo-placeholder"><svg viewBox="0 0 24 24" fill="none" width="48" height="48"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.5"/><path d="M4 20c0-4 3.582-7 8-7s8 3 8 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div> }
+                @if (ct.alreadyInterested) {
+                  <span class="already-interested-badge">Already applied to your job</span>
+                }
+                <button class="flip-btn" (click)="toggleCaretakerFlip($event)" aria-label="More details">
+                  <svg viewBox="0 0 24 24" fill="none" width="16" height="16"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.6"/><path d="M12 8h.01M12 11v5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+                  More
+                </button>
+                <div class="card-info">
+                  <div class="card-name-row">
+                    <span class="card-name-text">{{ ct.name }}</span>
+                    @if ((ct.reviewCount ?? 0) > 0) { <span class="card-rating-badge">⭐ {{ ct.averageRating!.toFixed(1) }}</span> }
+                  </div>
+                  @if (distanceLabel(ct.lat, ct.lng); as dist) { <span class="card-location">📍 {{ dist }}</span> }
+                  @if (ct.careTypes?.length) {
+                    <div class="card-chips">
+                      @for (t of ct.careTypes; track t) { <span class="chip chip--service">{{ t.replace('_', ' ') }}</span> }
+                    </div>
+                  }
+                  @if (ct.availability?.length) {
+                    <div class="card-chips">
+                      @for (a of ct.availability; track a) { <span class="chip chip--avail">{{ a }}</span> }
+                    </div>
+                  }
+                </div>
+              </div>
+
+              <div class="card-back">
+                <button class="flip-btn flip-btn--back" (click)="toggleCaretakerFlip($event)" aria-label="Back">
+                  <svg viewBox="0 0 24 24" fill="none" width="16" height="16"><path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  Back
+                </button>
+                @if (ct.profilePhoto) { <img class="owner-profile-photo" [src]="ct.profilePhoto" [alt]="ct.name" /> }
+                @else { <div class="owner-profile-photo owner-profile-placeholder"><svg viewBox="0 0 24 24" fill="none" width="40" height="40"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.5"/><path d="M4 20c0-4 3.582-7 8-7s8 3 8 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg></div> }
+                <h3 class="back-name">{{ ct.name }}</h3>
+                @if ((ct.reviewCount ?? 0) > 0) { <span class="back-rating">⭐ {{ ct.averageRating!.toFixed(1) }} · {{ ct.reviewCount }} reviews</span> }
+                @if (ct.bio) { <p class="back-bio">{{ ct.bio }}</p> }
+              </div>
+
             </div>
-          }
+          </div>
+        </div>
+
+        <div class="action-row">
+          <button class="action-btn action-pass" (click)="swipeCaretakerLeft()" aria-label="Pass">
+            <svg viewBox="0 0 24 24" fill="none" width="28" height="28"><path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+          </button>
+          <button class="action-btn action-like" (click)="swipeCaretakerRight()" aria-label="Interested">
+            <svg viewBox="0 0 24 24" fill="none" width="28" height="28"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+          </button>
         </div>
       </div>
-    </div>
-
-    <div class="action-row">
-      <button class="action-btn action-pass" (click)="swipeLeft()" aria-label="Pass">
-        <svg viewBox="0 0 24 24" fill="none" width="28" height="28">
-          <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-        </svg>
-      </button>
-      <button class="action-btn action-like" (click)="swipeRight()" aria-label="Like">
-        <svg viewBox="0 0 24 24" fill="none" width="28" height="28">
-          <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
-        </svg>
-      </button>
-    </div>
-  </div>
+    }
+  }
 }

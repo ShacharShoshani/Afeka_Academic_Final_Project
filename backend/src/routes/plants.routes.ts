@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { ownershipGuard } from '../middleware/auth.js';
+import { validateImageDataUrl, imageErrorMessage } from '../lib/validateImage.js';
 
 const plantOwner = ownershipGuard('plant');
 import { prisma } from '../lib/prisma.js';
@@ -18,6 +19,11 @@ router.post('/', async (req, res) => {
     return res.status(401).json({ message: 'Unauthorized' });
   }
 
+  if (req.body.image) {
+    const imgErr = validateImageDataUrl(req.body.image);
+    if (imgErr) return res.status(400).json({ error: imageErrorMessage(imgErr) });
+  }
+
   const plant = await prisma.plant.create({
     data: {
       ...req.body,
@@ -34,6 +40,11 @@ router.put('/:id', plantOwner, async (req, res) => {
 
   if (!id) {
     return res.status(400).json({ message: 'Plant ID is required' });
+  }
+
+  if (req.body.image) {
+    const imgErr = validateImageDataUrl(req.body.image);
+    if (imgErr) return res.status(400).json({ error: imageErrorMessage(imgErr) });
   }
 
   delete req.body.createdAt;

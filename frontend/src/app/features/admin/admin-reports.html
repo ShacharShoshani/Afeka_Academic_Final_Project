@@ -1,0 +1,43 @@
+<div class="page">
+  <header class="header">
+    <button class="back-btn" (click)="goBack()">
+      <svg viewBox="0 0 24 24" fill="none" width="20" height="20">
+        <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      Settings
+    </button>
+    <span class="title">Admin - Reports</span>
+    <span class="spacer"></span>
+  </header>
+
+  @if (loading()) {
+    <div class="status">Loading…</div>
+  } @else if (error()) {
+    <div class="status error">{{ error() }}</div>
+  } @else if (reports().length === 0) {
+    <div class="status">No reports yet.</div>
+  } @else {
+    <div class="report-list">
+      @for (r of reports(); track r.id) {
+        <div class="report-card">
+          <div class="report-header">
+            <span class="category-badge">{{ r.category.replace('_', ' ') }}</span>
+            <span class="date">{{ formatDate(r.createdAt) }}</span>
+            <select class="status-select status-select--{{ r.status }}"
+              [value]="r.status"
+              (change)="updateStatus(r, $any($event.target).value)">
+              @for (s of STATUS_OPTIONS; track s) {
+                <option [value]="s">{{ STATUS_LABELS[s] }}</option>
+              }
+            </select>
+          </div>
+          <div class="report-users">
+            <span class="user-label">Reporter: <strong>{{ r.reporter?.name ?? r.reporterId }}</strong></span>
+            <span class="user-label">Reported: <strong>{{ r.reported?.name ?? r.reportedId }}</strong></span>
+          </div>
+          <p class="report-desc">{{ r.description }}</p>
+        </div>
+      }
+    </div>
+  }
+</div>

@@ -686,3 +686,31 @@ body {
   padding: 6px 12px;
   font-size: 0.7rem;
 }
+
+/* === Accessibility global additions === */
+
+/* Visible keyboard focus ring on all interactive elements. */
+:focus-visible {
+  outline: 2px solid var(--color-primary, #14b8a6);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Minimum 44×44px touch target for all buttons and anchors. */
+button, a, [role="button"] {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Exception: icon-only small buttons that live inside larger areas. */
+.bubble-time, .conn-time, .detail-label { min-height: unset; min-width: unset; }
+
+/* Visually hidden (screen-reader only) utility class. */
+.sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  overflow: hidden !important;
+  clip: rect(0 0 0 0) !important;
+  white-space: nowrap !important;
+}

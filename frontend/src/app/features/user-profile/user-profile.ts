@@ -1,9 +1,12 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import type { Pet, Plant, PublicUser, StrayAnimal, UserRole } from '@livin/common';
+import type { Pet, Plant, PublicUser, ReportCategory, StrayAnimal, UserRole } from '@livin/common';
 import { UsersService } from '../../services/users.service';
+import { BlockService } from '../../services/block.service';
+import { ReportService } from '../../services/report.service';
 import {
   formatDate,
   formatJoinDate,
@@ -16,7 +19,7 @@ import {
 
 @Component({
   selector: 'app-user-profile',
-  imports: [],
+  imports: [FormsModule],
   templateUrl: './user-profile.html',
   styleUrls: ['./user-profile.css', './user-profile-records.css'],
 })
@@ -24,6 +27,8 @@ export class UserProfile implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly usersService = inject(UsersService);
+  private readonly blockService = inject(BlockService);
+  private readonly reportService = inject(ReportService);
 
   protected readonly profile = signal<PublicUser | null>(null);
   protected readonly pets = signal<Pet[]>([]);
@@ -40,6 +45,51 @@ export class UserProfile implements OnInit {
   protected readonly formatAvailability = formatAvailability;
   protected readonly formatAnimalType = formatAnimalType;
   protected readonly formatSize = formatSize;
+
+  // ── Block / Report ──────────────────────────────────────────────────
+  protected readonly blocked = signal(false);
+  protected readonly showReportDialog = signal(false);
+  protected readonly reportCategories: ReportCategory[] = [
+    'harassment', 'unsafe_behavior', 'no_show', 'inappropriate_content', 'abuse_neglect', 'scam', 'other',
+  ];
+  protected reportDraft = { category: 'other' as ReportCategory, description: '' };
+  protected readonly reportError = signal('');
+  protected readonly reportSent = signal(false);
+
+  protected toggleBlock(): void {
+    const id = this.profile()?.id;
+    if (!id) return;
+    if (this.blocked()) {
+      this.blockService.unblock(id).subscribe({ next: () => this.blocked.set(false) });
+    } else {
+      this.blockService.block(id).subscribe({ next: () => this.blocked.set(true) });
+    }
+  }
+
+  protected openReportDialog(): void {
+    this.reportDraft = { category: 'other', description: '' };
+    this.reportError.set('');
+    this.reportSent.set(false);
+    this.showReportDialog.set(true);
+  }
+
+  protected closeReportDialog(): void { this.showReportDialog.set(false); }
+
+  protected submitReport(): void {
+    const id = this.profile()?.id;
+    if (!id || !this.reportDraft.description.trim()) {
+      this.reportError.set('Please add a description.');
+      return;
+    }
+    this.reportService.create({
+      reportedId: id,
+      category: this.reportDraft.category,
+      description: this.reportDraft.description.trim(),
+    }).subscribe({
+      next: () => { this.reportSent.set(true); setTimeout(() => this.showReportDialog.set(false), 1500); },
+      error: () => this.reportError.set('Failed to send report. Please try again.'),
+    });
+  }
 
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');

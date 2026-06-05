@@ -1,0 +1,193 @@
+<div class="page">
+  <header class="header">
+    <span class="header-spacer"></span>
+    <span class="title">Jobs Confirmed</span>
+    <span class="header-spacer"></span>
+  </header>
+
+  @if (loading()) {
+    <div class="status-block">Loading…</div>
+  } @else if (error()) {
+    <div class="status-block status-error">{{ error() }}</div>
+  } @else if (jobs().length === 0) {
+    <div class="status-block">
+      <p>No confirmed jobs yet.</p>
+      <p class="hint">Confirmed jobs appear here once both sides tap "Confirm Job" in a chat.</p>
+    </div>
+  } @else {
+    <div class="job-list">
+      @for (conn of jobs(); track conn.id) {
+        <div class="job-card">
+
+          <!-- ── Card header: avatar + name + status badge ── -->
+          <div class="job-card-header">
+            @if (conn.otherUser?.profilePhoto) {
+              <img class="avatar" [src]="conn.otherUser!.profilePhoto" [alt]="conn.otherUser!.name" />
+            } @else {
+              <div class="avatar avatar-placeholder">
+                <svg viewBox="0 0 24 24" fill="none" width="22" height="22">
+                  <circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.5"/>
+                  <path d="M4 20c0-4 3.582-7 8-7s8 3 8 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+              </div>
+            }
+            <div class="header-info">
+              <div class="other-name">{{ conn.otherUser?.name ?? 'Unknown' }}</div>
+            </div>
+            @if (conn.job) {
+              <span class="status-badge status-badge--{{ conn.job.status }}">
+                {{ STATUS_LABELS[conn.job.status] ?? conn.job.status }}
+              </span>
+            }
+          </div>
+
+          <!-- ── Job details ── -->
+          @if (conn.job) {
+            <div class="job-details">
+              @if (jobNeedsDetails(conn.job)) {
+                <div class="needs-details-banner">⚠️ No job details yet. Tap "Edit Details" to add dates and payment info.</div>
+              } @else {
+                @if (conn.job.title && conn.job.title !== 'Care Job') {
+                  <div class="detail-row">
+                    <span class="detail-label">Title</span>
+                    <span class="detail-value">{{ conn.job.title }}</span>
+                  </div>
+                }
+                <div class="detail-row">
+                  <span class="detail-label">Dates</span>
+                  <span class="detail-value">{{ formatDate(conn.job.startDate) }} → {{ formatDate(conn.job.endDate) }}</span>
+                </div>
+                @if (conn.job.paymentAmount > 0) {
+                  <div class="detail-row">
+                    <span class="detail-label">Payment</span>
+                    <span class="detail-value">
+                      {{ conn.job.paymentCurrency }} {{ conn.job.paymentAmount }}
+                      @if (conn.job.paymentRateType) { / {{ RATE_TYPE_LABELS[conn.job.paymentRateType] }} }
+                      @if (conn.job.paymentMethod) { · {{ conn.job.paymentMethod }} }
+                    </span>
+                  </div>
+                }
+                @if (conn.job.description) {
+                  <div class="detail-row">
+                    <span class="detail-label">Notes</span>
+                    <span class="detail-value">{{ conn.job.description }}</span>
+                  </div>
+                }
+              }
+            </div>
+          }
+
+          <!-- ── Edit form (inline) ── -->
+          @if (editingJobId() === conn.job?.id) {
+            <div class="edit-form">
+              <p class="edit-form-title">Edit Job Details</p>
+
+              <div class="form-field">
+                <label class="form-label">Title</label>
+                <input class="form-input" type="text" [(ngModel)]="draft.title" placeholder="e.g. Dog walking" />
+              </div>
+
+              <div class="form-row">
+                <div class="form-field">
+                  <label class="form-label">Start date</label>
+                  <input class="form-input" type="date" [(ngModel)]="draft.startDate" />
+                </div>
+                <div class="form-field">
+                  <label class="form-label">End date</label>
+                  <input class="form-input" type="date" [(ngModel)]="draft.endDate" />
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-field">
+                  <label class="form-label">Amount (ILS)</label>
+                  <input class="form-input" type="number" min="0" [(ngModel)]="draft.paymentAmount" />
+                </div>
+                <div class="form-field">
+                  <label class="form-label">Rate</label>
+                  <select class="form-select" [(ngModel)]="draft.paymentRateType">
+                    <option value="">None</option>
+                    @for (r of rateTypes; track r) {
+                      <option [value]="r">{{ RATE_TYPE_LABELS[r] }}</option>
+                    }
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-field">
+                <label class="form-label">Payment method</label>
+                <select class="form-select" [(ngModel)]="draft.paymentMethod">
+                  <option value="">None</option>
+                  @for (m of paymentMethods; track m) {
+                    <option [value]="m">{{ m }}</option>
+                  }
+                </select>
+              </div>
+
+              <div class="form-field">
+                <label class="form-label">Notes</label>
+                <textarea class="form-input form-textarea" [(ngModel)]="draft.description" placeholder="Anything the other side should know…"></textarea>
+              </div>
+
+              @if (saveError()) {
+                <p class="save-error">{{ saveError() }}</p>
+              }
+
+              <div class="form-actions">
+                <button class="btn-save" (click)="saveJobDetails()" [disabled]="saving()">
+                  {{ saving() ? 'Saving…' : 'Save' }}
+                </button>
+                <button class="btn-cancel-edit" (click)="cancelEditJob()">Cancel</button>
+              </div>
+            </div>
+          }
+
+          <!-- ── Review form ── -->
+          @if (reviewingJobId() === conn.job?.id) {
+            <div class="edit-form">
+              <p class="edit-form-title">Leave a Review for {{ conn.otherUser?.name }}</p>
+              <div class="star-row">
+                @for (s of STARS; track s) {
+                  <button class="star-btn" [class.star-btn--on]="s <= reviewDraft.rating" (click)="setReviewRating(s)">★</button>
+                }
+              </div>
+              <div class="form-field">
+                <label class="form-label">Comment (optional)</label>
+                <textarea class="form-input form-textarea" [(ngModel)]="reviewDraft.comment" placeholder="What was it like working with them?"></textarea>
+              </div>
+              @if (reviewError()) {
+                <p class="save-error">{{ reviewError() }}</p>
+              }
+              <div class="form-actions">
+                <button class="btn-save" (click)="submitReview(conn)" [disabled]="submittingReview()">
+                  {{ submittingReview() ? 'Submitting…' : 'Submit Review' }}
+                </button>
+                <button class="btn-cancel-edit" (click)="cancelReview()">Cancel</button>
+              </div>
+            </div>
+          }
+
+          <!-- ── Action row ── -->
+          <div class="job-actions">
+            <button class="btn-chat" (click)="openChat(conn.id)">💬 Chat</button>
+
+            @if (conn.job && editingJobId() !== conn.job.id && reviewingJobId() !== conn.job.id) {
+              <button class="btn-edit-details" (click)="startEditJob(conn)">✏️ Edit Details</button>
+
+              @if (conn.job.status === 'accepted') {
+                <button class="btn-progress" (click)="markStatus(conn, 'in_progress')">▶ Start Job</button>
+              }
+              @if (conn.job.status === 'in_progress') {
+                <button class="btn-complete" (click)="markStatus(conn, 'completed')">✓ Mark Complete</button>
+              }
+              @if (canReview(conn)) {
+                <button class="btn-review" (click)="startReview(conn)">⭐ Review</button>
+              }
+            }
+          </div>
+
+        </div>
+      }
+    </div>
+  }
+</div>

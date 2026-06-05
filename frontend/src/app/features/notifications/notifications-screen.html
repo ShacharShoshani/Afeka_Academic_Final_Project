@@ -1,0 +1,42 @@
+<div class="page">
+  <header class="header">
+    <button class="back-btn" (click)="goBack()">
+      <svg viewBox="0 0 24 24" fill="none" width="20" height="20">
+        <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+    <span class="title">Notifications</span>
+    @if (notifications().length > 0) {
+      <button class="mark-all" (click)="markAllRead()">Mark all read</button>
+    } @else {
+      <span class="header-spacer"></span>
+    }
+  </header>
+
+  @if (loading()) {
+    <div class="status">Loading…</div>
+  } @else if (notifications().length === 0) {
+    <div class="status">No notifications yet.</div>
+  } @else {
+    <ul class="notif-list">
+      @for (n of notifications(); track n.id) {
+        <li class="notif-item" [class.notif-item--unread]="!n.isRead" (click)="navigate(n)">
+          <div class="notif-icon">{{ TYPE_LABELS[n.type]?.charAt(0) ?? '🔔' }}</div>
+          <div class="notif-body">
+            <span class="notif-title">{{ TYPE_LABELS[n.type] ?? n.type }}</span>
+            <span class="notif-detail">
+              @if (n.type === 'new_match') { You matched with <strong>{{ n.payload['otherUserName'] }}</strong>! }
+              @if (n.type === 'new_message') { <strong>{{ n.payload['senderName'] }}</strong>: {{ n.payload['preview'] }} }
+              @if (n.type === 'job_confirmed') {
+                @if (n.payload['bothConfirmed']) { Both confirmed the job. } @else { {{ n.payload['confirmerName'] }} confirmed the job. }
+              }
+              @if (n.type === 'job_declined') { {{ n.payload['declinerName'] }} cancelled the match. }
+              @if (n.type === 'review_request') { {{ n.payload['reviewerName'] }} left you a {{ n.payload['rating'] }}★ review. }
+            </span>
+          </div>
+          <span class="notif-time">{{ formatTime(n.createdAt) }}</span>
+        </li>
+      }
+    </ul>
+  }
+</div>

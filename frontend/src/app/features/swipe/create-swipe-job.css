@@ -1,0 +1,52 @@
+.page { min-height:100dvh; display:flex; flex-direction:column; background:#f8f9fb; }
+.header { display:flex; align-items:center; gap:.5rem; padding:.75rem 1rem; background:#fff; border-bottom:1px solid #eee; position:sticky; top:0; z-index:10; }
+.back-btn { background:none; border:none; cursor:pointer; padding:.25rem; border-radius:6px; display:flex; }
+.back-btn:hover { background:#f0f0f0; }
+.title { font-weight:700; font-size:1rem; flex:1; text-align:center; }
+.header-spacer { width:44px; }
+
+.content { flex:1; padding:1rem 1rem calc(96px + env(safe-area-inset-bottom)); max-width:520px; margin:0 auto; width:100%; display:flex; flex-direction:column; gap:.875rem; }
+
+.card { background:#fff; border-radius:14px; padding:1.1rem; box-shadow:0 1px 4px rgba(0,0,0,.06); display:flex; flex-direction:column; gap:.75rem; }
+.card-title { font-size:1rem; font-weight:700; margin:0; }
+.card-desc { font-size:.82rem; color:#6b7280; margin:-.25rem 0 0; }
+
+.field { display:flex; flex-direction:column; gap:.3rem; }
+.field-label { font-size:.78rem; font-weight:700; color:#6b7280; text-transform:uppercase; letter-spacing:.04em; }
+.field-input { padding:.6rem .85rem; border:1.5px solid #e5e7eb; border-radius:9px; font-family:inherit; font-size:.9rem; background:#fafafa; }
+.field-input:focus { outline:none; border-color:var(--color-primary,#14b8a6); background:#fff; }
+.field-textarea { resize:vertical; min-height:70px; }
+.field-row { display:flex; gap:.6rem; }
+.field-row .field { flex:1; }
+
+.chips { display:flex; flex-wrap:wrap; gap:.45rem; }
+.chip { padding:.45rem .85rem; border:1.5px solid #e5e7eb; border-radius:999px; background:#fff; color:#374151; font-family:inherit; font-size:.82rem; font-weight:500; cursor:pointer; transition:all .12s; }
+.chip:hover { border-color:#b0b3bc; }
+.chip--on { background:var(--color-primary-light,#f0fdfa); border-color:var(--color-primary,#14b8a6); color:var(--color-primary-dark,#0d9488); font-weight:700; }
+
+.care-items { display:flex; flex-wrap:wrap; gap:.5rem; }
+.care-item-btn { display:flex; flex-direction:column; align-items:center; gap:.3rem; padding:.5rem; border:2px solid #e5e7eb; border-radius:12px; background:#fff; cursor:pointer; transition:all .12s; }
+.care-item-btn:hover { border-color:#b0b3bc; }
+.care-item-btn--on { border-color:var(--color-primary,#14b8a6); background:var(--color-primary-light,#f0fdfa); }
+.care-thumb { width:52px; height:52px; border-radius:8px; object-fit:cover; }
+.care-label { font-size:.75rem; font-weight:600; color:#374151; max-width:64px; text-align:center; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+.segmented { display:flex; gap:.3rem; background:#f3f4f6; border-radius:10px; padding:.25rem; }
+.seg { flex:1; padding:.45rem; border:none; border-radius:8px; background:transparent; color:#6b7280; font-family:inherit; font-size:.82rem; font-weight:600; cursor:pointer; transition:all .12s; }
+.seg--on { background:#fff; color:var(--color-primary-dark,#0d9488); box-shadow:0 1px 3px rgba(0,0,0,.1); }
+
+.toggle-row { display:flex; align-items:center; justify-content:space-between; gap:1rem; }
+.toggle-label { font-size:.88rem; font-weight:600; }
+.switch { width:46px; height:26px; border-radius:999px; border:none; background:#d1d5db; position:relative; cursor:pointer; transition:background .15s; }
+.switch--on { background:var(--color-primary,#14b8a6); }
+.switch-knob { position:absolute; top:3px; left:3px; width:20px; height:20px; border-radius:50%; background:#fff; transition:transform .15s; }
+.switch--on .switch-knob { transform:translateX(20px); }
+
+.location-btn { padding:.55rem 1rem; border:1.5px solid #e5e7eb; border-radius:9px; background:#fff; font-family:inherit; font-size:.85rem; font-weight:600; cursor:pointer; color:#374151; }
+.location-btn:disabled { opacity:.6; cursor:default; }
+.location-error { color:#dc2626; font-size:.82rem; margin:0; }
+.maps-warning { font-size:.8rem; color:#92400e; background:#fff7ed; border:1px solid #fed7aa; border-radius:8px; padding:.5rem .75rem; margin:0; }
+
+.save-error { color:#dc2626; font-size:.84rem; margin:0; text-align:center; }
+.save-btn { padding:.9rem; border:none; border-radius:12px; background:var(--color-gradient-primary,linear-gradient(135deg,#14b8a6,#10b981)); color:#fff; font-family:inherit; font-size:.95rem; font-weight:700; cursor:pointer; }
+.save-btn:disabled { opacity:.6; cursor:default; }

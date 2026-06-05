@@ -472,7 +472,7 @@
       <div class="form-group">
         <label class="form-label" for="job-method">Payment method</label>
         <select id="job-method" class="form-select" [(ngModel)]="draft.paymentMethod">
-          <option value="">— Select —</option>
+          <option value="">Select</option>
           @for (m of paymentMethods; track m) {
             <option [value]="m">{{ m }}</option>
           }

@@ -1,0 +1,142 @@
+<div class="page">
+  <header class="header">
+    <button class="back-btn" (click)="goBack()">
+      <svg viewBox="0 0 24 24" fill="none" width="20" height="20">
+        <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span>Settings</span>
+    </button>
+    <span class="title">Matching Preferences</span>
+    <span class="header-spacer"></span>
+  </header>
+
+  @if (loading()) {
+    <div class="status-block">Loading…</div>
+  } @else {
+    <main class="content">
+      <p class="intro">Set your preferences. We’ll filter the job deck to show you relevant matches.</p>
+
+      <section class="card">
+        <h2 class="card-title">What to care for</h2>
+        <p class="card-desc">Pick everything you’re open to.</p>
+        <div class="chips">
+          @for (t of allCareTypes; track t) {
+            <button class="chip" [class.chip--on]="isSelected(careTypesWanted(), t)" (click)="toggleCareType(t)">
+              {{ formatLabel(t) }}
+            </button>
+          }
+        </div>
+      </section>
+
+      <section class="card">
+        <h2 class="card-title">Services</h2>
+        <p class="card-desc">Services you can provide or need.</p>
+        <div class="chips">
+          @for (s of allServices; track s) {
+            <button class="chip" [class.chip--on]="isSelected(services(), s)" (click)="toggleService(s)">
+              {{ formatLabel(s) }}
+            </button>
+          }
+        </div>
+      </section>
+
+      <section class="card">
+        <h2 class="card-title">Availability</h2>
+        <div class="chips">
+          @for (a of allAvailability; track a) {
+            <button class="chip" [class.chip--on]="isSelected(availabilityWanted(), a)" (click)="toggleAvailability(a)">
+              {{ formatLabel(a) }}
+            </button>
+          }
+        </div>
+      </section>
+
+      <section class="card">
+        <h2 class="card-title">Location</h2>
+        <div class="toggle-row">
+          <div class="toggle-text">
+            <span class="toggle-label">I can host at my home</span>
+            <span class="toggle-sub">Care for pets/plants at my place.</span>
+          </div>
+          <button class="switch" [class.switch--on]="canHostAtMine()" (click)="toggleHost()" [attr.aria-pressed]="canHostAtMine()">
+            <span class="switch-knob"></span>
+          </button>
+        </div>
+        <div class="toggle-row">
+          <div class="toggle-text">
+            <span class="toggle-label">I can travel to the other person</span>
+            <span class="toggle-sub">Go to the owner’s house.</span>
+          </div>
+          <button class="switch" [class.switch--on]="canTravelToOther()" (click)="toggleTravel()" [attr.aria-pressed]="canTravelToOther()">
+            <span class="switch-knob"></span>
+          </button>
+        </div>
+        <label class="field">
+          <span class="field-label">Preferred area / city</span>
+          <input
+            class="field-input"
+            type="text"
+            placeholder="e.g. Tel Aviv"
+            [ngModel]="residenceFilter()"
+            (ngModelChange)="onResidenceInput($event)"
+          />
+        </label>
+        <label class="field">
+          <span class="field-label">Max distance (km)</span>
+          <input
+            class="field-input"
+            type="number"
+            min="0"
+            placeholder="Any"
+            [ngModel]="maxDistanceKm()"
+            (ngModelChange)="onNumberInput(maxDistanceKm, $event)"
+          />
+        </label>
+      </section>
+
+      <section class="card">
+        <h2 class="card-title">Payment</h2>
+        <p class="card-desc">Paid, volunteer, or both?</p>
+        <div class="segmented">
+          @for (w of allWorkTypes; track w) {
+            <button class="seg" [class.seg--on]="workType() === w" (click)="setWorkType(w)">
+              {{ formatLabel(w) }}
+            </button>
+          }
+        </div>
+
+        @if (workType() !== 'volunteer') {
+          <p class="card-desc card-desc--mt">Accepted rate types</p>
+          <div class="chips">
+            @for (r of allRateTypes; track r) {
+              <button class="chip" [class.chip--on]="isSelected(paymentRateTypes(), r)" (click)="toggleRateType(r)">
+                {{ formatLabel(r) }}
+              </button>
+            }
+          </div>
+
+          <div class="field-row">
+            <label class="field">
+              <span class="field-label">Min</span>
+              <input class="field-input" type="number" min="0" placeholder="0"
+                [ngModel]="minPayment()" (ngModelChange)="onNumberInput(minPayment, $event)" />
+            </label>
+            <label class="field">
+              <span class="field-label">Max</span>
+              <input class="field-input" type="number" min="0" placeholder="Any"
+                [ngModel]="maxPayment()" (ngModelChange)="onNumberInput(maxPayment, $event)" />
+            </label>
+          </div>
+        }
+      </section>
+
+      @if (error()) {
+        <p class="error-text">{{ error() }}</p>
+      }
+
+      <button class="save-btn" (click)="save()" [disabled]="saving()">
+        {{ saving() ? 'Saving…' : saved() ? 'Saved ✓' : 'Save preferences' }}
+      </button>
+    </main>
+  }
+</div>

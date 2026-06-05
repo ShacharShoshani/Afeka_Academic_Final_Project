@@ -1,8 +1,14 @@
 <div class="page">
+  <header class="header">
+    <span class="header-spacer"></span>
+    <span class="title">Settings</span>
+    <span class="header-spacer"></span>
+  </header>
+
   <main class="content">
     <section class="setting-section">
-      <h2 class="section-title">Browse mode</h2>
-      <p class="section-desc">Choose how you discover other users on Livin.</p>
+      <h2 class="section-title">App mode</h2>
+      <p class="section-desc">Choose how you use Livin.</p>
 
       <div class="mode-cards">
         <button
@@ -16,8 +22,8 @@
             <rect x="3" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.5"/>
             <rect x="14" y="14" width="7" height="7" rx="1" stroke="currentColor" stroke-width="1.5"/>
           </svg>
-          <span class="mode-name">Social</span>
-          <span class="mode-desc">Browse a grid of profiles and filter by care type, availability, and location.</span>
+          <span class="mode-name">Job Post Mode</span>
+          <span class="mode-desc">Browse profiles and posted jobs. Filter by care type, availability, and location.</span>
           @if (currentMode() === 'social') {
             <span class="mode-check">✓ Active</span>
           }
@@ -32,13 +38,73 @@
             <rect x="4" y="2" width="16" height="20" rx="3" stroke="currentColor" stroke-width="1.5"/>
             <path d="M8 12l2 2 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
           </svg>
-          <span class="mode-name">Swipe</span>
-          <span class="mode-desc">See one profile at a time. Swipe right to connect, left to skip. A mutual match opens a chat.</span>
+          <span class="mode-name">Swipe Mode</span>
+          <span class="mode-desc">Browse care jobs and apply by swiping right. Owners can see who's interested and accept a helper.</span>
           @if (currentMode() === 'swipe') {
             <span class="mode-check">✓ Active</span>
           }
         </button>
       </div>
     </section>
+
+    <section class="setting-section">
+      <button class="link-row" (click)="openPreferences()">
+        <div class="link-text">
+          <span class="link-title">Matching Preferences</span>
+          <span class="link-sub">What to care for, services, availability, payment, location.</span>
+        </div>
+        <svg class="chevron" viewBox="0 0 24 24" fill="none" width="18" height="18">
+          <path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+    </section>
+
+    @if (isAdmin()) {
+      <section class="setting-section">
+        <button class="link-row" (click)="openAdminReports()">
+          <div class="link-text">
+            <span class="link-title">🛡 Admin - Reports</span>
+            <span class="link-sub">View and manage user reports.</span>
+          </div>
+          <svg class="chevron" viewBox="0 0 24 24" fill="none" width="18" height="18">
+            <path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </section>
+    }
+
+    <!-- Change password -->
+    <section class="setting-section">
+      <button class="link-row" (click)="toggleChangePassword()">
+        <div class="link-text">
+          <span class="link-title">Change Password</span>
+          <span class="link-sub">Update your account password.</span>
+        </div>
+        <svg class="chevron" viewBox="0 0 24 24" fill="none" width="18" height="18"
+          [style.transform]="showChangePassword() ? 'rotate(90deg)' : 'none'" style="transition:transform .2s">
+          <path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      @if (showChangePassword()) {
+        <div class="change-pwd-form">
+          @if (changePwdSuccess()) {
+            <p class="pwd-success">{{ changePwdSuccess() }}</p>
+          } @else {
+            <label class="edit-label">Current password</label>
+            <input class="edit-input" type="password" [(ngModel)]="changePwd.current" placeholder="Current password" />
+            <label class="edit-label">New password</label>
+            <input class="edit-input" type="password" [(ngModel)]="changePwd.newPwd" placeholder="Min 8 chars" />
+            <label class="edit-label">Confirm new password</label>
+            <input class="edit-input" type="password" [(ngModel)]="changePwd.confirm" placeholder="Repeat new password" />
+            @if (changePwdError()) { <p class="pwd-error">{{ changePwdError() }}</p> }
+            <button class="pwd-save-btn" (click)="submitChangePassword()" [disabled]="changePwdSaving()">
+              {{ changePwdSaving() ? 'Saving…' : 'Save new password' }}
+            </button>
+          }
+        </div>
+      }
+    </section>
+
+    <button class="logout-btn" (click)="logout()">Log out</button>
   </main>
 </div>

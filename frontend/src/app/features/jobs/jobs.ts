@@ -379,6 +379,7 @@ export class Jobs implements OnInit {
     const map: Record<JobStatus, string> = {
       pending: 'Open',
       accepted: 'Accepted',
+      in_progress: 'In Progress',
       completed: 'Completed',
       cancelled: 'Cancelled',
     };

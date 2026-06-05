@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { prisma } from '../lib/prisma.js';
 import { requireAuth } from '../middleware/auth.js';
 import { validate } from '../middleware/validate.js';
+import { validateImageDataUrl, imageErrorMessage } from '../lib/validateImage.js';
 
 const router = Router();
 
@@ -10,6 +11,10 @@ const PUBLIC_USER_SELECT = {
   id: true,
   name: true,
   residence: true,
+  lat: true,
+  lng: true,
+  city: true,
+  country: true,
   role: true,
   bio: true,
   dateOfBirth: true,
@@ -19,6 +24,8 @@ const PUBLIC_USER_SELECT = {
   displayMode: true,
   createdAt: true,
   updatedAt: true,
+  averageRating: true,
+  reviewCount: true,
 } as const;
 
 const CARE_TYPES = ['dogs', 'cats', 'birds', 'fish', 'rabbits', 'hamsters', 'reptiles', 'plants', 'stray_animals'] as const;
@@ -134,6 +141,22 @@ router.get('/:id/strays', requireAuth, async (req, res) => {
 
 const patchMeSchema = z.object({
   displayMode: z.enum(['social', 'swipe']).optional(),
+  name: z.string().min(2).max(100).optional(),
+  bio: z.string().max(500).optional(),
+  phone: z.string().min(5).max(20).optional(),
+  residence: z.string().min(1).max(200).optional(),
+  dateOfBirth: z.string().optional(),
+  careTypes: z.array(z.enum(CARE_TYPES)).optional(),
+  availability: z.array(z.enum(AVAILABILITY)).optional(),
+  profilePhoto: z.string().optional().superRefine((val, ctx) => {
+    if (!val) return;
+    const err = validateImageDataUrl(val);
+    if (err) ctx.addIssue({ code: 'custom', message: imageErrorMessage(err) });
+  }),
+  lat: z.number().nullable().optional(),
+  lng: z.number().nullable().optional(),
+  city: z.string().max(100).nullable().optional(),
+  country: z.string().max(100).nullable().optional(),
 });
 
 // PATCH /api/users/me — update caller's own profile fields.

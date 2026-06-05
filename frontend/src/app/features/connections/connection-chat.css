@@ -42,6 +42,191 @@
 
 .header-spacer { width: 64px; }
 
+/* ── Status banners ───────────────────────────────────────────────── */
+
+.status-banner {
+  flex-shrink: 0;
+  padding: 0.65rem 1rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.status-banner--confirmed {
+  background: #dcfce7;
+  border-bottom: 1px solid #bbf7d0;
+  color: #166534;
+}
+
+.status-banner--cancelled {
+  background: #fef2f2;
+  border-bottom: 1px solid #fecaca;
+  color: #991b1b;
+}
+
+/* ── Dual confirm bar ─────────────────────────────────────────────── */
+
+.confirm-bar {
+  flex-shrink: 0;
+  background: #eef2ff;
+  border-bottom: 1px solid #e0e7ff;
+  padding: 0.65rem 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.confirm-sides {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.confirm-side {
+  display: flex;
+  flex-direction: column;
+  gap: 0.05rem;
+}
+
+.confirm-side-label {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.confirm-side-status {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #9ca3af;
+}
+
+.confirm-side--done .confirm-side-status {
+  color: #16a34a;
+}
+
+.confirm-divider {
+  color: #c7c9d1;
+  font-size: 1.1rem;
+  align-self: center;
+}
+
+.confirm-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.confirm-btn {
+  padding: 0.45rem 0.9rem;
+  border: none;
+  border-radius: 999px;
+  background: #4f46e5;
+  color: #fff;
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.confirm-btn:disabled { opacity: 0.6; cursor: default; }
+
+.decline-btn {
+  padding: 0.45rem 0.9rem;
+  border: 1.5px solid #fca5a5;
+  border-radius: 999px;
+  background: #fff;
+  color: #dc2626;
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+
+.decline-btn:hover { background: #fef2f2; }
+
+/* ── Decline confirmation dialog ──────────────────────────────────── */
+
+.decline-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  padding: 1rem;
+}
+
+.decline-dialog {
+  background: #fff;
+  border-radius: 16px;
+  padding: 1.5rem;
+  max-width: 340px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.18);
+}
+
+.decline-q {
+  font-size: 1rem;
+  font-weight: 700;
+  margin: 0;
+  color: #111827;
+}
+
+.decline-sub {
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.decline-btns {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+.decline-yes {
+  padding: 0.8rem;
+  border: none;
+  border-radius: 10px;
+  background: #dc2626;
+  color: #fff;
+  font-family: inherit;
+  font-size: 0.92rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.decline-yes:disabled { opacity: 0.6; cursor: default; }
+
+.decline-no {
+  padding: 0.75rem;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 10px;
+  background: #fff;
+  color: #374151;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.decline-no:hover { background: #f9fafb; }
+
+/* ── Message list ─────────────────────────────────────────────────── */
+
 .status-block {
   flex: 1;
   display: flex;
@@ -107,6 +292,8 @@
   align-self: flex-end;
 }
 
+/* ── Compose ──────────────────────────────────────────────────────── */
+
 .compose {
   display: flex;
   align-items: center;
@@ -115,6 +302,18 @@
   background: #fff;
   border-top: 1px solid #eee;
   flex-shrink: 0;
+}
+
+.compose--disabled {
+  justify-content: center;
+  padding: 0.9rem 1rem;
+  background: #f9fafb;
+}
+
+.compose-closed {
+  font-size: 0.85rem;
+  color: #9ca3af;
+  font-style: italic;
 }
 
 .compose-input {
@@ -149,3 +348,114 @@
 
 .send-btn:hover:not(:disabled) { background: #4338ca; }
 .send-btn:disabled { background: #a5b4fc; cursor: not-allowed; }
+
+/* ── Emoji picker ─────────────────────────────────────────────────── */
+
+.emoji-panel {
+  flex-shrink: 0;
+  max-height: 220px;
+  overflow-y: auto;
+  background: #fff;
+  border-top: 1px solid #f0f0f0;
+  padding: 0.5rem 0.75rem 0.25rem;
+}
+
+.emoji-cat-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #9ca3af;
+  margin: 0.4rem 0 0.2rem;
+}
+
+.emoji-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+}
+
+.emoji-btn {
+  background: none;
+  border: none;
+  padding: 4px;
+  font-size: 1.3rem;
+  cursor: pointer;
+  border-radius: 6px;
+  line-height: 1;
+  transition: background 0.1s;
+}
+
+.emoji-btn:hover { background: #f3f4f6; }
+
+/* ── Image attachment ─────────────────────────────────────────────── */
+
+.image-preview-bar {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: #f9fafb;
+  border-top: 1px solid #f0f0f0;
+}
+
+.image-preview-thumb {
+  width: 56px;
+  height: 56px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+.image-preview-remove {
+  background: #fff;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  font-size: 0.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #6b7280;
+  flex-shrink: 0;
+}
+
+.image-preview-remove:hover { border-color: #dc2626; color: #dc2626; }
+
+/* ── Compose icon buttons (emoji + attach) ────────────────────────── */
+
+.compose-icon-btn {
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #9ca3af;
+  border-radius: 6px;
+  transition: color 0.12s;
+}
+
+.compose-icon-btn:hover { color: #6b7280; }
+.compose-icon-btn--active { color: #4f46e5; }
+
+/* Needed for the file-input label */
+.compose-icon-btn input { display: none; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+
+/* ── Image bubble ─────────────────────────────────────────────────── */
+
+.bubble-image {
+  max-width: 220px;
+  max-height: 260px;
+  border-radius: 10px;
+  object-fit: cover;
+  display: block;
+}
+
+.msg-own .bubble-image { border-radius: 10px 10px 2px 10px; }

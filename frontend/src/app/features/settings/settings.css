@@ -44,11 +44,50 @@
 
 .content {
   flex: 1;
-  padding: 1.5rem 1rem;
+  padding: 1.5rem 1rem calc(96px + env(safe-area-inset-bottom));
   max-width: 480px;
   margin: 0 auto;
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
+
+.link-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  width: 100%;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  text-align: left;
+  color: inherit;
+  font-family: inherit;
+}
+
+.link-text { display: flex; flex-direction: column; gap: 0.2rem; }
+.link-title { font-size: 0.95rem; font-weight: 600; }
+.link-sub { font-size: 0.8rem; color: #6b7280; line-height: 1.4; }
+.chevron { color: #c7c9d1; flex-shrink: 0; }
+
+.logout-btn {
+  margin-top: 0.25rem;
+  padding: 0.85rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 12px;
+  background: #fff;
+  color: #dc2626;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.logout-btn:hover { border-color: #dc2626; }
 
 .setting-section {
   background: #fff;
@@ -126,3 +165,48 @@
   color: #4f46e5;
   margin-top: 0.25rem;
 }
+
+.change-pwd-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #f0f0f0;
+  margin-top: 0.5rem;
+}
+
+.edit-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #6b7280;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.edit-input {
+  padding: 0.65rem 0.85rem;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  background: #fafafa;
+}
+
+.edit-input:focus { outline: none; border-color: var(--color-primary, #14b8a6); background: #fff; }
+
+.pwd-error { color: #dc2626; font-size: .83rem; margin: 0; }
+.pwd-success { color: #166534; font-size: .83rem; font-weight: 600; }
+
+.pwd-save-btn {
+  padding: 0.75rem;
+  border: none;
+  border-radius: 10px;
+  background: var(--color-gradient-primary, linear-gradient(135deg, #14b8a6, #10b981));
+  color: #fff;
+  font-family: inherit;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 0.25rem;
+}
+.pwd-save-btn:disabled { opacity: 0.6; cursor: default; }

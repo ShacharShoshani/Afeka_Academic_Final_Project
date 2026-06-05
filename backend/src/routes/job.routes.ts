@@ -95,9 +95,21 @@ router.post('/', validate(createJobSchema), async (req, res) => {
         endDate,
         locationLat,
         locationLng,
+        locationAddress,
+        locationCity,
+        locationCountry,
         paymentMethod,
         paymentAmount,
         paymentCurrency,
+        paymentMethodList,
+        currency,
+        minPayment,
+        maxPayment,
+        isSwipeJob,
+        services,
+        estimatedHours,
+        behaviorNotes,
+        friendliness,
         petIds = [],
         plantIds = [],
         strayAnimalIds = [],
@@ -118,9 +130,21 @@ router.post('/', validate(createJobSchema), async (req, res) => {
             endDate: endDate ? new Date(endDate) : new Date(),
             locationLat: locationLat ?? 0,
             locationLng: locationLng ?? 0,
+            locationAddress: locationAddress ?? null,
+            locationCity: locationCity ?? null,
+            locationCountry: locationCountry ?? null,
             paymentMethod: paymentMethod ?? '',
             paymentAmount: paymentAmount ?? 0,
             paymentCurrency: paymentCurrency ?? 'ILS',
+            paymentMethodList: paymentMethodList ?? [],
+            currency: currency ?? 'ILS',
+            minPayment: minPayment ?? null,
+            maxPayment: maxPayment ?? null,
+            isSwipeJob: isSwipeJob ?? false,
+            services: services ?? [],
+            estimatedHours: estimatedHours ?? null,
+            behaviorNotes: behaviorNotes ?? null,
+            friendliness: friendliness ?? null,
             status: 'pending',
             ...(petIds.length && {
                 pets: { create: petIds.map((petId: string) => ({ petId })) },
@@ -147,6 +171,27 @@ router.get('/', async (_req, res) => {
     res.json(jobs.map(flattenJob));
 });
 
+// ── GET /:id — single job ────────────────────────────────────────────────────
+
+router.get('/:id', async (req, res) => {
+    const jobId = req.params.id as string;
+    const userId = req.user?.id;
+
+    const job = await prisma.job.findUnique({ where: { id: jobId }, include: jobIncludes });
+    if (!job) {
+        res.status(404).json({ error: 'Job not found' });
+        return;
+    }
+
+    // Only participants (owner or caretaker) can view a confirmed/swipe-mode job.
+    if (job.connectionId && userId !== job.ownerId && userId !== job.caretakerId) {
+        res.status(403).json({ error: 'Not a participant in this job' });
+        return;
+    }
+
+    res.json(flattenJob(job));
+});
+
 // ── PUT /:id — update a job ──────────────────────────────────────────────────
 
 router.put('/:id', validate(updateJobSchema), async (req, res) => {
@@ -159,8 +204,14 @@ router.put('/:id', validate(updateJobSchema), async (req, res) => {
         return;
     }
 
-    if (!userId || userId !== job.ownerId) {
-        res.status(403).json({ error: 'You can only update your own jobs' });
+    // For swipe-confirmed jobs (connectionId set), both owner and caretaker can update.
+    // For regular job-post-mode jobs, only the owner can update.
+    const isParticipant = job.connectionId
+        ? (userId === job.ownerId || userId === job.caretakerId)
+        : userId === job.ownerId;
+
+    if (!userId || !isParticipant) {
+        res.status(403).json({ error: 'You do not have permission to update this job' });
         return;
     }
 

@@ -36,6 +36,16 @@ export const routes: Routes = [
       import('./features/login/login').then((m) => m.Login),
   },
   {
+    path: 'forgot-password',
+    loadComponent: () =>
+      import('./features/auth/forgot-password').then((m) => m.ForgotPassword),
+  },
+  {
+    path: 'reset-password',
+    loadComponent: () =>
+      import('./features/auth/reset-password').then((m) => m.ResetPassword),
+  },
+  {
     path: 'home',
     canActivate: [authGuard],
     loadComponent: () =>
@@ -46,6 +56,24 @@ export const routes: Routes = [
     canActivate: [authGuard],
     loadComponent: () =>
       import('./features/browse/browse').then((m) => m.Browse),
+  },
+  {
+    path: 'swipe',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/swipe/swipe-deck').then((m) => m.SwipeDeck),
+  },
+  {
+    path: 'swipe/create-job',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/swipe/create-swipe-job').then((m) => m.CreateSwipeJob),
+  },
+  {
+    path: 'preferences',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/preferences/match-preferences').then((m) => m.MatchPreferences),
   },
   {
     path: 'jobs',
@@ -76,6 +104,30 @@ export const routes: Routes = [
     canActivate: [authGuard],
     loadComponent: () =>
       import('./features/connections/connection-chat').then((m) => m.ConnectionChat),
+  },
+  {
+    path: 'confirmed',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/connections/confirmed-jobs').then((m) => m.ConfirmedJobs),
+  },
+  {
+    path: 'my-jobs',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/swipe/my-jobs').then((m) => m.MyJobs),
+  },
+  {
+    path: 'notifications',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/notifications/notifications-screen').then((m) => m.NotificationsScreen),
+  },
+  {
+    path: 'admin/reports',
+    canActivate: [authGuard],
+    loadComponent: () =>
+      import('./features/admin/admin-reports').then((m) => m.AdminReports),
   },
   { path: '', redirectTo: 'home', pathMatch: 'full' },
 ];

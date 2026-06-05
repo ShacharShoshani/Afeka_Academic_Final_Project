@@ -1,0 +1,227 @@
+<div class="page">
+  <header class="header">
+    <button class="back-btn" (click)="goBack()">
+      <svg viewBox="0 0 24 24" fill="none" width="20" height="20">
+        <path d="M15 18l-6-6 6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+    <span class="title">New Swipe Job</span>
+    <span class="header-spacer"></span>
+  </header>
+
+  <main class="content">
+
+    <!-- ── 1. Basic ─────────────────────────────────────────────────── -->
+    <section class="card">
+      <h2 class="card-title">Basic Info</h2>
+
+      <label class="field">
+        <span class="field-label">Job title *</span>
+        <input class="field-input" type="text" [(ngModel)]="title" placeholder="e.g. Dog walking for Buddy" />
+      </label>
+
+      <label class="field">
+        <span class="field-label">Description</span>
+        <textarea class="field-input field-textarea" [(ngModel)]="description" placeholder="Tell helpers what's needed…" rows="3"></textarea>
+      </label>
+
+      <div class="field">
+        <span class="field-label">Services needed</span>
+        <div class="chips">
+          @for (s of ALL_SERVICES; track s) {
+            <button type="button" class="chip" [class.chip--on]="services.includes(s)" (click)="toggleService(s)">
+              {{ formatService(s) }}
+            </button>
+          }
+        </div>
+      </div>
+    </section>
+
+    <!-- ── 2. Care Item ──────────────────────────────────────────────── -->
+    <section class="card">
+      <h2 class="card-title">Care Item</h2>
+      <p class="card-desc">Pick an existing pet/plant from your profile, or leave blank.</p>
+
+      @if (pets().length > 0) {
+        <div class="field">
+          <span class="field-label">Your pets</span>
+          <div class="care-items">
+            @for (pet of pets(); track pet.id) {
+              <button type="button" class="care-item-btn" [class.care-item-btn--on]="selectedPetId() === pet.id"
+                (click)="selectedPetId.set(selectedPetId() === pet.id ? null : pet.id); selectedPlantId.set(null); selectedStrayId.set(null)">
+                @if (pet.image) {
+                  <img class="care-thumb" [src]="pet.image" [alt]="pet.name" />
+                }
+                <span class="care-label">{{ pet.name }}</span>
+              </button>
+            }
+          </div>
+        </div>
+      }
+
+      @if (plants().length > 0) {
+        <div class="field">
+          <span class="field-label">Your plants</span>
+          <div class="care-items">
+            @for (plant of plants(); track plant.id) {
+              <button type="button" class="care-item-btn" [class.care-item-btn--on]="selectedPlantId() === plant.id"
+                (click)="selectedPlantId.set(selectedPlantId() === plant.id ? null : plant.id); selectedPetId.set(null); selectedStrayId.set(null)">
+                @if (plant.image) {
+                  <img class="care-thumb" [src]="plant.image" [alt]="plant.name" />
+                }
+                <span class="care-label">{{ plant.name }}</span>
+              </button>
+            }
+          </div>
+        </div>
+      }
+
+      @if (strays().length > 0) {
+        <div class="field">
+          <span class="field-label">Stray animals you reported</span>
+          <div class="care-items">
+            @for (stray of strays(); track stray.id) {
+              <button type="button" class="care-item-btn" [class.care-item-btn--on]="selectedStrayId() === stray.id"
+                (click)="selectedStrayId.set(selectedStrayId() === stray.id ? null : stray.id); selectedPetId.set(null); selectedPlantId.set(null)">
+                @if (stray.image) {
+                  <img class="care-thumb" [src]="stray.image" [alt]="stray.name ?? 'Stray'" />
+                }
+                <span class="care-label">{{ stray.name ?? 'Stray ' + stray.type }}</span>
+              </button>
+            }
+          </div>
+        </div>
+      }
+
+      <label class="field">
+        <span class="field-label">Behaviour notes (optional)</span>
+        <textarea class="field-input field-textarea" [(ngModel)]="behaviorNotes" placeholder="e.g. Good with kids, needs leash outside" rows="2"></textarea>
+      </label>
+
+      <div class="field">
+        <span class="field-label">Friendliness</span>
+        <div class="segmented">
+          @for (f of FRIENDLINESS; track f) {
+            <button type="button" class="seg" [class.seg--on]="friendliness === f" (click)="friendliness = f">
+              {{ f }}
+            </button>
+          }
+        </div>
+      </div>
+    </section>
+
+    <!-- ── 3. Timing ────────────────────────────────────────────────── -->
+    <section class="card">
+      <h2 class="card-title">Timing</h2>
+
+      <div class="field-row">
+        <label class="field">
+          <span class="field-label">Start date *</span>
+          <input class="field-input" type="datetime-local" [(ngModel)]="startDate" />
+        </label>
+        <label class="field">
+          <span class="field-label">End date *</span>
+          <input class="field-input" type="datetime-local" [(ngModel)]="endDate" />
+        </label>
+      </div>
+
+      <label class="field">
+        <span class="field-label">Estimated hours</span>
+        <input class="field-input" type="number" min="0" step="0.5" [(ngModel)]="estimatedHours" placeholder="e.g. 2" />
+      </label>
+    </section>
+
+    <!-- ── 4. Location ──────────────────────────────────────────────── -->
+    <section class="card">
+      <h2 class="card-title">Location</h2>
+
+      @if (mapsAvailable() === false) {
+        <p class="maps-warning">Google Maps is not available. Type your address below.</p>
+      }
+
+      <label class="field">
+        <span class="field-label">Address / city</span>
+        <input class="field-input" type="text" #locationInput
+          [(ngModel)]="locationAddress"
+          placeholder="Start typing or use my location…" />
+      </label>
+
+      @if (mapsAvailable() !== false) {
+        <button type="button" class="location-btn" (click)="useCurrentLocation()" [disabled]="locationLoading()">
+          📍 {{ locationLoading() ? 'Getting location…' : 'Use my current location' }}
+        </button>
+      }
+
+      @if (locationError()) {
+        <p class="location-error">{{ locationError() }}</p>
+      }
+    </section>
+
+    <!-- ── 5. Payment ───────────────────────────────────────────────── -->
+    <section class="card">
+      <h2 class="card-title">Payment</h2>
+
+      <div class="toggle-row">
+        <span class="toggle-label">This is a volunteer job (no pay)</span>
+        <button type="button" class="switch" [class.switch--on]="isVolunteer" (click)="isVolunteer = !isVolunteer">
+          <span class="switch-knob"></span>
+        </button>
+      </div>
+
+      @if (!isVolunteer) {
+        <div class="field-row">
+          <label class="field">
+            <span class="field-label">Amount</span>
+            <input class="field-input" type="number" min="0" [(ngModel)]="paymentAmount" placeholder="150" />
+          </label>
+          <label class="field">
+            <span class="field-label">Or range min</span>
+            <input class="field-input" type="number" min="0" [(ngModel)]="minPayment" placeholder="100" />
+          </label>
+          <label class="field">
+            <span class="field-label">Max</span>
+            <input class="field-input" type="number" min="0" [(ngModel)]="maxPayment" placeholder="200" />
+          </label>
+        </div>
+
+        <div class="field">
+          <span class="field-label">Rate type</span>
+          <div class="segmented">
+            @for (r of RATE_TYPES; track r) {
+              <button type="button" class="seg" [class.seg--on]="paymentRateType === r" (click)="paymentRateType = r">{{ r }}</button>
+            }
+          </div>
+        </div>
+
+        <div class="field">
+          <span class="field-label">Currency</span>
+          <div class="segmented">
+            @for (c of CURRENCIES; track c) {
+              <button type="button" class="seg" [class.seg--on]="currency === c" (click)="currency = c">{{ c }}</button>
+            }
+          </div>
+        </div>
+
+        <div class="field">
+          <span class="field-label">Payment methods (multi-select)</span>
+          <div class="chips">
+            @for (m of ALL_PAYMENT_METHODS; track m) {
+              <button type="button" class="chip" [class.chip--on]="paymentMethods.includes(m)" (click)="togglePaymentMethod(m)">
+                {{ formatMethod(m) }}
+              </button>
+            }
+          </div>
+        </div>
+      }
+    </section>
+
+    @if (saveError()) {
+      <p class="save-error">{{ saveError() }}</p>
+    }
+
+    <button class="save-btn" (click)="submit()" [disabled]="saving()">
+      {{ saving() ? 'Creating…' : 'Create Swipe Job' }}
+    </button>
+
+  </main>
+</div>

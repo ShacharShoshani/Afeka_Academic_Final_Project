@@ -13,25 +13,33 @@ export class Connections implements OnInit {
   private readonly router = inject(Router);
   private readonly connectionsService = inject(ConnectionsService);
 
-  protected readonly connections = signal<UserConnection[]>([]);
+  protected readonly active = signal<UserConnection[]>([]);
+  protected readonly cancelled = signal<UserConnection[]>([]);
   protected readonly loading = signal(true);
   protected readonly error = signal('');
+  protected readonly showCancelled = signal(false);
 
   ngOnInit(): void {
-    this.connectionsService.list().subscribe({
-      next: (list) => {
-        this.connections.set(list);
-        this.loading.set(false);
-      },
-      error: () => {
-        this.error.set('Failed to load connections');
-        this.loading.set(false);
-      },
+    let done = 0;
+    const finish = () => { if (++done === 2) this.loading.set(false); };
+
+    this.connectionsService.list('active').subscribe({
+      next: (list) => { this.active.set(list); finish(); },
+      error: () => { this.error.set('Failed to load chats'); finish(); },
+    });
+
+    this.connectionsService.list('cancelled').subscribe({
+      next: (list) => { this.cancelled.set(list); finish(); },
+      error: () => finish(),
     });
   }
 
   protected openChat(id: string): void {
     this.router.navigate(['/connections', id]);
+  }
+
+  protected toggleCancelled(): void {
+    this.showCancelled.update((v) => !v);
   }
 
   protected lastMessage(conn: UserConnection): string {

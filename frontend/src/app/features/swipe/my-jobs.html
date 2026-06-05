@@ -1,0 +1,89 @@
+<div class="page">
+  <header class="header">
+    <span class="header-spacer"></span>
+    <span class="title">My Jobs</span>
+    @if (isOwner()) {
+      <button class="header-btn" (click)="createJob()">+ New</button>
+    } @else {
+      <span class="header-spacer"></span>
+    }
+  </header>
+
+  <!-- ── OWNER: Active swipe jobs ─────────────────────────────────── -->
+  @if (isOwner()) {
+    <section class="section">
+      <h2 class="section-title">Active Jobs</h2>
+
+      @if (loadingJobs()) {
+        <p class="muted">Loading…</p>
+      } @else if (myJobs().length === 0) {
+        <div class="empty-card">
+          <p>No jobs yet.</p>
+          <p class="muted-sm">Create a job so helpers can find you in the app.</p>
+          <button class="btn-create" (click)="createJob()">Create a job</button>
+        </div>
+      } @else {
+        <ul class="job-list">
+          @for (job of myJobs(); track job.id) {
+            <li class="job-row">
+              @if (mainImage(job); as img) {
+                <img class="job-thumb" [src]="img" [alt]="job.title" />
+              } @else {
+                <div class="job-thumb job-thumb-ph">
+                  <svg viewBox="0 0 24 24" fill="none" width="22" height="22"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.5"/><path d="M4 20c0-4 3.582-7 8-7s8 3 8 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                </div>
+              }
+              <div class="job-info">
+                <span class="job-title">{{ job.title }}</span>
+                <span class="job-meta">{{ formatDate(job.startDate) }} · {{ statusLabel(job.status) }}</span>
+                @if ((job.pendingCount ?? 0) > 0) {
+                  <span class="interest-badge">{{ job.pendingCount }} interested</span>
+                }
+                @if ((job.matchedCount ?? 0) > 0) {
+                  <span class="matched-badge">{{ job.matchedCount }} matched</span>
+                }
+              </div>
+              <button class="btn-find" (click)="openSearch(job.id)" [disabled]="job.status !== 'pending'">
+                Find helpers
+              </button>
+            </li>
+          }
+        </ul>
+      }
+    </section>
+  }
+
+  <!-- ── Confirmed jobs (both roles) ─────────────────────────────── -->
+  <section class="section">
+    <h2 class="section-title">Confirmed Jobs</h2>
+
+    @if (loadingConfirmed()) {
+      <p class="muted">Loading…</p>
+    } @else if (confirmedConnections().length === 0) {
+      <p class="muted-sm">No confirmed jobs yet.</p>
+    } @else {
+      <ul class="conn-list">
+        @for (conn of confirmedConnections(); track conn.id) {
+          <li class="conn-row" (click)="openChat(conn.id)">
+            @if (conn.otherUser?.profilePhoto) {
+              <img class="conn-avatar" [src]="conn.otherUser!.profilePhoto" [alt]="conn.otherUser!.name" />
+            } @else {
+              <div class="conn-avatar conn-avatar-ph">
+                <svg viewBox="0 0 24 24" fill="none" width="20" height="20"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="1.5"/><path d="M4 20c0-4 3.582-7 8-7s8 3 8 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+              </div>
+            }
+            <div class="conn-info">
+              <span class="conn-name">{{ conn.otherUser?.name ?? 'Unknown' }}</span>
+              @if (conn.job) {
+                <span class="conn-meta">{{ conn.job.title }} · {{ statusLabel(conn.job.status) }}</span>
+              }
+            </div>
+            <svg class="chevron" viewBox="0 0 24 24" fill="none" width="16" height="16">
+              <path d="M9 18l6-6-6-6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </li>
+        }
+      </ul>
+    }
+  </section>
+</div>

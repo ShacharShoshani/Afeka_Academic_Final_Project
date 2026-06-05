@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import type { Job, PaymentMethod, PaymentRateType, PublicUser } from '@livin/common';
+import type { Currency, Job, PaymentMethod, PaymentMethodEnum, PaymentRateType, PetFriendliness, PublicUser, ServiceType } from '@livin/common';
 import { environment } from '../../environments/environment.local';
 
 // The API includes the hydrated `owner` relation on every Job response
@@ -14,10 +14,22 @@ export interface CreateJobPayload {
   endDate?: string;
   locationLat?: number;
   locationLng?: number;
+  locationAddress?: string;
+  locationCity?: string;
+  locationCountry?: string;
   paymentMethod?: PaymentMethod;
   paymentRateType?: PaymentRateType;
   paymentAmount?: number;
   paymentCurrency?: string;
+  paymentMethodList?: PaymentMethodEnum[];
+  currency?: Currency;
+  minPayment?: number;
+  maxPayment?: number;
+  isSwipeJob?: boolean;
+  services?: ServiceType[];
+  estimatedHours?: number;
+  behaviorNotes?: string;
+  friendliness?: PetFriendliness;
   petIds?: string[];
   plantIds?: string[];
   strayAnimalIds?: string[];
@@ -47,6 +59,10 @@ export class JobService {
 
   list(): Observable<JobWithOwner[]> {
     return this.http.get<JobWithOwner[]>(this.baseUrl, { withCredentials: true });
+  }
+
+  getById(id: string): Observable<JobWithOwner> {
+    return this.http.get<JobWithOwner>(`${this.baseUrl}/${id}`, { withCredentials: true });
   }
 
   create(payload: CreateJobPayload): Observable<{ message: string; job: JobWithOwner }> {

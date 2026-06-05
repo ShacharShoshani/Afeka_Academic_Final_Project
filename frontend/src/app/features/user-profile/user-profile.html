@@ -7,8 +7,41 @@
       <span>Browse</span>
     </button>
     <span class="title">Profile</span>
-    <span class="header-spacer"></span>
+    <div class="header-actions">
+      <button class="header-icon-btn" [class.blocked]="blocked()" (click)="toggleBlock()" [attr.aria-label]="blocked() ? 'Unblock user' : 'Block user'" title="{{ blocked() ? 'Unblock' : 'Block' }}">
+        🚫
+      </button>
+      <button class="header-icon-btn" (click)="openReportDialog()" aria-label="Report user" title="Report">
+        ⚑
+      </button>
+    </div>
   </header>
+
+  <!-- Report dialog -->
+  @if (showReportDialog()) {
+    <div class="report-overlay">
+      <div class="report-dialog">
+        @if (reportSent()) {
+          <p class="report-sent">✓ Report submitted. Thank you.</p>
+        } @else {
+          <p class="report-title">Report {{ profile()?.name }}</p>
+          <label class="report-field-label">Category</label>
+          <select class="report-select" [(ngModel)]="reportDraft.category">
+            @for (c of reportCategories; track c) {
+              <option [value]="c">{{ c.replace(/_/g, ' ') }}</option>
+            }
+          </select>
+          <label class="report-field-label">Description</label>
+          <textarea class="report-textarea" [(ngModel)]="reportDraft.description" placeholder="Describe what happened…" rows="4"></textarea>
+          @if (reportError()) { <p class="report-error">{{ reportError() }}</p> }
+          <div class="report-actions">
+            <button class="report-submit" (click)="submitReport()">Submit</button>
+            <button class="report-cancel" (click)="closeReportDialog()">Cancel</button>
+          </div>
+        }
+      </div>
+    </div>
+  }
 
   @if (loading()) {
     <div class="status-block">Loading…</div>

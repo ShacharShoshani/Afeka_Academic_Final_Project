@@ -13,6 +13,11 @@ import { strayAnimalsRouter } from './routes/stray-animals.routes.js';
 import { jobRouter } from './routes/job.routes.js';
 import { swipeRouter } from './routes/swipe.routes.js';
 import { connectionsRouter } from './routes/connections.routes.js';
+import { preferencesRouter } from './routes/preferences.routes.js';
+import { reviewRouter } from './routes/review.routes.js';
+import { blockRouter } from './routes/block.routes.js';
+import { reportRouter } from './routes/report.routes.js';
+import { notificationRouter } from './routes/notification.routes.js';
 import { errorHandler } from './middleware/errorHandler.js';
 import { requireAuth } from './middleware/auth.js';
 
@@ -49,6 +54,11 @@ app.use('/api/stray-animals', requireAuth, strayAnimalsRouter);
 app.use('/api/jobs', requireAuth, jobRouter);
 app.use('/api/swipe', requireAuth, swipeRouter);
 app.use('/api/connections', requireAuth, connectionsRouter);
+app.use('/api/preferences', requireAuth, preferencesRouter);
+app.use('/api/reviews', requireAuth, reviewRouter);
+app.use('/api/blocks', requireAuth, blockRouter);
+app.use('/api/reports', requireAuth, reportRouter);
+app.use('/api/notifications', requireAuth, notificationRouter);
 
 // Global error handler (must be registered last)
 app.use(errorHandler);

@@ -82,6 +82,11 @@ export class RegistrationStep2 implements AfterViewInit, OnDestroy {
   protected readonly residenceTouched = signal(false);
   protected readonly locationLoading = signal(false);
   protected readonly locationError = signal('');
+  // Captured from Google Places / Geocoder — stored alongside the text address.
+  private residenceLat: number | null = null;
+  private residenceLng: number | null = null;
+  private residenceCity: string | null = null;
+  private residenceCountry: string | null = null;
   // null = not yet checked, true = working, false = unavailable / auth failed
   protected readonly mapsAvailable = signal<boolean | null>(null);
 
@@ -183,6 +188,17 @@ export class RegistrationStep2 implements AfterViewInit, OnDestroy {
 
   // ── Autocomplete helpers ────────────────────────────────────────────────────
 
+  private extractGeoFromComponents(components: google.maps.GeocoderAddressComponent[]): void {
+    const getComponent = (type: string) =>
+      components.find((c) => c.types.includes(type))?.long_name ?? null;
+    this.residenceCity =
+      getComponent('locality') ??
+      getComponent('sublocality_level_1') ??
+      getComponent('administrative_area_level_2') ??
+      null;
+    this.residenceCountry = getComponent('country');
+  }
+
   private initAutocomplete(): void {
     this.destroyAutocomplete(); // guard against double-init
     const input = this.residenceInputRef?.nativeElement;
@@ -193,6 +209,10 @@ export class RegistrationStep2 implements AfterViewInit, OnDestroy {
       const place = this.autocomplete!.getPlace();
       const address = place.formatted_address ?? place.name ?? '';
       if (!address) return;
+      const loc = place.geometry?.location;
+      this.residenceLat = loc ? loc.lat() : null;
+      this.residenceLng = loc ? loc.lng() : null;
+      if (place.address_components) this.extractGeoFromComponents(place.address_components);
       this.residenceAddress.set(address);
       this.residenceConfirmed.set(true);
       this.locationError.set('');
@@ -239,6 +259,10 @@ export class RegistrationStep2 implements AfterViewInit, OnDestroy {
     this.residenceConfirmed.set(false);
     this.residenceTouched.set(false);
     this.locationError.set('');
+    this.residenceLat = null;
+    this.residenceLng = null;
+    this.residenceCity = null;
+    this.residenceCountry = null;
     if (this.residenceInputRef?.nativeElement) {
       this.residenceInputRef.nativeElement.value = '';
     }
@@ -275,6 +299,9 @@ export class RegistrationStep2 implements AfterViewInit, OnDestroy {
             return;
           }
           const address = result.formatted_address;
+          this.residenceLat = lat;
+          this.residenceLng = lng;
+          if (result.address_components) this.extractGeoFromComponents(result.address_components);
           this.residenceAddress.set(address);
           this.residenceConfirmed.set(true);
           this.locationError.set('');
@@ -330,7 +357,13 @@ export class RegistrationStep2 implements AfterViewInit, OnDestroy {
       ? this.residenceAddress()
       : (this.residenceInputRef?.nativeElement?.value.trim() ?? this.residenceAddress());
 
-    this.store.dispatch(setUserData({ name, email, phone, residence }));
+    this.store.dispatch(setUserData({
+      name, email, phone, residence,
+      lat: this.residenceLat,
+      lng: this.residenceLng,
+      city: this.residenceCity,
+      country: this.residenceCountry,
+    }));
     this.router.navigate(['/register/step-3']);
   }
 }

@@ -1,3 +1,5 @@
+<app-toast [match]="matchToast()" />
+
 @if (showNavbar()) {
   <app-navbar />
 }
@@ -9,3 +11,7 @@
 }
 
 <router-outlet />
+
+@if (showSwipeNav()) {
+  <app-swipe-nav />
+}

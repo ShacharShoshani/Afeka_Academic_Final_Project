@@ -1,6 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../../services/auth.service';
+import { NotificationService } from '../../../services/notification.service';
 
 @Component({
   selector: 'app-navbar',
@@ -10,6 +11,7 @@ import { AuthService } from '../../../services/auth.service';
 })
 export class Navbar {
   protected readonly authService = inject(AuthService);
+  protected readonly notificationService = inject(NotificationService);
   private readonly router = inject(Router);
 
   protected logout(): void {
