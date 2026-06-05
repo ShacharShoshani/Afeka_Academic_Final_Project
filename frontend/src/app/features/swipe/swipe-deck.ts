@@ -102,10 +102,11 @@ export class SwipeDeck implements OnInit {
     this.loadDeck(jobId);
   }
 
-  // ── Caretaker gestures ────────────────────────────────────────────────────
+  // ── Shared drag gesture (used by both caretaker job cards and owner caretaker cards) ──
 
   protected onPointerDown(e: PointerEvent): void {
-    if (this.pointerId !== -1 || this.flipped()) return;
+    // Block drag when either card face is flipped.
+    if (this.pointerId !== -1 || this.flipped() || this.caretakerFlipped()) return;
     this.pointerId = e.pointerId;
     this.startX = e.clientX;
     this.dragging.set(true);
@@ -124,7 +125,13 @@ export class SwipeDeck implements OnInit {
     const delta = this.dragDeltaX();
     this.dragging.set(false);
     this.dragDeltaX.set(0);
-    if (Math.abs(delta) >= 100) this.commitJobSwipe(delta > 0);
+    if (Math.abs(delta) < 100) return;
+    // Route to the correct commit handler based on the active role/phase.
+    if (this.isOwner() && this.ownerPhase() === 'swiping') {
+      this.commitCaretakerSwipe(delta > 0);
+    } else {
+      this.commitJobSwipe(delta > 0);
+    }
   }
 
   protected swipeJobLeft(): void { this.commitJobSwipe(false); }
@@ -260,10 +267,6 @@ export class SwipeDeck implements OnInit {
       return `${job.currency || job.paymentCurrency} ${job.paymentAmount}${this.formatRateType(job.paymentRateType)}`;
     }
     return 'Volunteer';
-  }
-
-  protected navigateCreateJob(): void {
-    this.router.navigate(['/swipe/create-job']);
   }
 
   protected navigateMyJobs(): void {

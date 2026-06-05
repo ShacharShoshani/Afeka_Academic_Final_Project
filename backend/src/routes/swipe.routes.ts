@@ -108,13 +108,26 @@ router.get('/deck', async (req, res) => {
         const callerLat = callerFull?.lat;
         const callerLng = callerFull?.lng;
         const maxKm = prefs?.maxDistanceKm;
+        const wantedCareTypes = prefs?.careTypesWanted ?? [];
 
-        const filtered = (maxKm && callerLat != null && callerLng != null)
-            ? rawJobs.filter((j) => {
-                if (!j.locationLat && !j.locationLng) return true;
-                return haversineKm(callerLat, callerLng, j.locationLat, j.locationLng) <= maxKm;
-            })
-            : rawJobs;
+        const filtered = rawJobs.filter((j) => {
+            // Geo-distance filter (skip if no coords on either side).
+            if (maxKm && callerLat != null && callerLng != null) {
+                if (j.locationLat || j.locationLng) {
+                    if (haversineKm(callerLat, callerLng, j.locationLat, j.locationLng) > maxKm) return false;
+                }
+            }
+            // Care-type overlap filter: at least one wanted care type must match job's care items.
+            if (wantedCareTypes.length > 0) {
+                const matched = wantedCareTypes.some((ct) => {
+                    if (ct === 'plants') return (j as any).plants.length > 0;
+                    if (ct === 'stray_animals') return (j as any).strayAnimals.length > 0;
+                    return (j as any).pets.some((p: any) => p.pet?.type === ct);
+                });
+                if (!matched) return false;
+            }
+            return true;
+        });
 
         return res.json({ type: 'jobs', jobs: filtered.slice(0, 10).map(flattenSwipeJob) });
     }
@@ -373,6 +386,16 @@ router.post('/express', validate(expressSchema), async (req, res) => {
     void createNotification(otherUserId, 'new_match', {
         connectionId: connection.id,
         otherUserName: callersName,
+    });
+    // Also persist a notification for the caller so it appears in their Notification Center.
+    // Look up the other user's name for the notification payload.
+    const otherUserRecord = await prisma.user.findUnique({
+        where: { id: otherUserId },
+        select: { name: true },
+    });
+    void createNotification(caller.id, 'new_match', {
+        connectionId: connection.id,
+        otherUserName: otherUserRecord?.name ?? '',
     });
 
     return res.json({ matched: true, connectionId: connection.id });

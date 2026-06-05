@@ -89,7 +89,16 @@
                 @if (distanceLabel(job.locationLat, job.locationLng); as dist) {
                   <div class="meta-row"><span class="meta-item">📍 {{ dist }}</span></div>
                 }
-                <div class="payment-row"><span class="payment-label">{{ paymentSummary(job) }}</span></div>
+                <div class="payment-row">
+                  <span class="payment-label">{{ paymentSummary(job) }}</span>
+                  @if (job.paymentMethodList?.length) {
+                    <div class="card-chips">
+                      @for (m of job.paymentMethodList; track m) {
+                        <span class="chip chip--pay">{{ m.replace('_', ' ') }}</span>
+                      }
+                    </div>
+                  }
+                </div>
               </div>
             </div>
 
@@ -173,7 +182,17 @@
           </div>
         }
 
-        <div class="swipe-card swipe-card-top">
+        <div
+          class="swipe-card swipe-card-top"
+          [class.is-dragging]="dragging()"
+          [style.transform]="cardTransform()"
+          (pointerdown)="onPointerDown($event)"
+          (pointermove)="onPointerMove($event)"
+          (pointerup)="onPointerUp($event)"
+          (pointercancel)="onPointerUp($event)"
+        >
+          <div class="like-indicator" [style.opacity]="likeOpacity()">INTERESTED</div>
+          <div class="pass-indicator" [style.opacity]="passOpacity()">PASS</div>
           <div class="card-scene">
             <div class="card-flip" [class.card-flip--flipped]="caretakerFlipped()">
 
