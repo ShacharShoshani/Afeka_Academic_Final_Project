@@ -166,8 +166,8 @@
 }
 
 .role-badge[data-role="owner"] {
-  background: #fef3c7;
-  color: #92400e;
+  background: var(--color-accent-light);
+  color: var(--color-accent-dark);
 }
 
 .role-badge[data-role="admin"] {

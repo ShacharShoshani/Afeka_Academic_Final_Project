@@ -6,6 +6,7 @@
   width: 100%;
   max-width: 400px;
   margin-bottom: 40px;
+  animation: ds-slide-up var(--dur-slow) var(--ease-out);
 }
 
 .form-field {

@@ -39,6 +39,9 @@
                   <span class="conn-time">{{ formatTime(conn.messages[conn.messages.length - 1].sentAt) }}</span>
                 }
               </div>
+              @if (conn.job?.title) {
+                <span class="conn-job">Job: {{ conn.job!.title }}</span>
+              }
               <span class="conn-preview">{{ lastMessage(conn) }}</span>
             </div>
             <svg class="chevron" viewBox="0 0 24 24" fill="none" width="16" height="16">
@@ -76,6 +79,9 @@
                   <span class="conn-name conn-name--muted">{{ conn.otherUser?.name ?? 'Unknown' }}</span>
                   <span class="conn-badge conn-badge--cancelled">Cancelled</span>
                 </div>
+                @if (conn.job?.title) {
+                  <span class="conn-job">Job: {{ conn.job!.title }}</span>
+                }
                 <span class="conn-preview">{{ lastMessage(conn) }}</span>
               </div>
               <svg class="chevron" viewBox="0 0 24 24" fill="none" width="16" height="16">

@@ -35,6 +35,8 @@ export class SwipeDeck implements OnInit {
   protected readonly dragDeltaX = signal(0);
   protected readonly flipped = signal(false);
   protected readonly empty = signal(false);
+  protected readonly flyingOff = signal(false);
+  protected readonly exitingRight = signal<boolean | null>(null);
 
   private startX = 0;
   private pointerId = -1;
@@ -105,8 +107,9 @@ export class SwipeDeck implements OnInit {
   // ── Shared drag gesture (used by both caretaker job cards and owner caretaker cards) ──
 
   protected onPointerDown(e: PointerEvent): void {
-    // Block drag when either card face is flipped.
+    // Block drag when either card face is flipped or an exit animation is playing.
     if (this.pointerId !== -1 || this.flipped() || this.caretakerFlipped()) return;
+    if (this.flyingOff() || this.exitingRight() !== null) return;
     this.pointerId = e.pointerId;
     this.startX = e.clientX;
     this.dragging.set(true);
@@ -123,19 +126,29 @@ export class SwipeDeck implements OnInit {
     if (e.pointerId !== this.pointerId) return;
     this.pointerId = -1;
     const delta = this.dragDeltaX();
-    this.dragging.set(false);
-    this.dragDeltaX.set(0);
-    if (Math.abs(delta) < 100) return;
-    // Route to the correct commit handler based on the active role/phase.
-    if (this.isOwner() && this.ownerPhase() === 'swiping') {
-      this.commitCaretakerSwipe(delta > 0);
-    } else {
-      this.commitJobSwipe(delta > 0);
+    if (Math.abs(delta) < 100) {
+      this.dragging.set(false);
+      this.dragDeltaX.set(0);
+      return;
     }
+    // Fly card off screen in the drag direction, then commit.
+    const liked = delta > 0;
+    this.flyingOff.set(true);
+    this.dragDeltaX.set(liked ? 700 : -700);
+    setTimeout(() => {
+      this.flyingOff.set(false);
+      this.dragging.set(false);
+      this.dragDeltaX.set(0);
+      if (this.isOwner() && this.ownerPhase() === 'swiping') {
+        this.commitCaretakerSwipe(liked);
+      } else {
+        this.commitJobSwipe(liked);
+      }
+    }, 280);
   }
 
-  protected swipeJobLeft(): void { this.commitJobSwipe(false); }
-  protected swipeJobRight(): void { this.commitJobSwipe(true); }
+  protected swipeJobLeft(): void { this.exitThenCommit(false, 'job'); }
+  protected swipeJobRight(): void { this.exitThenCommit(true, 'job'); }
 
   private commitJobSwipe(liked: boolean): void {
     const job = this.currentJob();
@@ -181,8 +194,8 @@ export class SwipeDeck implements OnInit {
 
   // ── Owner swipe gestures (caretaker cards) ────────────────────────────────
 
-  protected swipeCaretakerLeft(): void { this.commitCaretakerSwipe(false); }
-  protected swipeCaretakerRight(): void { this.commitCaretakerSwipe(true); }
+  protected swipeCaretakerLeft(): void { this.exitThenCommit(false, 'caretaker'); }
+  protected swipeCaretakerRight(): void { this.exitThenCommit(true, 'caretaker'); }
 
   private commitCaretakerSwipe(liked: boolean): void {
     const caretaker = this.currentCaretaker();
@@ -206,6 +219,16 @@ export class SwipeDeck implements OnInit {
   protected toggleCaretakerFlip(e: Event): void {
     e.stopPropagation();
     this.caretakerFlipped.update((v) => !v);
+  }
+
+  private exitThenCommit(liked: boolean, type: 'job' | 'caretaker'): void {
+    if (this.exitingRight() !== null || this.flyingOff()) return;
+    this.exitingRight.set(liked);
+    setTimeout(() => {
+      this.exitingRight.set(null);
+      if (type === 'job') this.commitJobSwipe(liked);
+      else this.commitCaretakerSwipe(liked);
+    }, 280);
   }
 
   // ── Match modal ────────────────────────────────────────────────────────────
@@ -271,5 +294,9 @@ export class SwipeDeck implements OnInit {
 
   protected navigateMyJobs(): void {
     this.router.navigate(['/my-jobs']);
+  }
+
+  protected navigateCreateJob(): void {
+    this.router.navigate(['/swipe/create-job']);
   }
 }

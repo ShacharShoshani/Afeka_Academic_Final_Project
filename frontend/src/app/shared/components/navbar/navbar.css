@@ -3,8 +3,8 @@
   align-items: center;
   gap: 8px;
   padding: 12px 20px;
-  background: var(--color-white);
-  border-bottom: 1px solid var(--color-gray-200);
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
   position: sticky;
   top: 0;
   z-index: 100;
@@ -35,13 +35,13 @@
   font-weight: 500;
   text-decoration: none;
   transition:
-    background var(--transition-fast),
-    color var(--transition-fast);
+    background var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
   white-space: nowrap;
 }
 
 .nav-link:hover {
-  background: var(--color-gray-100);
+  background: var(--color-surface-alt);
   color: var(--color-text-primary);
 }
 
@@ -58,7 +58,7 @@
 
 .logout-btn {
   padding: 7px 16px;
-  border: 2px solid var(--color-gray-200);
+  border: 2px solid var(--color-border);
   border-radius: var(--radius-full);
   background: transparent;
   color: var(--color-text-secondary);
@@ -67,7 +67,7 @@
   font-weight: 500;
   cursor: pointer;
   flex-shrink: 0;
-  transition: border-color var(--transition-fast), color var(--transition-fast);
+  transition: border-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
 }
 
 .logout-btn:hover {
@@ -83,23 +83,31 @@
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  color: var(--color-text-secondary, #6b7280);
+  color: var(--color-text-secondary);
   text-decoration: none;
-  transition: background .12s, color .12s;
+  transition: background var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
   flex-shrink: 0;
 }
-.bell-btn:hover { background: var(--color-gray-100, #f7f7f8); color: var(--color-text-primary, #111827); }
+
+.bell-btn:hover {
+  background: var(--color-surface-alt);
+  color: var(--color-text-primary);
+}
 
 .bell-badge {
   position: absolute;
-  top: 2px; right: 2px;
-  min-width: 16px; height: 16px;
-  background: #ef4444;
-  color: #fff;
-  font-size: .62rem;
+  top: 2px;
+  right: 2px;
+  min-width: 16px;
+  height: 16px;
+  background: var(--color-danger);
+  color: var(--color-white);
+  font-size: 0.62rem;
   font-weight: 800;
-  border-radius: 999px;
-  display: flex; align-items: center; justify-content: center;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   padding: 0 3px;
   line-height: 1;
   pointer-events: none;

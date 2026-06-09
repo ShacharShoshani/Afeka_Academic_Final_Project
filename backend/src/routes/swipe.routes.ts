@@ -206,17 +206,32 @@ router.get('/deck', async (req, res) => {
         ...rawCaretakers.filter((c) => !interestedIds.has(c.id)),
     ];
 
-    // Distance filter.
+    // Care types required by this job, derived from its care items.
+    const jobCareTypes = new Set<string>();
+    (job as any).pets.forEach((p: any) => { if (p.pet?.type) jobCareTypes.add(p.pet.type); });
+    if ((job as any).plants.length) jobCareTypes.add('plants');
+    if ((job as any).strayAnimals.length) jobCareTypes.add('stray_animals');
+
+    // Distance + care-type relevance filter. Lenient: keep caretakers without careTypes,
+    // and always keep caretakers who already applied to this job.
     const callerLat = ownerFull?.lat;
     const callerLng = ownerFull?.lng;
     const maxKm = ownerPrefs?.maxDistanceKm;
 
-    const filtered = (maxKm && callerLat != null && callerLng != null)
-        ? sorted.filter((c) => {
-            if (c.lat == null || c.lng == null) return true;
-            return haversineKm(callerLat, callerLng, c.lat, c.lng) <= maxKm;
-        })
-        : sorted;
+    const filtered = sorted.filter((c) => {
+        if (interestedIds.has(c.id)) return true;
+        // Care-type overlap.
+        if (jobCareTypes.size > 0 && c.careTypes.length > 0) {
+            if (!c.careTypes.some((t) => jobCareTypes.has(t))) return false;
+        }
+        // Distance.
+        if (maxKm && callerLat != null && callerLng != null) {
+            if (c.lat != null && c.lng != null) {
+                if (haversineKm(callerLat, callerLng, c.lat, c.lng) > maxKm) return false;
+            }
+        }
+        return true;
+    });
 
     return res.json({
         type: 'caretakers',
@@ -375,6 +390,19 @@ router.post('/express', validate(expressSchema), async (req, res) => {
         create: { user1Id, user2Id },
         update: {},
     });
+
+    // Link the swipe job to this connection so the chat / Jobs Confirmed show the real job.
+    // Only link if the connection has no job yet (Job.connectionId is @unique).
+    const existingLinked = await prisma.job.findFirst({
+        where: { connectionId: connection.id },
+        select: { id: true },
+    });
+    if (!existingLinked) {
+        await prisma.job.update({
+            where: { id: jobId },
+            data: { connectionId: connection.id },
+        });
+    }
 
     // Notify both sides.
     const otherUserId = caller.role === 'caretaker' ? job.ownerId : caretakerId!;

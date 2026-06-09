@@ -2,8 +2,9 @@
   display: flex;
   flex-direction: column;
   min-height: 100dvh;
-  background: var(--color-gray-100);
+  background: var(--color-bg);
   font-family: var(--font-family);
+  animation: ds-fade-in var(--dur-base) var(--ease-out);
 }
 
 /* Header */

@@ -2,7 +2,8 @@
   display: flex;
   flex-direction: column;
   min-height: 100dvh;
-  background: var(--color-gray-100);
+  background: var(--color-bg);
+  animation: ds-fade-in var(--dur-base) var(--ease-out);
 }
 
 .btn-add {
@@ -29,7 +30,7 @@
   position: sticky;
   top: 57px; /* matches header height */
   z-index: 5;
-  border-bottom: 1px solid var(--color-gray-200);
+  border-bottom: 1px solid var(--color-border);
 }
 
 .map-no-location {
@@ -62,9 +63,9 @@
 .filter-chip {
   flex-shrink: 0;
   padding: 7px 16px;
-  border: 1.5px solid var(--color-gray-200);
+  border: 1.5px solid var(--color-border);
   border-radius: var(--radius-full);
-  background: var(--color-white);
+  background: var(--color-surface);
   color: var(--color-text-secondary);
   font-family: inherit;
   font-size: 0.875rem;
@@ -92,7 +93,7 @@
 }
 
 .status-error {
-  color: #ef4444;
+  color: var(--color-danger);
 }
 
 .empty-state {

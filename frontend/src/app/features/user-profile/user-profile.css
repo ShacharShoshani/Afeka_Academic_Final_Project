@@ -2,8 +2,9 @@
   display: flex;
   flex-direction: column;
   min-height: 100dvh;
-  background: var(--color-gray-100);
+  background: var(--color-bg);
   font-family: var(--font-family);
+  animation: ds-fade-in var(--dur-base) var(--ease-out);
 }
 
 /* Header */
@@ -40,7 +41,7 @@
 .header-spacer { width: 96px; }
 
 .status-block { text-align: center; padding: 64px 24px; color: var(--color-text-secondary); font-size: 0.95rem; }
-.status-error { color: #b91c1c; }
+.status-error { color: var(--color-danger); }
 
 /* Main content */
 .content {
@@ -96,7 +97,7 @@
   color: var(--color-primary-dark);
   margin-bottom: 10px;
 }
-.role-badge[data-role="owner"] { background: #fef3c7; color: #92400e; }
+.role-badge[data-role="owner"] { background: var(--color-accent-light); color: var(--color-accent-dark); }
 .role-badge[data-role="admin"] { background: #ede9fe; color: #5b21b6; }
 
 .profile-meta { display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; font-size: 0.8rem; color: var(--color-text-secondary); }
@@ -104,18 +105,20 @@
 /* Block / Report */
 .header-actions { display:flex; gap:.25rem; }
 .header-icon-btn { background:none; border:none; font-size:1.1rem; cursor:pointer; padding:.3rem; border-radius:6px; opacity:.55; transition:opacity .12s; }
-.header-icon-btn:hover { opacity:1; background:#f0f0f0; }
+.header-icon-btn:hover { opacity:1; background:var(--color-surface-alt); }
 .header-icon-btn.blocked { opacity:1; }
 
 .report-overlay { position:fixed; inset:0; background:rgba(0,0,0,.4); display:flex; align-items:center; justify-content:center; z-index:300; padding:1rem; }
-.report-dialog { background:#fff; border-radius:14px; padding:1.25rem; max-width:360px; width:100%; display:flex; flex-direction:column; gap:.75rem; box-shadow:0 8px 30px rgba(0,0,0,.18); }
+.report-dialog { background:var(--color-surface); border-radius:var(--radius-lg); padding:1.25rem; max-width:360px; width:100%; display:flex; flex-direction:column; gap:.75rem; box-shadow:var(--shadow-lg); border:1px solid var(--color-border); }
 .report-title { font-weight:700; font-size:.95rem; margin:0; }
-.report-field-label { font-size:.75rem; font-weight:700; color:#6b7280; text-transform:uppercase; letter-spacing:.04em; margin-bottom:-.25rem; }
-.report-select, .report-textarea { border:1.5px solid #e5e7eb; border-radius:9px; padding:.55rem .75rem; font-family:inherit; font-size:.88rem; background:#fafafa; }
-.report-select:focus, .report-textarea:focus { outline:none; border-color:#4f46e5; }
+.report-field-label { font-size:.74rem; font-weight:700; color:var(--color-text-secondary); text-transform:uppercase; letter-spacing:.04em; margin-bottom:-.25rem; }
+.report-select, .report-textarea { border:1.5px solid var(--color-border); border-radius:var(--radius-md); padding:.55rem .75rem; font-family:inherit; font-size:.88rem; background:var(--color-surface-alt); color:var(--color-text-primary); transition:border-color var(--dur-fast) var(--ease-out); }
+.report-select:focus, .report-textarea:focus { outline:none; border-color:var(--color-primary); background:var(--color-surface); box-shadow:0 0 0 3px var(--color-primary-light); }
 .report-textarea { resize:vertical; }
-.report-error { color:#dc2626; font-size:.82rem; margin:0; }
-.report-sent { color:#166534; font-weight:700; text-align:center; padding:.5rem; }
+.report-error { color:var(--color-danger); font-size:.82rem; margin:0; }
+.report-sent { color:var(--color-success); font-weight:700; text-align:center; padding:.5rem; }
 .report-actions { display:flex; gap:.5rem; }
-.report-submit { flex:1; padding:.7rem; border:none; border-radius:9px; background:#dc2626; color:#fff; font-family:inherit; font-weight:700; cursor:pointer; }
-.report-cancel { padding:.7rem 1rem; border:1.5px solid #e5e7eb; border-radius:9px; background:#fff; font-family:inherit; font-weight:600; cursor:pointer; }
+.report-submit { flex:1; padding:.7rem; border:none; border-radius:var(--radius-md); background:var(--color-danger); color:#fff; font-family:inherit; font-weight:700; cursor:pointer; transition:opacity var(--dur-fast) var(--ease-out); }
+.report-submit:hover { opacity:.88; }
+.report-cancel { padding:.7rem 1rem; border:1.5px solid var(--color-border); border-radius:var(--radius-md); background:var(--color-surface); color:var(--color-text-secondary); font-family:inherit; font-weight:600; cursor:pointer; transition:border-color var(--dur-fast) var(--ease-out); }
+.report-cancel:hover { border-color:var(--color-text-muted); }

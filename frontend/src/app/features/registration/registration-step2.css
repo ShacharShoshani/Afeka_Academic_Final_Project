@@ -2,6 +2,9 @@
   display: flex;
   flex-direction: column;
   min-height: 100dvh;
+  background:
+    radial-gradient(1200px 480px at 50% -10%, var(--color-primary-light), transparent 70%),
+    var(--color-bg);
 }
 
 /* Header */
@@ -70,6 +73,7 @@
   width: 100%;
   max-width: 400px;
   margin-bottom: 40px;
+  animation: ds-slide-up var(--dur-slow) var(--ease-out);
 }
 
 .form-field {
@@ -218,10 +222,10 @@
   gap: 6px;
   margin-top: 7px;
   padding: 5px 12px;
-  border: 1.5px dashed var(--color-primary, #4f46e5);
+  border: 1.5px dashed var(--color-primary, var(--color-primary));
   border-radius: var(--radius-full, 999px);
   background: transparent;
-  color: var(--color-primary, #4f46e5);
+  color: var(--color-primary, var(--color-primary));
   font-size: 0.8rem;
   font-weight: 500;
   cursor: pointer;
@@ -231,7 +235,7 @@
 }
 
 .live-location-btn:hover:not(:disabled) {
-  background: var(--color-primary-light, #eef2ff);
+  background: var(--color-primary-light, var(--color-primary-light));
 }
 
 .live-location-btn:disabled {

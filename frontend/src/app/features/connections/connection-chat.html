@@ -6,7 +6,12 @@
       </svg>
       <span>Chats</span>
     </button>
-    <span class="title">{{ connection()?.otherUser?.name ?? 'Chat' }}</span>
+    <span class="title">
+      {{ connection()?.otherUser?.name ?? 'Chat' }}
+      @if (connection()?.job?.title) {
+        <span class="title-job">{{ connection()!.job!.title }}</span>
+      }
+    </span>
     <span class="header-spacer"></span>
   </header>
 

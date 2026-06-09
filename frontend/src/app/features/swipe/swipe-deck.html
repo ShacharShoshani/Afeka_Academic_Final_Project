@@ -50,6 +50,9 @@
       <div
         class="swipe-card swipe-card-top"
         [class.is-dragging]="dragging()"
+        [class.is-flying-off]="flyingOff()"
+        [class.is-exiting-right]="exitingRight() === true"
+        [class.is-exiting-left]="exitingRight() === false"
         [style.transform]="cardTransform()"
         (pointerdown)="onPointerDown($event)"
         (pointermove)="onPointerMove($event)"
@@ -138,9 +141,8 @@
 
   } @else if (ownerPhase() === 'no-jobs') {
     <div class="empty-state">
-      <p>You have no open jobs.</p>
-      <p class="empty-hint">Go to the Jobs tab to create a job first.</p>
-      <button class="btn-go" (click)="navigateMyJobs()">Go to Jobs</button>
+      <p>You need to create a job before you can start swiping.</p>
+      <button class="btn-go" (click)="navigateCreateJob()">Create New Job</button>
     </div>
 
   } @else if (ownerPhase() === 'choose-job') {
@@ -156,7 +158,7 @@
   } @else if (ownerPhase() === 'swiping') {
     @if (activeJob()) {
       <div class="active-job-bar">
-        <span class="active-job-label">Looking for helpers for:</span>
+        <span class="active-job-label">Finding helpers for:</span>
         <span class="active-job-title">{{ activeJob()!.title }}</span>
         <button class="active-job-change" (click)="ownerPhase.set('choose-job')">Change</button>
       </div>
@@ -185,6 +187,9 @@
         <div
           class="swipe-card swipe-card-top"
           [class.is-dragging]="dragging()"
+          [class.is-flying-off]="flyingOff()"
+          [class.is-exiting-right]="exitingRight() === true"
+          [class.is-exiting-left]="exitingRight() === false"
           [style.transform]="cardTransform()"
           (pointerdown)="onPointerDown($event)"
           (pointermove)="onPointerMove($event)"
