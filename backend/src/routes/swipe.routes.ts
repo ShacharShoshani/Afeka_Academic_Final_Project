@@ -5,6 +5,7 @@ import { validate } from '../middleware/validate.js';
 import { emitToUser } from '../socket/socket.js';
 import { createNotification } from '../lib/notify.js';
 import { PUBLIC_USER_SELECT } from '../lib/selectors.js';
+import { flattenJob } from '../lib/job-utils.js';
 
 const router = Router();
 
@@ -14,16 +15,6 @@ const SWIPE_JOB_INCLUDE = {
     plants: { include: { plant: true } },
     strayAnimals: { include: { strayAnimal: true } },
 } as const;
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function flattenSwipeJob(job: any) {
-    return {
-        ...job,
-        pets: (job.pets ?? []).map((p: any) => p.pet),
-        plants: (job.plants ?? []).map((p: any) => p.plant),
-        strayAnimals: (job.strayAnimals ?? []).map((s: any) => s.strayAnimal),
-    };
-}
 
 function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
     const R = 6371;
@@ -107,7 +98,7 @@ router.get('/deck', async (req, res) => {
             return true;
         });
 
-        return res.json({ type: 'jobs', jobs: filtered.slice(0, 10).map(flattenSwipeJob) });
+        return res.json({ type: 'jobs', jobs: filtered.slice(0, 10).map(flattenJob) });
     }
 
     // ── OWNER deck: caretakers for a specific job ─────────────────────────────
@@ -214,7 +205,7 @@ router.get('/deck', async (req, res) => {
     return res.json({
         type: 'caretakers',
         jobId: resolvedJobId,
-        job: flattenSwipeJob(job),
+        job: flattenJob(job),
         caretakers: filtered.slice(0, 10).map((c) => ({
             ...c,
             alreadyInterested: interestedIds.has(c.id),
@@ -239,7 +230,7 @@ router.get('/my-jobs', async (req, res) => {
     });
 
     const result = jobs.map((j) => ({
-        ...flattenSwipeJob(j),
+        ...flattenJob(j),
         pendingCount: j.jobInterests.filter((i) => i.status === 'pending').length,
         matchedCount: j.jobInterests.filter((i) => i.status === 'matched').length,
     }));

@@ -3,20 +3,9 @@ import { validate } from '../middleware/validate';
 import { createJobSchema, updateJobSchema } from '../validators/job.validators';
 import { prisma } from '../lib/prisma.js';
 import { PUBLIC_USER_SELECT } from '../lib/selectors.js';
+import { flattenJob } from '../lib/job-utils.js';
 
 const router = Router();
-
-// ── Helpers ─────────────────────────────────────────────────────────────────
-
-function flattenJob(job: any) {
-    const { pets, plants, strayAnimals, ...rest } = job;
-    return {
-        ...rest,
-        pets: pets.map((p: any) => p.pet),
-        plants: plants.map((p: any) => p.plant),
-        strayAnimals: strayAnimals.map((s: any) => s.strayAnimal),
-    };
-}
 
 const jobIncludes = {
     owner: { select: PUBLIC_USER_SELECT },
