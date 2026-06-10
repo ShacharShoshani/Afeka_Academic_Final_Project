@@ -4,29 +4,9 @@ import { prisma } from '../lib/prisma.js';
 import { requireAuth } from '../middleware/auth.js';
 import { validate } from '../middleware/validate.js';
 import { validateImageDataUrl, imageErrorMessage } from '../lib/validateImage.js';
+import { PUBLIC_USER_SELECT } from '../lib/selectors.js';
 
 const router = Router();
-
-const PUBLIC_USER_SELECT = {
-  id: true,
-  name: true,
-  residence: true,
-  lat: true,
-  lng: true,
-  city: true,
-  country: true,
-  role: true,
-  bio: true,
-  dateOfBirth: true,
-  careTypes: true,
-  availability: true,
-  profilePhoto: true,
-  displayMode: true,
-  createdAt: true,
-  updatedAt: true,
-  averageRating: true,
-  reviewCount: true,
-} as const;
 
 const CARE_TYPES = ['dogs', 'cats', 'birds', 'fish', 'rabbits', 'hamsters', 'reptiles', 'plants', 'stray_animals'] as const;
 const AVAILABILITY = ['mornings', 'afternoons', 'evenings', 'weekends'] as const;

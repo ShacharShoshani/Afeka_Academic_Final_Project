@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { validate } from '../middleware/validate';
 import { createJobSchema, updateJobSchema } from '../validators/job.validators';
 import { prisma } from '../lib/prisma.js';
+import { PUBLIC_USER_SELECT } from '../lib/selectors.js';
 
 const router = Router();
 
@@ -16,15 +17,6 @@ function flattenJob(job: any) {
         strayAnimals: strayAnimals.map((s: any) => s.strayAnimal),
     };
 }
-
-const PUBLIC_USER_SELECT = {
-    id: true,
-    name: true,
-    residence: true,
-    role: true,
-    bio: true,
-    profilePhoto: true,
-} as const;
 
 const jobIncludes = {
     owner: { select: PUBLIC_USER_SELECT },

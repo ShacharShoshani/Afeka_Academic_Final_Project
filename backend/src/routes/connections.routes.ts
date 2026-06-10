@@ -5,29 +5,9 @@ import { validate } from '../middleware/validate.js';
 import { emitToUser } from '../socket/socket.js';
 import { createNotification } from '../lib/notify.js';
 import { validateImageDataUrl, imageErrorMessage } from '../lib/validateImage.js';
+import { PUBLIC_USER_SELECT } from '../lib/selectors.js';
 
 const router = Router();
-
-const PUBLIC_USER_SELECT = {
-    id: true,
-    name: true,
-    bio: true,
-    profilePhoto: true,
-    residence: true,
-    lat: true,
-    lng: true,
-    city: true,
-    country: true,
-    role: true,
-    careTypes: true,
-    availability: true,
-    displayMode: true,
-    dateOfBirth: true,
-    createdAt: true,
-    updatedAt: true,
-    averageRating: true,
-    reviewCount: true,
-} as const;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function serializeConnection(c: any, callerId: string) {
@@ -249,8 +229,8 @@ router.post('/:id/confirm', async (req, res) => {
             confirmedAt: bothConfirmed ? (connection.confirmedAt ?? new Date()) : null,
         },
         include: {
-            user1: { select: { ...PUBLIC_USER_SELECT, role: true } },
-            user2: { select: { ...PUBLIC_USER_SELECT, role: true } },
+            user1: { select: PUBLIC_USER_SELECT },
+            user2: { select: PUBLIC_USER_SELECT },
             job: { select: JOB_SELECT },
         },
     });

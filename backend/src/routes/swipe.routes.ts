@@ -4,31 +4,9 @@ import { prisma } from '../lib/prisma.js';
 import { validate } from '../middleware/validate.js';
 import { emitToUser } from '../socket/socket.js';
 import { createNotification } from '../lib/notify.js';
+import { PUBLIC_USER_SELECT } from '../lib/selectors.js';
 
 const router = Router();
-
-// ── Shared selectors ──────────────────────────────────────────────────────────
-
-const PUBLIC_USER_SELECT = {
-    id: true,
-    name: true,
-    bio: true,
-    profilePhoto: true,
-    residence: true,
-    lat: true,
-    lng: true,
-    city: true,
-    country: true,
-    role: true,
-    careTypes: true,
-    availability: true,
-    displayMode: true,
-    dateOfBirth: true,
-    createdAt: true,
-    updatedAt: true,
-    averageRating: true,
-    reviewCount: true,
-} as const;
 
 const SWIPE_JOB_INCLUDE = {
     owner: { select: PUBLIC_USER_SELECT },
