@@ -32,7 +32,8 @@ Open two browser windows (or two different browsers to avoid cookie conflicts).
 
 ### 1. Mode selection (Settings)
 - Account A → Settings → select **Swipe Mode**
-- Show the bottom navigation replacing the top bar
+- Account B → Settings → select **Swipe Mode**
+- Show the bottom navigation replacing the top bar (both accounts)
 
 ### 2. Matching Preferences
 - Account A → Settings → Matching Preferences
