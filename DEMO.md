@@ -44,6 +44,7 @@ Open two browser windows (or two different browsers to avoid cookie conflicts).
 - Account A → My Jobs tab → tap **+ New**
 - Fill in:
   - Title: "Dog sitting for Buddy"
+  - Description: "Buddy is a 3-year-old Golden Retriever who needs two daily walks and morning/evening feeding. He's friendly and leash-trained. Looking for a reliable helper for the weekend."
   - Services: Walking, Feeding
   - Start / End dates: next weekend
   - Estimated hours: 5
