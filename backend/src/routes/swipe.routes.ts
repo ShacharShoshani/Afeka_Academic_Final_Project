@@ -38,7 +38,10 @@ router.get('/deck', async (req, res) => {
     if (caller.role === 'caretaker') {
         const [alreadyExpressed, prefs, callerFull, blockedOwnerIds] = await Promise.all([
             prisma.jobInterest.findMany({
-                where: { caretakerId: caller.id },
+                where: {
+                    caretakerId: caller.id,
+                    OR: [{ caretakerLiked: true }, { status: { in: ['rejected', 'matched'] } }],
+                },
                 select: { jobId: true },
             }),
             prisma.matchPreference.findUnique({ where: { userId: caller.id } }),
@@ -124,9 +127,12 @@ router.get('/deck', async (req, res) => {
         return res.status(403).json({ error: 'Not your job' });
     }
 
-    // Get caretaker IDs already handled (matched or rejected) for this job.
+    // Get caretaker IDs already handled: matched/rejected, or owner already swiped right.
     const handled = await prisma.jobInterest.findMany({
-        where: { jobId: resolvedJobId, status: { in: ['matched', 'rejected'] } },
+        where: {
+            jobId: resolvedJobId,
+            OR: [{ status: { in: ['matched', 'rejected'] } }, { ownerLiked: true }],
+        },
         select: { caretakerId: true },
     });
     const handledIds = handled.map((h) => h.caretakerId);
@@ -341,6 +347,17 @@ router.post('/express', validate(expressSchema), async (req, res) => {
     });
 
     const connection = await getOrCreateConnection(job.ownerId, caretakerId!);
+
+    // A mutual swipe is a confirmation — mark both sides confirmed so the connection
+    // appears immediately in the "Jobs Confirmed" tab without a separate chat confirm step.
+    await prisma.userConnection.update({
+        where: { id: connection.id },
+        data: {
+            user1Confirmed: true,
+            user2Confirmed: true,
+            confirmedAt: connection.confirmedAt ?? new Date(),
+        },
+    });
 
     // Link the swipe job to this connection so the chat / Jobs Confirmed show the real job.
     // Only link if the connection has no job yet (Job.connectionId is @unique).
