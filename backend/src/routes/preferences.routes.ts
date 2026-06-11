@@ -50,7 +50,15 @@ const updateSchema = z.object({
     maxPayment: z.number().int().min(0).nullable(),
     maxDistanceKm: z.number().int().min(0).nullable(),
     residenceFilter: z.string().trim().max(100).nullable(),
-});
+}).refine(
+    d => d.minPayment === null || d.maxPayment === null || d.minPayment <= d.maxPayment,
+    { message: 'minPayment must not exceed maxPayment', path: ['maxPayment'] },
+).refine(
+    d => d.workType === 'volunteer'
+        ? d.paymentRateTypes.length === 0 && d.minPayment === null && d.maxPayment === null
+        : true,
+    { message: 'Payment fields must be empty for volunteer work type', path: ['paymentRateTypes'] },
+);
 
 // PUT /api/preferences — upsert the caller's matching preferences.
 router.put('/', validate(updateSchema), async (req, res) => {
