@@ -1,3 +1,5 @@
+import { type Request, type Response } from 'express';
+
 // Shared image validation for base64 data URLs.
 // Allowed MIME types: jpeg, jpg, png, webp. SVG explicitly blocked.
 // Max payload: ~5 MB raw → ~6.7 MB base64 — enforced at 7 MB base64 length.
@@ -27,6 +29,13 @@ export function imageErrorMessage(err: ImageValidationError): string {
         case 'UNSUPPORTED_TYPE': return 'Image must be a JPEG, PNG, or WebP';
         case 'TOO_LARGE': return 'Image must be under 5 MB';
     }
+}
+
+export function checkBodyImage(req: Request, res: Response): boolean {
+    if (!req.body.image) return true;
+    const err = validateImageDataUrl(req.body.image);
+    if (err) { res.status(400).json({ error: imageErrorMessage(err) }); return false; }
+    return true;
 }
 
 // Zod refinement helper — use with z.string().

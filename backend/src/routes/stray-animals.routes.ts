@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { ownershipGuard } from '../middleware/auth.js';
 import { prisma } from '../lib/prisma.js';
-import { validateImageDataUrl, imageErrorMessage } from '../lib/validateImage.js';
+import { checkBodyImage } from '../lib/validateImage.js';
 
 const strayReporter = ownershipGuard('strayAnimal');
 
@@ -20,10 +20,7 @@ router.post('/', async (req, res) => {
     return res.status(401).json({ message: 'Unauthorized' });
   }
 
-  if (req.body.image) {
-    const imgErr = validateImageDataUrl(req.body.image);
-    if (imgErr) return res.status(400).json({ error: imageErrorMessage(imgErr) });
-  }
+  if (!checkBodyImage(req, res)) return;
 
   const stray = await prisma.strayAnimal.create({
     data: {
@@ -43,10 +40,7 @@ router.put('/:id', strayReporter, async (req, res) => {
     return res.status(400).json({ message: 'Stray Animal ID is required' });
   }
 
-  if (req.body.image) {
-    const imgErr = validateImageDataUrl(req.body.image);
-    if (imgErr) return res.status(400).json({ error: imageErrorMessage(imgErr) });
-  }
+  if (!checkBodyImage(req, res)) return;
 
   delete req.body.createdAt;
   delete req.body.reporterId;
