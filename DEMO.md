@@ -46,6 +46,7 @@ Open two browser windows (or two different browsers to avoid cookie conflicts).
   - Title: "Dog sitting for Buddy"
   - Services: Walking, Feeding
   - Start / End dates: next weekend
+  - Estimated hours: 5
   - Location: Tel Aviv (use autocomplete or "Use my current location")
   - Payment: 150 ILS / daily
 - Tap **Create Swipe Job** → redirected back to My Jobs, job appears in the list
