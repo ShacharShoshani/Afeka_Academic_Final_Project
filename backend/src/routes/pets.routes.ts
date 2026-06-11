@@ -35,11 +35,7 @@ router.post('/', async (req, res) => {
 router.put('/:id', petOwner, async (req, res) => {
   const id = req.params.id as string;
 
-  if (!id) {
-    return res.status(400).json({ message: 'Pet ID is required' });
-  }
-
-  if (!checkBodyImage(req, res)) return;
+if (!checkBodyImage(req, res)) return;
 
   delete req.body.createdAt;
   delete req.body.ownerId;
@@ -54,11 +50,7 @@ router.put('/:id', petOwner, async (req, res) => {
 router.delete('/:id', petOwner, async (req, res) => {
   const id = req.params.id as string;
 
-  if (!id) {
-    return res.status(400).json({ message: 'Pet ID is required' });
-  }
-
-  await prisma.pet.delete({
+await prisma.pet.delete({
     where: { id }
   });
 

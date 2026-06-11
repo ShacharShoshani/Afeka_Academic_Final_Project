@@ -36,11 +36,7 @@ router.post('/', async (req, res) => {
 router.put('/:id', strayReporter, async (req, res) => {
   const id = req.params.id as string;
 
-  if (!id) {
-    return res.status(400).json({ message: 'Stray Animal ID is required' });
-  }
-
-  if (!checkBodyImage(req, res)) return;
+if (!checkBodyImage(req, res)) return;
 
   delete req.body.createdAt;
   delete req.body.reporterId;
@@ -55,11 +51,7 @@ router.put('/:id', strayReporter, async (req, res) => {
 router.delete('/:id', strayReporter, async (req, res) => {
   const id = req.params.id as string;
 
-  if (!id) {
-    return res.status(400).json({ message: 'Stray Animal ID is required' });
-  }
-
-  await prisma.strayAnimal.delete({
+await prisma.strayAnimal.delete({
     where: { id }
   });
 
