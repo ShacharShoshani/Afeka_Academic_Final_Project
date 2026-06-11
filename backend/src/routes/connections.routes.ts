@@ -1,4 +1,4 @@
-import { Router } from 'express';
+import { Router, type Response } from 'express';
 import { z } from 'zod';
 import { prisma } from '../lib/prisma.js';
 import { validate } from '../middleware/validate.js';
@@ -8,6 +8,16 @@ import { validateImageDataUrl, imageErrorMessage } from '../lib/validateImage.js
 import { PUBLIC_USER_SELECT } from '../lib/selectors.js';
 
 const router = Router();
+
+function assertParticipant(
+    connection: { user1Id: string; user2Id: string },
+    callerId: string,
+    res: Response,
+): boolean {
+    if (connection.user1Id === callerId || connection.user2Id === callerId) return true;
+    res.status(403).json({ error: 'Not a participant in this connection' });
+    return false;
+}
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function serializeConnection(c: any, callerId: string) {
@@ -106,10 +116,7 @@ router.get('/:id', async (req, res) => {
         return;
     }
 
-    if (connection.user1Id !== callerId && connection.user2Id !== callerId) {
-        res.status(403).json({ error: 'Not a participant in this connection' });
-        return;
-    }
+    if (!assertParticipant(connection, callerId, res)) return;
 
     res.json(serializeConnection(connection, callerId));
 });
@@ -145,10 +152,7 @@ router.post('/:id/messages', validate(sendMessageSchema), async (req, res) => {
         return;
     }
 
-    if (connection.user1Id !== callerId && connection.user2Id !== callerId) {
-        res.status(403).json({ error: 'Not a participant in this connection' });
-        return;
-    }
+    if (!assertParticipant(connection, callerId, res)) return;
 
     if (connection.cancelledAt) {
         res.status(403).json({ error: 'This match has been cancelled' });
@@ -205,10 +209,7 @@ router.post('/:id/confirm', async (req, res) => {
         return;
     }
 
-    if (connection.user1Id !== callerId && connection.user2Id !== callerId) {
-        res.status(403).json({ error: 'Not a participant in this connection' });
-        return;
-    }
+    if (!assertParticipant(connection, callerId, res)) return;
 
     if (connection.cancelledAt) {
         res.status(403).json({ error: 'Cannot confirm a cancelled match' });
@@ -292,10 +293,7 @@ router.post('/:id/decline', async (req, res) => {
         return;
     }
 
-    if (connection.user1Id !== callerId && connection.user2Id !== callerId) {
-        res.status(403).json({ error: 'Not a participant in this connection' });
-        return;
-    }
+    if (!assertParticipant(connection, callerId, res)) return;
 
     if (connection.cancelledAt) {
         res.status(409).json({ error: 'Match is already cancelled' });
