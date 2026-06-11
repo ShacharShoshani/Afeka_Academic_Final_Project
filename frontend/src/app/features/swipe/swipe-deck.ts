@@ -110,6 +110,9 @@ export class SwipeDeck implements OnInit {
     // Block drag when either card face is flipped or an exit animation is playing.
     if (this.pointerId !== -1 || this.flipped() || this.caretakerFlipped()) return;
     if (this.flyingOff() || this.exitingRight() !== null) return;
+    // Don't capture when the pointer started on an interactive element — setPointerCapture
+    // redirects pointerup to the card, which prevents click from firing on the button.
+    if ((e.target as HTMLElement).closest('button, a')) return;
     this.pointerId = e.pointerId;
     this.startX = e.clientX;
     this.dragging.set(true);
