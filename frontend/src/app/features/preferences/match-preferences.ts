@@ -91,9 +91,13 @@ export class MatchPreferences implements OnInit {
   protected toggleHost(): void { this.canHostAtMine.update((v) => !v); this.saved.set(false); }
   protected toggleTravel(): void { this.canTravelToOther.update((v) => !v); this.saved.set(false); }
 
-  protected onNumberInput(sig: ReturnType<typeof signal<number | null>>, raw: string): void {
-    const n = raw.trim() === '' ? null : Number(raw);
-    sig.set(n === null || Number.isNaN(n) ? null : Math.max(0, Math.round(n)));
+  protected onNumberInput(sig: ReturnType<typeof signal<number | null>>, raw: string | number | null): void {
+    if (raw === null || raw === '') {
+      sig.set(null);
+    } else {
+      const n = Number(raw);
+      sig.set(Number.isNaN(n) ? null : Math.max(0, Math.round(n)));
+    }
     this.saved.set(false);
   }
 
