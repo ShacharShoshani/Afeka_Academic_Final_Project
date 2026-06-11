@@ -5,7 +5,7 @@ import { validate } from '../middleware/validate.js';
 import { emitToUser } from '../socket/socket.js';
 import { createNotification } from '../lib/notify.js';
 import { PUBLIC_USER_SELECT } from '../lib/selectors.js';
-import { flattenJob, getBlockedIds } from '../lib/job-utils.js';
+import { flattenJob, getBlockedIds, getOrCreateConnection } from '../lib/job-utils.js';
 
 const router = Router();
 
@@ -340,12 +340,7 @@ router.post('/express', validate(expressSchema), async (req, res) => {
         data: { status: 'accepted', caretakerId: caretakerId! },
     });
 
-    const [user1Id, user2Id] = [job.ownerId, caretakerId!].sort();
-    const connection = await prisma.userConnection.upsert({
-        where: { user1Id_user2Id: { user1Id, user2Id } },
-        create: { user1Id, user2Id },
-        update: {},
-    });
+    const connection = await getOrCreateConnection(job.ownerId, caretakerId!);
 
     // Link the swipe job to this connection so the chat / Jobs Confirmed show the real job.
     // Only link if the connection has no job yet (Job.connectionId is @unique).
@@ -410,12 +405,7 @@ router.post('/', validate(swipeBodySchema), async (req, res) => {
     });
     if (!reciprocal?.liked) { res.json({ matched: false }); return; }
 
-    const [user1Id, user2Id] = [callerId, toUserId].sort();
-    const connection = await prisma.userConnection.upsert({
-        where: { user1Id_user2Id: { user1Id, user2Id } },
-        create: { user1Id, user2Id },
-        update: {},
-    });
+    const connection = await getOrCreateConnection(callerId, toUserId);
 
     emitToUser(toUserId, 'new-match', {
         connectionId: connection.id,
