@@ -5,7 +5,7 @@ import { validate } from '../middleware/validate.js';
 import { emitToUser } from '../socket/socket.js';
 import { createNotification } from '../lib/notify.js';
 import { PUBLIC_USER_SELECT } from '../lib/selectors.js';
-import { flattenJob } from '../lib/job-utils.js';
+import { flattenJob, getBlockedIds } from '../lib/job-utils.js';
 
 const router = Router();
 
@@ -36,22 +36,17 @@ router.get('/deck', async (req, res) => {
 
     // ── CARETAKER deck (unchanged from previous impl) ─────────────────────────
     if (caller.role === 'caretaker') {
-        const [alreadyExpressed, prefs, callerFull, blocksGiven, blocksReceived] = await Promise.all([
+        const [alreadyExpressed, prefs, callerFull, blockedOwnerIds] = await Promise.all([
             prisma.jobInterest.findMany({
                 where: { caretakerId: caller.id },
                 select: { jobId: true },
             }),
             prisma.matchPreference.findUnique({ where: { userId: caller.id } }),
             prisma.user.findUnique({ where: { id: caller.id }, select: { lat: true, lng: true } }),
-            prisma.blockedUser.findMany({ where: { blockerId: caller.id }, select: { blockedId: true } }),
-            prisma.blockedUser.findMany({ where: { blockedId: caller.id }, select: { blockerId: true } }),
+            getBlockedIds(caller.id),
         ]);
 
         const expressedJobIds = alreadyExpressed.map((r) => r.jobId);
-        const blockedOwnerIds = [
-            ...blocksGiven.map((b) => b.blockedId),
-            ...blocksReceived.map((b) => b.blockerId),
-        ];
 
         const where: Record<string, unknown> = {
             isSwipeJob: true,
@@ -136,15 +131,7 @@ router.get('/deck', async (req, res) => {
     });
     const handledIds = handled.map((h) => h.caretakerId);
 
-    // Get blocked user IDs.
-    const [blocksGiven, blocksReceived] = await Promise.all([
-        prisma.blockedUser.findMany({ where: { blockerId: caller.id }, select: { blockedId: true } }),
-        prisma.blockedUser.findMany({ where: { blockedId: caller.id }, select: { blockerId: true } }),
-    ]);
-    const blockedIds = [
-        ...blocksGiven.map((b) => b.blockedId),
-        ...blocksReceived.map((b) => b.blockerId),
-    ];
+    const blockedIds = await getBlockedIds(caller.id);
 
     // Fetch caretakers not yet handled and not blocked.
     const [rawCaretakers, ownerPrefs, ownerFull] = await Promise.all([
