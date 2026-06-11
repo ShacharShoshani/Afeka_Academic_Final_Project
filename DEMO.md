@@ -44,7 +44,7 @@ Open two browser windows (or two different browsers to avoid cookie conflicts).
 - Account A → My Jobs tab → tap **+ New**
 - Fill in:
   - Title: "Dog sitting for Buddy"
-  - Services: Dogs
+  - Services: Walking, Feeding
   - Start / End dates: next weekend
   - Location: Tel Aviv (use autocomplete or "Use my current location")
   - Payment: 150 ILS / daily
