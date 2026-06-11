@@ -348,17 +348,6 @@ router.post('/express', validate(expressSchema), async (req, res) => {
 
     const connection = await getOrCreateConnection(job.ownerId, caretakerId!);
 
-    // A mutual swipe is a confirmation — mark both sides confirmed so the connection
-    // appears immediately in the "Jobs Confirmed" tab without a separate chat confirm step.
-    await prisma.userConnection.update({
-        where: { id: connection.id },
-        data: {
-            user1Confirmed: true,
-            user2Confirmed: true,
-            confirmedAt: connection.confirmedAt ?? new Date(),
-        },
-    });
-
     // Link the swipe job to this connection so the chat / Jobs Confirmed show the real job.
     // Only link if the connection has no job yet (Job.connectionId is @unique).
     const existingLinked = await prisma.job.findFirst({
