@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { ownershipGuard } from '../middleware/auth.js';
-import { validateImageDataUrl, imageErrorMessage } from '../lib/validateImage.js';
+import { checkBodyImage } from '../lib/validateImage.js';
 
 const plantOwner = ownershipGuard('plant');
 import { prisma } from '../lib/prisma.js';
@@ -19,10 +19,7 @@ router.post('/', async (req, res) => {
     return res.status(401).json({ message: 'Unauthorized' });
   }
 
-  if (req.body.image) {
-    const imgErr = validateImageDataUrl(req.body.image);
-    if (imgErr) return res.status(400).json({ error: imageErrorMessage(imgErr) });
-  }
+  if (!checkBodyImage(req, res)) return;
 
   const plant = await prisma.plant.create({
     data: {
@@ -38,14 +35,7 @@ router.post('/', async (req, res) => {
 router.put('/:id', plantOwner, async (req, res) => {
   const id = req.params.id as string;
 
-  if (!id) {
-    return res.status(400).json({ message: 'Plant ID is required' });
-  }
-
-  if (req.body.image) {
-    const imgErr = validateImageDataUrl(req.body.image);
-    if (imgErr) return res.status(400).json({ error: imageErrorMessage(imgErr) });
-  }
+if (!checkBodyImage(req, res)) return;
 
   delete req.body.createdAt;
   delete req.body.ownerId;
@@ -60,11 +50,7 @@ router.put('/:id', plantOwner, async (req, res) => {
 router.delete('/:id', plantOwner, async (req, res) => {
   const id = req.params.id as string;
 
-  if (!id) {
-    return res.status(400).json({ message: 'Plant ID is required' });
-  }
-
-  await prisma.plant.delete({
+await prisma.plant.delete({
     where: { id }
   });
 

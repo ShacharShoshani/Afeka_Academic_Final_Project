@@ -32,7 +32,8 @@ Open two browser windows (or two different browsers to avoid cookie conflicts).
 
 ### 1. Mode selection (Settings)
 - Account A → Settings → select **Swipe Mode**
-- Show the bottom navigation replacing the top bar
+- Account B → Settings → select **Swipe Mode**
+- Show the bottom navigation replacing the top bar (both accounts)
 
 ### 2. Matching Preferences
 - Account A → Settings → Matching Preferences
@@ -40,7 +41,20 @@ Open two browser windows (or two different browsers to avoid cookie conflicts).
 - Set max distance: 50 km
 - Save
 
-### 3. Swipe deck (Jobs Search tab)
+### 3. Create a Swipe Job (My Jobs tab)
+- Account A → My Jobs tab → tap **+ New**
+- Fill in:
+  - Title: "Dog sitting for Buddy"
+  - Description: "Buddy is a 3-year-old Golden Retriever who needs two daily walks and morning/evening feeding. He's friendly and leash-trained. Looking for a reliable helper for the weekend."
+  - Services: Walking, Feeding
+  - Start / End dates: next weekend
+  - Estimated hours: 5
+  - Location: Tel Aviv (use autocomplete or "Use my current location")
+  - Payment: 150 ILS / daily
+- Tap **Create Swipe Job** → redirected back to My Jobs, job appears in the list
+- Tap **Find helpers** on the new job → lands on the swipe deck
+
+### 4. Swipe deck (Jobs Search tab)
 - Account A sees Noa's card with name, role badge, age, availability chips
 - Swipe right on Noa
 - Switch to Account B → swipe right on Tali
@@ -48,47 +62,47 @@ Open two browser windows (or two different browsers to avoid cookie conflicts).
 - **Account A** (still on another tab) sees the green toast: "💚 New match with Tali Cohen!"
 - Bell icon badge increments to 1
 
-### 4. Notifications
+### 5. Notifications
 - Account A taps bell → /notifications → sees "New match" entry
 - Tap notification → navigates to the chat
 
-### 5. Real-time chat (Chats tab)
+### 6. Real-time chat (Chats tab)
 - Open chat between Tali and Noa
 - Account A types "Hi Noa! Looking forward to meeting." → send
 - **Account B's chat updates instantly** without refresh
 - Both see the dual confirm bar: "You: Pending · [Other]: Pending"
 - Send an emoji and an image attachment to demonstrate chat features
 
-### 6. Confirm the job
+### 7. Confirm the job
 - Account A taps **Confirm Job** → bar shows "You ✓ · Noa: Pending"
 - Account B sees the banner update instantly (Socket.io)
 - Account B taps **Confirm Job** → "✓ Confirmed by both sides"
 - Connection moves from **Chats** to **Jobs Confirmed**
 
-### 7. Jobs Confirmed
+### 8. Jobs Confirmed
 - Account A → Jobs Confirmed tab → sees the job card with "⚠️ Add job details"
 - Tap **Edit Details** → fill in dates (next weekend), amount 150 ILS/daily
 - Save → card now shows the dates and payment
 - Tap **▶ Start Job** → status changes to "In Progress"
 - Tap **✓ Mark Complete** → status "Completed"
 
-### 8. Reviews
+### 9. Reviews
 - Account A → Jobs Confirmed → ⭐ Review → 5 stars + comment → Submit
 - Account B opens Noa's public profile (/users/:id) → sees ⭐ 5.0 · 1 review badge
 
-### 9. Block / Report (safety)
+### 10. Block / Report (safety)
 - Account A opens any public profile → tap 🚫 to block
 - Account A goes back to swipe deck — blocked user no longer appears
 - Account A taps ⚑ Report on another profile → fill in category + description → submit
 - Admin account → Settings → "Admin Reports" → sees the report, change status to "Under Review"
 
-### 10. Password features
+### 11. Password features
 - From the login page tap **Forgot password?**
 - Enter email → token returned (dev mode)
 - Copy token → navigate to reset → set new password → log in with it
 - Settings → Change Password → update and confirm
 
-### 11. Switch back to Job Post Mode
+### 12. Switch back to Job Post Mode
 - Settings → App Mode → **Job Post Mode**
 - Top navbar + Google Map reappear
 - Browse grid, create/edit jobs — unchanged from original flow

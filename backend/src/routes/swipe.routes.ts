@@ -4,31 +4,10 @@ import { prisma } from '../lib/prisma.js';
 import { validate } from '../middleware/validate.js';
 import { emitToUser } from '../socket/socket.js';
 import { createNotification } from '../lib/notify.js';
+import { PUBLIC_USER_SELECT } from '../lib/selectors.js';
+import { flattenJob, getBlockedIds, getOrCreateConnection } from '../lib/job-utils.js';
 
 const router = Router();
-
-// ── Shared selectors ──────────────────────────────────────────────────────────
-
-const PUBLIC_USER_SELECT = {
-    id: true,
-    name: true,
-    bio: true,
-    profilePhoto: true,
-    residence: true,
-    lat: true,
-    lng: true,
-    city: true,
-    country: true,
-    role: true,
-    careTypes: true,
-    availability: true,
-    displayMode: true,
-    dateOfBirth: true,
-    createdAt: true,
-    updatedAt: true,
-    averageRating: true,
-    reviewCount: true,
-} as const;
 
 const SWIPE_JOB_INCLUDE = {
     owner: { select: PUBLIC_USER_SELECT },
@@ -36,16 +15,6 @@ const SWIPE_JOB_INCLUDE = {
     plants: { include: { plant: true } },
     strayAnimals: { include: { strayAnimal: true } },
 } as const;
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function flattenSwipeJob(job: any) {
-    return {
-        ...job,
-        pets: (job.pets ?? []).map((p: any) => p.pet),
-        plants: (job.plants ?? []).map((p: any) => p.plant),
-        strayAnimals: (job.strayAnimals ?? []).map((s: any) => s.strayAnimal),
-    };
-}
 
 function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
     const R = 6371;
@@ -67,22 +36,20 @@ router.get('/deck', async (req, res) => {
 
     // ── CARETAKER deck (unchanged from previous impl) ─────────────────────────
     if (caller.role === 'caretaker') {
-        const [alreadyExpressed, prefs, callerFull, blocksGiven, blocksReceived] = await Promise.all([
+        const [alreadyExpressed, prefs, callerFull, blockedOwnerIds] = await Promise.all([
             prisma.jobInterest.findMany({
-                where: { caretakerId: caller.id },
+                where: {
+                    caretakerId: caller.id,
+                    OR: [{ caretakerLiked: true }, { status: { in: ['rejected', 'matched'] } }],
+                },
                 select: { jobId: true },
             }),
             prisma.matchPreference.findUnique({ where: { userId: caller.id } }),
             prisma.user.findUnique({ where: { id: caller.id }, select: { lat: true, lng: true } }),
-            prisma.blockedUser.findMany({ where: { blockerId: caller.id }, select: { blockedId: true } }),
-            prisma.blockedUser.findMany({ where: { blockedId: caller.id }, select: { blockerId: true } }),
+            getBlockedIds(caller.id),
         ]);
 
         const expressedJobIds = alreadyExpressed.map((r) => r.jobId);
-        const blockedOwnerIds = [
-            ...blocksGiven.map((b) => b.blockedId),
-            ...blocksReceived.map((b) => b.blockerId),
-        ];
 
         const where: Record<string, unknown> = {
             isSwipeJob: true,
@@ -129,7 +96,7 @@ router.get('/deck', async (req, res) => {
             return true;
         });
 
-        return res.json({ type: 'jobs', jobs: filtered.slice(0, 10).map(flattenSwipeJob) });
+        return res.json({ type: 'jobs', jobs: filtered.slice(0, 10).map(flattenJob) });
     }
 
     // ── OWNER deck: caretakers for a specific job ─────────────────────────────
@@ -160,22 +127,17 @@ router.get('/deck', async (req, res) => {
         return res.status(403).json({ error: 'Not your job' });
     }
 
-    // Get caretaker IDs already handled (matched or rejected) for this job.
+    // Get caretaker IDs already handled: matched/rejected, or owner already swiped right.
     const handled = await prisma.jobInterest.findMany({
-        where: { jobId: resolvedJobId, status: { in: ['matched', 'rejected'] } },
+        where: {
+            jobId: resolvedJobId,
+            OR: [{ status: { in: ['matched', 'rejected'] } }, { ownerLiked: true }],
+        },
         select: { caretakerId: true },
     });
     const handledIds = handled.map((h) => h.caretakerId);
 
-    // Get blocked user IDs.
-    const [blocksGiven, blocksReceived] = await Promise.all([
-        prisma.blockedUser.findMany({ where: { blockerId: caller.id }, select: { blockedId: true } }),
-        prisma.blockedUser.findMany({ where: { blockedId: caller.id }, select: { blockerId: true } }),
-    ]);
-    const blockedIds = [
-        ...blocksGiven.map((b) => b.blockedId),
-        ...blocksReceived.map((b) => b.blockerId),
-    ];
+    const blockedIds = await getBlockedIds(caller.id);
 
     // Fetch caretakers not yet handled and not blocked.
     const [rawCaretakers, ownerPrefs, ownerFull] = await Promise.all([
@@ -236,7 +198,7 @@ router.get('/deck', async (req, res) => {
     return res.json({
         type: 'caretakers',
         jobId: resolvedJobId,
-        job: flattenSwipeJob(job),
+        job: flattenJob(job),
         caretakers: filtered.slice(0, 10).map((c) => ({
             ...c,
             alreadyInterested: interestedIds.has(c.id),
@@ -261,7 +223,7 @@ router.get('/my-jobs', async (req, res) => {
     });
 
     const result = jobs.map((j) => ({
-        ...flattenSwipeJob(j),
+        ...flattenJob(j),
         pendingCount: j.jobInterests.filter((i) => i.status === 'pending').length,
         matchedCount: j.jobInterests.filter((i) => i.status === 'matched').length,
     }));
@@ -384,12 +346,7 @@ router.post('/express', validate(expressSchema), async (req, res) => {
         data: { status: 'accepted', caretakerId: caretakerId! },
     });
 
-    const [user1Id, user2Id] = [job.ownerId, caretakerId!].sort();
-    const connection = await prisma.userConnection.upsert({
-        where: { user1Id_user2Id: { user1Id, user2Id } },
-        create: { user1Id, user2Id },
-        update: {},
-    });
+    const connection = await getOrCreateConnection(job.ownerId, caretakerId!);
 
     // Link the swipe job to this connection so the chat / Jobs Confirmed show the real job.
     // Only link if the connection has no job yet (Job.connectionId is @unique).
@@ -454,12 +411,7 @@ router.post('/', validate(swipeBodySchema), async (req, res) => {
     });
     if (!reciprocal?.liked) { res.json({ matched: false }); return; }
 
-    const [user1Id, user2Id] = [callerId, toUserId].sort();
-    const connection = await prisma.userConnection.upsert({
-        where: { user1Id_user2Id: { user1Id, user2Id } },
-        create: { user1Id, user2Id },
-        update: {},
-    });
+    const connection = await getOrCreateConnection(callerId, toUserId);
 
     emitToUser(toUserId, 'new-match', {
         connectionId: connection.id,

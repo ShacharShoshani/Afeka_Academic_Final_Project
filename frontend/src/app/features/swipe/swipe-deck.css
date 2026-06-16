@@ -28,10 +28,10 @@
 .swipe-card {
   position: absolute;
   width: min(360px, calc(100vw - 2rem));
+  height: 420px;
   touch-action: none;
   transform-origin: 50% 120%;
   border-radius: var(--radius-lg);
-  overflow: hidden;
   box-shadow: var(--shadow-lg);
   background: var(--color-surface);
   cursor: grab;
@@ -114,6 +114,7 @@
   -webkit-backface-visibility: hidden;
 }
 
+
 .card-back {
   position: absolute;
   inset: 0;
@@ -136,6 +137,7 @@
   object-fit: cover;
   display: block;
   pointer-events: none;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
 }
 
 .card-photo-placeholder {
@@ -146,6 +148,7 @@
   align-items: center;
   justify-content: center;
   color: var(--color-text-muted);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
 }
 
 /* ── Flip button ──────────────────────────────────────────────────── */
@@ -333,7 +336,7 @@
   display: flex;
   justify-content: center;
   gap: 2.5rem;
-  margin-top: 350px;
+  margin-top: 440px;
 }
 
 .action-btn {
@@ -706,7 +709,7 @@
   display: flex;
   align-items: center;
   gap: .5rem;
-  padding: .55rem 1rem;
+  padding: .55rem calc(38px + 1.5rem) .55rem 1rem;
   background: var(--color-primary-light);
   border-bottom: 1px solid var(--color-primary-light);
   flex-shrink: 0;

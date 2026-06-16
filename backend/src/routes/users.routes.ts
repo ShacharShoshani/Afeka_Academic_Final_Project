@@ -1,32 +1,12 @@
-import { Router } from 'express';
+import { Router, type Request, type Response, type NextFunction } from 'express';
 import { z } from 'zod';
 import { prisma } from '../lib/prisma.js';
 import { requireAuth } from '../middleware/auth.js';
 import { validate } from '../middleware/validate.js';
 import { validateImageDataUrl, imageErrorMessage } from '../lib/validateImage.js';
+import { PUBLIC_USER_SELECT } from '../lib/selectors.js';
 
 const router = Router();
-
-const PUBLIC_USER_SELECT = {
-  id: true,
-  name: true,
-  residence: true,
-  lat: true,
-  lng: true,
-  city: true,
-  country: true,
-  role: true,
-  bio: true,
-  dateOfBirth: true,
-  careTypes: true,
-  availability: true,
-  profilePhoto: true,
-  displayMode: true,
-  createdAt: true,
-  updatedAt: true,
-  averageRating: true,
-  reviewCount: true,
-} as const;
 
 const CARE_TYPES = ['dogs', 'cats', 'birds', 'fish', 'rabbits', 'hamsters', 'reptiles', 'plants', 'stray_animals'] as const;
 const AVAILABILITY = ['mornings', 'afternoons', 'evenings', 'weekends'] as const;
@@ -47,8 +27,18 @@ const listQuerySchema = z.object({
 });
 
 const idParamSchema = z.object({
-  id: z.string().uuid('Invalid user id'),
+  id: z.uuid('Invalid user id'),
 });
+
+function validateIdParam(req: Request, res: Response, next: NextFunction) {
+  const parsed = idParamSchema.safeParse(req.params);
+  if (!parsed.success) {
+    res.status(400).json({ error: 'Invalid user id' });
+    return;
+  }
+  req.params['id'] = parsed.data.id;
+  next();
+}
 
 // GET /api/users — public list (auth-gated). Excludes the caller and strips sensitive fields.
 router.get('/', requireAuth, async (req, res) => {
@@ -77,15 +67,9 @@ router.get('/', requireAuth, async (req, res) => {
 });
 
 // GET /api/users/:id — single public profile (auth-gated).
-router.get('/:id', requireAuth, async (req, res) => {
-  const parsed = idParamSchema.safeParse(req.params);
-  if (!parsed.success) {
-    res.status(400).json({ error: 'Invalid user id' });
-    return;
-  }
-
+router.get('/:id', requireAuth, validateIdParam, async (req, res) => {
   const user = await prisma.user.findUnique({
-    where: { id: parsed.data.id },
+    where: { id: req.params['id'] as string },
     select: PUBLIC_USER_SELECT,
   });
 
@@ -98,42 +82,27 @@ router.get('/:id', requireAuth, async (req, res) => {
 });
 
 // GET /api/users/:id/pets — pets belonging to user :id. Any authed user can read.
-router.get('/:id/pets', requireAuth, async (req, res) => {
-  const parsed = idParamSchema.safeParse(req.params);
-  if (!parsed.success) {
-    res.status(400).json({ error: 'Invalid user id' });
-    return;
-  }
+router.get('/:id/pets', requireAuth, validateIdParam, async (req, res) => {
   const pets = await prisma.pet.findMany({
-    where: { ownerId: parsed.data.id },
+    where: { ownerId: req.params['id'] as string },
     orderBy: { createdAt: 'desc' },
   });
   res.json(pets);
 });
 
 // GET /api/users/:id/plants
-router.get('/:id/plants', requireAuth, async (req, res) => {
-  const parsed = idParamSchema.safeParse(req.params);
-  if (!parsed.success) {
-    res.status(400).json({ error: 'Invalid user id' });
-    return;
-  }
+router.get('/:id/plants', requireAuth, validateIdParam, async (req, res) => {
   const plants = await prisma.plant.findMany({
-    where: { ownerId: parsed.data.id },
+    where: { ownerId: req.params['id'] as string },
     orderBy: { createdAt: 'desc' },
   });
   res.json(plants);
 });
 
 // GET /api/users/:id/strays — stray animals reported by user :id.
-router.get('/:id/strays', requireAuth, async (req, res) => {
-  const parsed = idParamSchema.safeParse(req.params);
-  if (!parsed.success) {
-    res.status(400).json({ error: 'Invalid user id' });
-    return;
-  }
+router.get('/:id/strays', requireAuth, validateIdParam, async (req, res) => {
   const strays = await prisma.strayAnimal.findMany({
-    where: { reporterId: parsed.data.id },
+    where: { reporterId: req.params['id'] as string },
     orderBy: { createdAt: 'desc' },
   });
   res.json(strays);

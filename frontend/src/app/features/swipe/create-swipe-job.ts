@@ -181,6 +181,7 @@ export class CreateSwipeJob implements OnInit, AfterViewInit {
   protected submit(): void {
     if (this.saving()) return;
     if (!this.title.trim()) { this.saveError.set('Job title is required.'); return; }
+    if (!this.description.trim()) { this.saveError.set('Description is required.'); return; }
     if (!this.startDate || !this.endDate) { this.saveError.set('Start and end dates are required.'); return; }
 
     // Resolve care item IDs
