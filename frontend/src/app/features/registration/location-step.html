@@ -1,0 +1,101 @@
+<div class="page">
+  <header class="header">
+    <button class="back-btn" (click)="goBack()" aria-label="Go back">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <span class="step-label">Step 2 of {{ totalSteps() }}</span>
+  </header>
+
+  <app-progress-bar [currentStep]="2" [totalSteps]="totalSteps()" />
+
+  <div class="content">
+    <h1 class="title">Where are you based?</h1>
+    <p class="subtitle">We use your area to match you with people nearby.</p>
+
+    <div class="loc-wrap">
+      <!-- Current location card -->
+      <button type="button" class="locate-card" (click)="requestLiveLocation()" [disabled]="locationLoading()">
+        <span class="locate-icon">
+          @if (locationLoading()) {
+            <svg class="spin" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="2" stroke-dasharray="40 20"/></svg>
+          } @else {
+            <svg viewBox="0 0 24 24" fill="none"><path d="M12 2v3M12 19v3M2 12h3M19 12h3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="12" r="6" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="2" fill="currentColor"/></svg>
+          }
+        </span>
+        <span class="locate-text">
+          <span class="locate-title">{{ locationLoading() ? 'Detecting your location…' : 'Use my current location' }}</span>
+          <span class="locate-sub">Fastest way — we'll fill in the details for you</span>
+        </span>
+      </button>
+
+      @if (locationError()) {
+        <p class="loc-note">{{ locationError() }}</p>
+      }
+
+      <div class="divider"><span>or enter address manually</span></div>
+
+      <!-- Country (searchable) -->
+      <div class="form-field country-field">
+        <label for="country">Country</label>
+        <div class="country-combo">
+          <span class="country-flag" aria-hidden="true">{{ countryCode() ? flagEmoji(countryCode()) : '🌍' }}</span>
+          <input id="country" type="text" autocomplete="country-name" placeholder="Search country…"
+                 [value]="countryQuery()" (input)="onCountryInput($event)" (focus)="openCountry()" (blur)="closeCountrySoon()"
+                 role="combobox" [attr.aria-expanded]="countryOpen()" aria-autocomplete="list" />
+        </div>
+        @if (countryOpen() && filteredCountries().length) {
+          <ul class="country-list" role="listbox">
+            @for (c of filteredCountries(); track c.code) {
+              <li role="option" [attr.aria-selected]="c.code === countryCode()">
+                <button type="button" class="country-option" (click)="selectCountry(c)">
+                  <span aria-hidden="true">{{ flagEmoji(c.code) }}</span> {{ c.name }}
+                </button>
+              </li>
+            }
+          </ul>
+        }
+      </div>
+
+      <!-- Address autocomplete (fills city + street) -->
+      @if (mapsAvailable() !== false) {
+        <div class="form-field">
+          <label for="address">Find your address</label>
+          <input #addressInput id="address" type="text" autocomplete="off"
+                 placeholder="Start typing your street address…" />
+          <span class="field-hint">Pick a suggestion and we'll fill in the fields below.</span>
+        </div>
+      }
+
+      <!-- City + Street -->
+      <div class="form-field">
+        <label for="city">City</label>
+        <input id="city" type="text" autocomplete="address-level2" placeholder="City"
+               [value]="city()" (input)="onCity($event)" />
+      </div>
+
+      <div class="form-field">
+        <label for="street">Street</label>
+        <input id="street" type="text" autocomplete="address-line1" placeholder="Street name"
+               [value]="street()" (input)="onStreet($event)" />
+      </div>
+
+      <!-- House number (private) -->
+      <div class="form-field">
+        <label for="houseNumber">House / apartment number</label>
+        <input id="houseNumber" type="text" autocomplete="address-line2" placeholder="e.g. 12, Apt 4"
+               [value]="houseNumber()" (input)="onHouseNumber($event)" />
+        <span class="privacy-note">
+          <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="4" y="10" width="16" height="10" rx="2" stroke="currentColor" stroke-width="1.6"/><path d="M8 10V7a4 4 0 018 0v3" stroke="currentColor" stroke-width="1.6"/></svg>
+          Your house number stays private. It's only shown after both sides confirm a job.
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <button class="continue-btn" [disabled]="!canContinue()" (click)="onContinue()">
+      Continue
+      <span aria-hidden="true">&rarr;</span>
+    </button>
+  </div>
+</div>

@@ -22,6 +22,12 @@ model User {
   lng                Float?
   city               String?
   country            String?
+  // Structured address (all optional, backward compatible with `residence`).
+  // houseNumber, street and formattedAddress are PRIVATE — never in PUBLIC_USER_SELECT.
+  countryCode        String?
+  street             String?
+  houseNumber        String?
+  formattedAddress   String?
   averageRating      Float                @default(0)
   reviewCount        Int                  @default(0)
   resetToken         String?              @unique
@@ -154,6 +160,12 @@ model Pet {
   specialNeeds       String
   image              String
   estimatedBirthDate String?
+  // Onboarding care details. `careDetails` (medical/vet/emergency/feeding/behavior/routine)
+  // is PRIVATE — stripped by PUBLIC_PET_SELECT on other users' profiles.
+  friendliness       PetFriendliness?
+  allergies          String       @default("")
+  description        String       @default("")
+  careDetails        Json?
   ownerId            String
   owner              User         @relation(fields: [ownerId], references: [id])
   createdAt          DateTime     @default(now())
@@ -167,6 +179,10 @@ model Plant {
   specialNeeds       String
   image              String
   estimatedBirthDate String?
+  // `careDetails` (watering/sunlight/fertilizer/sensitive notes) is PRIVATE —
+  // stripped by PUBLIC_PLANT_SELECT on other users' profiles.
+  description        String         @default("")
+  careDetails        Json?
   ownerId            String
   owner              User           @relation(fields: [ownerId], references: [id])
   createdAt          DateTime       @default(now())

@@ -1,7 +1,7 @@
 import { Component, inject, signal, ChangeDetectorRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../../services/auth.service';
-import { HomeDataService } from '../../home-data.service';
+import { HomeDataService, PetCreate, PetUpdate } from '../../home-data.service';
 import type { Pet, AnimalSize } from '@livin/common';
 import { formatAnimalType, formatSize, formatDate } from '../../../../shared/utils/format';
 
@@ -71,9 +71,9 @@ export class PetsTab {
     if (!d.name.trim()) return;
     const now = new Date().toISOString();
     if (d.id) {
-      this.data.editPet({ id: d.id, ownerId: this.auth.user()?.id ?? '', name: d.name.trim(), type: d.type, size: d.size as AnimalSize, specialNeeds: d.specialNeeds.trim(), image: d.image, estimatedBirthDate: d.estimatedBirthDate || null } as Omit<Pet, 'createdAt' | 'updatedAt'>);
+      this.data.editPet({ id: d.id, ownerId: this.auth.user()?.id ?? '', name: d.name.trim(), type: d.type, size: d.size as AnimalSize, specialNeeds: d.specialNeeds.trim(), image: d.image, estimatedBirthDate: d.estimatedBirthDate || null } as PetUpdate);
     } else {
-      this.data.addPet({ ownerId: this.auth.user()?.id ?? '', name: d.name.trim(), type: d.type, size: d.size as AnimalSize, specialNeeds: d.specialNeeds.trim(), image: d.image, estimatedBirthDate: d.estimatedBirthDate || null } as Omit<Pet, 'id' | 'createdAt' | 'updatedAt'>);
+      this.data.addPet({ ownerId: this.auth.user()?.id ?? '', name: d.name.trim(), type: d.type, size: d.size as AnimalSize, specialNeeds: d.specialNeeds.trim(), image: d.image, estimatedBirthDate: d.estimatedBirthDate || null } as PetCreate);
     }
     this.closeForm();
   }

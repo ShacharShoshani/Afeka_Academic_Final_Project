@@ -1,0 +1,44 @@
+.cards {
+  margin-bottom: 24px;
+}
+
+.name-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.phone-row {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+}
+
+/* Higher specificity than the shared `.form-field select { width:100% }` rule,
+   otherwise the dial-code select expands to full width and crushes the input. */
+.phone-row select.dial-select {
+  flex: 0 0 104px;
+  width: 104px;
+  min-width: 104px;
+  padding: 12px 6px;
+  min-height: 48px;
+  border: 2px solid var(--color-gray-200);
+  border-radius: var(--radius-md);
+  background: var(--color-white);
+  font-family: inherit;
+  font-size: 0.95rem;
+  color: var(--color-text-primary);
+}
+
+.phone-row select.dial-select:focus {
+  outline: none;
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 4px var(--color-primary-light);
+}
+
+.phone-row input#phone {
+  flex: 1 1 auto;
+  width: auto;
+  min-width: 0;
+  min-height: 48px;
+}

@@ -59,10 +59,10 @@ router.get('/deck', async (req, res) => {
         };
 
         if (prefs) {
-            if (prefs.services.length) where['services'] = { hasSome: prefs.services };
+            // NOTE: services and workType are filtered leniently in JS below. A DB
+            // clause on `paymentAmount` alone would misclassify swipe jobs, which carry
+            // their pay in minPayment/maxPayment (paymentAmount is often 0 for them).
             if (prefs.residenceFilter) where['locationAddress'] = { contains: prefs.residenceFilter, mode: 'insensitive' };
-            if (prefs.workType === 'paid') where['paymentAmount'] = { gt: 0 };
-            if (prefs.workType === 'volunteer') where['paymentAmount'] = 0;
         }
 
         const rawJobs = await prisma.job.findMany({
@@ -76,6 +76,8 @@ router.get('/deck', async (req, res) => {
         const callerLng = callerFull?.lng;
         const maxKm = prefs?.maxDistanceKm;
         const wantedCareTypes = prefs?.careTypesWanted ?? [];
+        const wantedServices = prefs?.services ?? [];
+        const workType = prefs?.workType ?? 'both';
 
         const filtered = rawJobs.filter((j) => {
             // Geo-distance filter (skip if no coords on either side).
@@ -84,14 +86,31 @@ router.get('/deck', async (req, res) => {
                     if (haversineKm(callerLat, callerLng, j.locationLat, j.locationLng) > maxKm) return false;
                 }
             }
-            // Care-type overlap filter: at least one wanted care type must match job's care items.
+            // Work-type filter. A job counts as "paid" if any payment field is positive
+            // (swipe jobs use minPayment/maxPayment; Job-Post jobs use paymentAmount).
+            if (workType !== 'both') {
+                const jobIsPaid =
+                    (j.paymentAmount ?? 0) > 0 || (j.minPayment ?? 0) > 0 || (j.maxPayment ?? 0) > 0;
+                if (workType === 'paid' && !jobIsPaid) return false;
+                if (workType === 'volunteer' && jobIsPaid) return false;
+            }
+            // Care-type overlap filter. Lenient: only exclude when the job actually
+            // lists care items to compare against (mirrors the owner-side filter).
             if (wantedCareTypes.length > 0) {
-                const matched = wantedCareTypes.some((ct) => {
-                    if (ct === 'plants') return (j as any).plants.length > 0;
-                    if (ct === 'stray_animals') return (j as any).strayAnimals.length > 0;
-                    return (j as any).pets.some((p: any) => p.pet?.type === ct);
-                });
-                if (!matched) return false;
+                const jobHasItems =
+                    (j as any).pets.length > 0 || (j as any).plants.length > 0 || (j as any).strayAnimals.length > 0;
+                if (jobHasItems) {
+                    const matched = wantedCareTypes.some((ct) => {
+                        if (ct === 'plants') return (j as any).plants.length > 0;
+                        if (ct === 'stray_animals') return (j as any).strayAnimals.length > 0;
+                        return (j as any).pets.some((p: any) => p.pet?.type === ct);
+                    });
+                    if (!matched) return false;
+                }
+            }
+            // Service overlap filter. Lenient: only exclude when the job lists services.
+            if (wantedServices.length > 0 && (j as any).services?.length > 0) {
+                if (!wantedServices.some((s) => (j as any).services.includes(s))) return false;
             }
             return true;
         });

@@ -1,5 +1,6 @@
 import { createAction } from '@ngrx/store';
-import { UserRole, User, CareType, Availability } from '@livin/common';
+import { User, CareType, Availability } from '@livin/common';
+import { CareItemDraft, HelperPrefs } from './registration.model';
 
 export const setUserData = createAction(
   '[User] Set Data',
@@ -23,3 +24,18 @@ export const setAccountData = createAction(
     password: string;
   }) => ({ accountData })
 );
+
+// Owner-only: pet/plant drafts collected in the pet-details step.
+export const setCareItems = createAction(
+  '[User] Set Care Items',
+  (pendingCareItems: CareItemDraft[]) => ({ pendingCareItems })
+);
+
+// Caretaker-only: helper details seeded into MatchPreference after registration.
+export const setHelperPrefs = createAction(
+  '[User] Set Helper Prefs',
+  (helperPrefs: HelperPrefs) => ({ helperPrefs })
+);
+
+// Clears the funnel after a successful registration.
+export const resetRegistration = createAction('[User] Reset Registration');

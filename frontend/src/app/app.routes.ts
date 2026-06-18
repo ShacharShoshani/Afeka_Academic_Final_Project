@@ -5,31 +5,37 @@ export const routes: Routes = [
   {
     path: 'register',
     loadComponent: () =>
-      import('./features/registration/registration-step1').then(
-        (m) => m.RegistrationStep1,
-      ),
+      import('./features/registration/account-basics').then((m) => m.AccountBasics),
   },
   {
-    path: 'register/step-2',
+    path: 'register/location',
     loadComponent: () =>
-      import('./features/registration/registration-step2').then(
-        (m) => m.RegistrationStep2,
-      ),
+      import('./features/registration/location-step').then((m) => m.LocationStep),
   },
   {
-    path: 'register/step-3',
+    path: 'register/about',
     loadComponent: () =>
-      import('./features/registration/registration-step3').then(
-        (m) => m.RegistrationStep3,
-      ),
+      import('./features/registration/about-step').then((m) => m.AboutStep),
   },
   {
-    path: 'register/step-4',
+    path: 'register/details',
     loadComponent: () =>
-      import('./features/registration/registration-step4').then(
-        (m) => m.RegistrationStep4,
-      ),
+      import('./features/registration/details-step').then((m) => m.DetailsStep),
   },
+  {
+    path: 'register/pets',
+    loadComponent: () =>
+      import('./features/registration/pet-details-step').then((m) => m.PetDetailsStep),
+  },
+  {
+    path: 'register/photo',
+    loadComponent: () =>
+      import('./features/registration/photo-step').then((m) => m.PhotoStep),
+  },
+  // Legacy deep links → restart the funnel.
+  { path: 'register/step-2', redirectTo: 'register', pathMatch: 'full' },
+  { path: 'register/step-3', redirectTo: 'register', pathMatch: 'full' },
+  { path: 'register/step-4', redirectTo: 'register', pathMatch: 'full' },
   {
     path: 'login',
     loadComponent: () =>

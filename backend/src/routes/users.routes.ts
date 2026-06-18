@@ -4,7 +4,7 @@ import { prisma } from '../lib/prisma.js';
 import { requireAuth } from '../middleware/auth.js';
 import { validate } from '../middleware/validate.js';
 import { validateImageDataUrl, imageErrorMessage } from '../lib/validateImage.js';
-import { PUBLIC_USER_SELECT } from '../lib/selectors.js';
+import { PUBLIC_USER_SELECT, PUBLIC_PET_SELECT, PUBLIC_PLANT_SELECT } from '../lib/selectors.js';
 
 const router = Router();
 
@@ -85,6 +85,7 @@ router.get('/:id', requireAuth, validateIdParam, async (req, res) => {
 router.get('/:id/pets', requireAuth, validateIdParam, async (req, res) => {
   const pets = await prisma.pet.findMany({
     where: { ownerId: req.params['id'] as string },
+    select: PUBLIC_PET_SELECT, // strips private careDetails
     orderBy: { createdAt: 'desc' },
   });
   res.json(pets);
@@ -94,6 +95,7 @@ router.get('/:id/pets', requireAuth, validateIdParam, async (req, res) => {
 router.get('/:id/plants', requireAuth, validateIdParam, async (req, res) => {
   const plants = await prisma.plant.findMany({
     where: { ownerId: req.params['id'] as string },
+    select: PUBLIC_PLANT_SELECT, // strips private careDetails
     orderBy: { createdAt: 'desc' },
   });
   res.json(plants);
@@ -126,6 +128,10 @@ const patchMeSchema = z.object({
   lng: z.number().nullable().optional(),
   city: z.string().max(100).nullable().optional(),
   country: z.string().max(100).nullable().optional(),
+  countryCode: z.string().max(8).nullable().optional(),
+  street: z.string().max(200).nullable().optional(),
+  houseNumber: z.string().max(32).nullable().optional(),
+  formattedAddress: z.string().max(300).nullable().optional(),
 });
 
 // PATCH /api/users/me — update caller's own profile fields.

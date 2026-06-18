@@ -1,0 +1,11 @@
+.form {
+  margin-bottom: 24px;
+}
+
+.helper-line {
+  width: 100%;
+  max-width: 420px;
+  margin-top: 10px;
+  font-size: 0.82rem;
+  color: var(--color-text-secondary);
+}

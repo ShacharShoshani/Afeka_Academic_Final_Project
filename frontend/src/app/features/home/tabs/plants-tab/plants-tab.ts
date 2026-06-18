@@ -1,7 +1,7 @@
 import { Component, inject, signal, ChangeDetectorRef } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../../../../services/auth.service';
-import { HomeDataService } from '../../home-data.service';
+import { HomeDataService, PlantCreate, PlantUpdate } from '../../home-data.service';
 import type { Plant } from '@livin/common';
 import { formatDate } from '../../../../shared/utils/format';
 
@@ -60,9 +60,9 @@ export class PlantsTab {
     if (!d.name.trim()) return;
     const now = new Date().toISOString();
     if (d.id) {
-      this.data.editPlant({ id: d.id, ownerId: this.auth.user()?.id ?? '', name: d.name.trim(), specialNeeds: d.specialNeeds.trim(), image: d.image, estimatedBirthDate: d.estimatedBirthDate || null } as Omit<Plant, 'createdAt' | 'updatedAt'>);
+      this.data.editPlant({ id: d.id, ownerId: this.auth.user()?.id ?? '', name: d.name.trim(), specialNeeds: d.specialNeeds.trim(), image: d.image, estimatedBirthDate: d.estimatedBirthDate || null } as PlantUpdate);
     } else {
-      this.data.addPlant({ ownerId: this.auth.user()?.id ?? '', name: d.name.trim(), specialNeeds: d.specialNeeds.trim(), image: d.image, estimatedBirthDate: d.estimatedBirthDate || null } as Omit<Plant, 'id' | 'createdAt' | 'updatedAt'>);
+      this.data.addPlant({ ownerId: this.auth.user()?.id ?? '', name: d.name.trim(), specialNeeds: d.specialNeeds.trim(), image: d.image, estimatedBirthDate: d.estimatedBirthDate || null } as PlantCreate);
     }
     this.closeForm();
   }

@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import { ownershipGuard } from '../middleware/auth.js';
 import { checkBodyImage } from '../lib/validateImage.js';
+import { validate } from '../middleware/validate.js';
+import { createPlantSchema } from '../validators/careitem.validators.js';
 
 const plantOwner = ownershipGuard('plant');
 import { prisma } from '../lib/prisma.js';
@@ -12,7 +14,7 @@ router.get('/', async (req, res) => {
   res.json(myPlants);
 });
 
-router.post('/', async (req, res) => {
+router.post('/', validate(createPlantSchema), async (req, res) => {
   const ownerId = req.user?.id;
 
   if (!ownerId) {
@@ -20,6 +22,9 @@ router.post('/', async (req, res) => {
   }
 
   if (!checkBodyImage(req, res)) return;
+
+  // Prisma's nullable Json field rejects a bare JS null — omit instead.
+  if (req.body.careDetails == null) delete req.body.careDetails;
 
   const plant = await prisma.plant.create({
     data: {

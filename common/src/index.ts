@@ -21,11 +21,16 @@ type User = {
     name: string;
     email: string;
     phone: string;
-    residence: string;
+    residence: string; // public display label (e.g. "Tel Aviv, Israel")
     lat: number | null;
     lng: number | null;
     city: string | null;
     country: string | null;
+    // Structured address — these four are PRIVATE (never on PublicUser).
+    countryCode: string | null;
+    street: string | null;
+    houseNumber: string | null;
+    formattedAddress: string | null;
     role: UserRole;
     bio: string;
     dateOfBirth: string;
@@ -173,6 +178,74 @@ type MatchPreference = {
     updatedAt: string;
 }
 
+// Rich, optional care details collected during owner onboarding (and editable later).
+// PRIVATE: stripped from other users' public profile responses (PUBLIC_PET_SELECT /
+// PUBLIC_PLANT_SELECT). All fields optional — progressive disclosure in the UI.
+type PetCareDetails = {
+    medical?: {
+        vetName?: string;
+        vetClinicAddress?: string;
+        vetPhone?: string;
+        emergencyClinic?: string;
+        conditions?: string;
+        medications?: string;
+        medicationInstructions?: string;
+        vaccinationNotes?: string;
+    };
+    emergencyContact?: {
+        name?: string;
+        phone?: string;
+    };
+    feeding?: {
+        schedule?: string;
+        amount?: string;
+        foodType?: string;
+        treatsAllowed?: boolean;
+        treatInstructions?: string;
+        foodAllergies?: string;
+        waterBowlLocation?: string;
+        waterInstructions?: string;
+    };
+    behavior?: {
+        triggers?: string;
+        stressSigns?: string;
+        hidingPlaces?: string;
+        houseRules?: string;
+        canGoOnFurniture?: boolean;
+        sleepingLocation?: string;
+        goodWithPeople?: boolean;
+        goodWithChildren?: boolean;
+        goodWithAnimals?: boolean;
+        needsSupervision?: boolean;
+    };
+    dogRoutine?: {
+        walksPerDay?: string;
+        preferredWalkTimes?: string;
+        pullsOnLeash?: boolean;
+        reactionToOtherDogs?: string;
+        canBeOffLeash?: boolean;
+        leashInstructions?: string;
+    };
+    catRoutine?: {
+        litterBoxLocation?: string;
+        cleaningFrequency?: string;
+        litterDisposal?: string;
+        windowBalconyRules?: string;
+        indoorOutdoor?: string;
+        hidingPlaces?: string;
+    };
+    plantCare?: {
+        plantType?: string;
+        wateringFrequency?: string;
+        waterAmount?: string;
+        sunlight?: string;
+        indoorOutdoor?: string;
+        fertilizer?: string;
+        sensitiveNotes?: string;
+        specialInstructions?: string;
+    };
+}
+
 type Pet = {
     id: string;
     ownerId: string;
@@ -182,6 +255,10 @@ type Pet = {
     specialNeeds: string;
     image: string;
     estimatedBirthDate: string | null;
+    friendliness: PetFriendliness | null;
+    allergies: string;
+    description: string;
+    careDetails: PetCareDetails | null; // PRIVATE
     createdAt: string;
     updatedAt: string;
 }
@@ -193,6 +270,8 @@ type Plant = {
     specialNeeds: string;
     image: string;
     estimatedBirthDate: string | null;
+    description: string;
+    careDetails: PetCareDetails | null; // PRIVATE (uses plantCare section)
     createdAt: string;
     updatedAt: string;
 }
@@ -294,6 +373,7 @@ export {
     PaymentMethod,
     PaymentRateType,
     Pet,
+    PetCareDetails,
     Plant,
     PublicUser,
     Review,

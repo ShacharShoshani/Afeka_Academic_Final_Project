@@ -17,12 +17,22 @@ export async function getOrCreateConnection(userAId: string, userBId: string) {
     });
 }
 
+// Strip the private `careDetails` blob (medical/vet/emergency/feeding/behavior)
+// from a pet/plant embedded in a job. Jobs are shown to the other party before a
+// confirmed job, so sensitive care info must not leak through them.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function stripCareDetails<T extends { careDetails?: unknown } | null | undefined>(item: T): T {
+    if (!item) return item;
+    const { careDetails: _careDetails, ...rest } = item as Record<string, unknown>;
+    return rest as T;
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function flattenJob(job: any) {
     return {
         ...job,
-        pets: (job.pets ?? []).map((p: any) => p.pet),
-        plants: (job.plants ?? []).map((p: any) => p.plant),
+        pets: (job.pets ?? []).map((p: any) => stripCareDetails(p.pet)),
+        plants: (job.plants ?? []).map((p: any) => stripCareDetails(p.plant)),
         strayAnimals: (job.strayAnimals ?? []).map((s: any) => s.strayAnimal),
     };
 }

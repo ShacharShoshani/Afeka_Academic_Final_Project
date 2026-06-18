@@ -1,0 +1,94 @@
+<div class="page">
+  <header class="header">
+    <button class="back-btn" (click)="goBack()" aria-label="Go back">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <span class="step-label">Step 4 of {{ totalSteps() }}</span>
+  </header>
+
+  <app-progress-bar [currentStep]="4" [totalSteps]="totalSteps()" />
+
+  <div class="content">
+    @if (isOwner()) {
+      <h1 class="title">What do you own?</h1>
+      <p class="subtitle">Tell helpers what kind of care you may need.</p>
+
+      <app-care-type-chips
+        [selected]="selectedCareTypes()"
+        ariaLabel="What you own"
+        (toggle)="toggleCareType($event)" />
+      <p class="helper-line">You can add the details for each one in the next step.</p>
+    } @else {
+      <h1 class="title">Your helper profile</h1>
+      <p class="subtitle">A few details so we can match you with the right jobs.</p>
+
+      <div class="block">
+        <div class="section-title">Services you can provide</div>
+        <div class="chips">
+          @for (s of serviceOptions; track s.value) {
+            <button type="button" class="chip" [class.selected]="isService(s.value)"
+                    [attr.aria-pressed]="isService(s.value)" (click)="toggleService(s.value)">
+              {{ s.label }}
+            </button>
+          }
+        </div>
+      </div>
+
+      <div class="block">
+        <div class="section-title">When are you available?</div>
+        <div class="chips">
+          @for (a of availabilityOptions; track a.value) {
+            <button type="button" class="chip" [class.selected]="isAvailability(a.value)"
+                    [attr.aria-pressed]="isAvailability(a.value)" (click)="toggleAvailability(a.value)">
+              {{ a.label }}
+            </button>
+          }
+        </div>
+      </div>
+
+      <div class="block">
+        <div class="section-title">Are you looking for…</div>
+        <div class="segmented" role="group" aria-label="Work type">
+          @for (w of workTypeOptions; track w.value) {
+            <button type="button" class="seg" [class.on]="workType() === w.value"
+                    [attr.aria-pressed]="workType() === w.value" (click)="setWorkType(w.value)">
+              {{ w.label }}
+            </button>
+          }
+        </div>
+      </div>
+
+      <div class="block">
+        <div class="section-title">How far can you travel?</div>
+        <div class="chips">
+          @for (d of distanceOptions; track d) {
+            <button type="button" class="chip" [class.selected]="maxDistanceKm() === d"
+                    [attr.aria-pressed]="maxDistanceKm() === d" (click)="setDistance(d)">
+              {{ d }} km
+            </button>
+          }
+        </div>
+      </div>
+
+      <div class="block toggles">
+        <label class="toggle-row">
+          <input type="checkbox" [checked]="canTravel()" (change)="canTravel.set($any($event.target).checked)" />
+          <span>I can travel to the owner's place</span>
+        </label>
+        <label class="toggle-row">
+          <input type="checkbox" [checked]="canHost()" (change)="canHost.set($any($event.target).checked)" />
+          <span>I can host pets at my place</span>
+        </label>
+      </div>
+
+      <p class="helper-line">You can fine-tune all of this later in Preferences.</p>
+    }
+  </div>
+
+  <div class="footer">
+    <button class="continue-btn" [disabled]="!canContinue()" (click)="onContinue()">
+      Continue
+      <span aria-hidden="true">&rarr;</span>
+    </button>
+  </div>
+</div>

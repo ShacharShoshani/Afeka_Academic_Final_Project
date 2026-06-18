@@ -1,0 +1,63 @@
+<div class="page">
+  <header class="header">
+    <button class="back-btn" (click)="goBack()" aria-label="Go back">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <span class="step-label">Step 3 of {{ totalSteps() }}</span>
+  </header>
+
+  <app-progress-bar [currentStep]="3" [totalSteps]="totalSteps()" />
+
+  <div class="content">
+    <h1 class="title">{{ isCaretaker() ? 'What can you help with?' : 'A little about you' }}</h1>
+    <p class="subtitle">
+      {{ isCaretaker()
+        ? 'Tell owners who you are and the kinds of care you can offer.'
+        : 'Help caretakers get to know you before they reach out.' }}
+    </p>
+
+    <form [formGroup]="form" class="form">
+      <div class="form-field">
+        <label for="bio">About me</label>
+        <textarea id="bio" formControlName="bio" rows="4"
+                  placeholder="Share a bit about yourself, your experience, and what matters to you…"></textarea>
+        @if (ctrl('bio').touched && ctrl('bio').hasError('minlength')) {
+          <span class="field-error">Tell us a little more (at least 10 characters)</span>
+        }
+      </div>
+
+      <div class="form-field">
+        <label for="dateOfBirth">Date of birth</label>
+        <input id="dateOfBirth" type="date" formControlName="dateOfBirth" [max]="maxDob()" [min]="minDob()"
+               [class.input-error]="ctrl('dateOfBirth').invalid && ctrl('dateOfBirth').touched" />
+        @if (ctrl('dateOfBirth').touched) {
+          @if (ctrl('dateOfBirth').hasError('required')) {
+            <span class="field-error">Date of birth is required</span>
+          } @else if (ctrl('dateOfBirth').hasError('future')) {
+            <span class="field-error">Date of birth cannot be in the future</span>
+          } @else if (ctrl('dateOfBirth').hasError('tooYoung')) {
+            <span class="field-error">You must be at least 16 years old</span>
+          } @else if (ctrl('dateOfBirth').hasError('invalidDate') || ctrl('dateOfBirth').hasError('tooOld')) {
+            <span class="field-error">Please enter a valid date of birth</span>
+          }
+        }
+      </div>
+    </form>
+
+    @if (isCaretaker()) {
+      <div class="section-title">What can you help with?</div>
+      <app-care-type-chips
+        [selected]="selectedCareTypes()"
+        ariaLabel="Care types you can help with"
+        (toggle)="toggleCareType($event)" />
+      <p class="helper-line">Pick everything you're comfortable caring for.</p>
+    }
+  </div>
+
+  <div class="footer">
+    <button class="continue-btn" [disabled]="!canContinue()" (click)="onContinue()">
+      Continue
+      <span aria-hidden="true">&rarr;</span>
+    </button>
+  </div>
+</div>

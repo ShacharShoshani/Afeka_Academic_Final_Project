@@ -1,0 +1,222 @@
+<div class="page">
+  <header class="header">
+    <button class="back-btn" (click)="goBack()" aria-label="Go back">
+      <svg viewBox="0 0 24 24" fill="none"><path d="M15 18L9 12L15 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <span class="step-label">Step 5 of {{ totalSteps }}</span>
+  </header>
+
+  <app-progress-bar [currentStep]="5" [totalSteps]="totalSteps" />
+
+  <div class="content">
+    <h1 class="title">Add a pet or plant</h1>
+    <p class="subtitle">Optional — just the basics for now. You can add more, and more items, anytime from your profile.</p>
+
+    @if (!hasItems()) {
+      <div class="empty-note">
+        You can add and describe your pets, plants, or strays later from your profile.
+      </div>
+    } @else {
+      <!-- Item type picker -->
+      <div class="chips item-picker">
+        @for (opt of itemOptions(); track opt.key) {
+          <button type="button" class="chip" [class.selected]="selectedKey() === opt.key"
+                  [attr.aria-pressed]="selectedKey() === opt.key" (click)="selectItem(opt.key)">
+            {{ opt.label }}
+          </button>
+        }
+      </div>
+
+      <form [formGroup]="form" class="form">
+        <!-- Basics -->
+        <div class="form-field">
+          <label for="name">{{ isPlant() ? 'Plant name / type' : 'Name' }}</label>
+          <input id="name" type="text" formControlName="name"
+                 [placeholder]="isPlant() ? 'e.g. Monstera' : 'e.g. Luna'" />
+        </div>
+
+        @if (!isPlant()) {
+          <div class="form-field">
+            <label for="age">Age (years)</label>
+            <input id="age" type="number" inputmode="numeric" min="0" max="100" step="1"
+                   formControlName="age" placeholder="e.g. 3" />
+            <span class="field-hint">Optional — a rough age is fine.</span>
+          </div>
+        }
+
+        <div class="form-field">
+          <label for="description">Short description</label>
+          <textarea id="description" formControlName="description" rows="3"
+                    [placeholder]="isPlant() ? 'Anything helpful about this plant…' : 'Personality, size, anything helpful…'"></textarea>
+        </div>
+
+        @if (!isPlant()) {
+          <div class="form-field">
+            <span class="field-label">Friendliness</span>
+            <div class="segmented" role="group" aria-label="Friendliness">
+              @for (fr of friendlinessOptions; track fr.value) {
+                <button type="button" class="seg" [class.on]="friendliness() === fr.value"
+                        [attr.aria-pressed]="friendliness() === fr.value" (click)="friendliness.set(fr.value)">
+                  {{ fr.label }}
+                </button>
+              }
+            </div>
+          </div>
+
+          <div class="form-field">
+            <label for="allergies">Sensitivities / allergies</label>
+            <input id="allergies" type="text" formControlName="allergies" placeholder="Optional" />
+          </div>
+        }
+
+        <div class="form-field">
+          <label for="specialNeeds">Special notes</label>
+          <input id="specialNeeds" type="text" formControlName="specialNeeds" placeholder="Optional" />
+        </div>
+
+        <!-- Optional collapsible sections -->
+        @if (!isPlant()) {
+          <!-- Medical -->
+          <div class="collapsible">
+            <button type="button" class="collapsible-head" (click)="toggleSection('medical')"
+                    [attr.aria-expanded]="isOpen('medical')">
+              <span>Medical &amp; emergency <span class="opt-tag">Optional</span></span>
+              <svg class="chev" [class.open]="isOpen('medical')" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            @if (isOpen('medical')) {
+              <div class="collapsible-body">
+                <p class="section-note">Private — only shared after a confirmed job.</p>
+                <input type="text" formControlName="vetName" placeholder="Vet name" />
+                <input type="text" formControlName="vetClinicAddress" placeholder="Vet clinic address" />
+                <input type="text" formControlName="vetPhone" placeholder="Vet phone" />
+                <input type="text" formControlName="emergencyClinic" placeholder="24/7 emergency clinic" />
+                <input type="text" formControlName="conditions" placeholder="Medical conditions" />
+                <input type="text" formControlName="medications" placeholder="Medications" />
+                <input type="text" formControlName="medicationInstructions" placeholder="Medication instructions" />
+                <input type="text" formControlName="vaccinationNotes" placeholder="Vaccination notes" />
+                <input type="text" formControlName="emName" placeholder="Emergency contact name" />
+                <input type="text" formControlName="emPhone" placeholder="Emergency contact phone" />
+              </div>
+            }
+          </div>
+
+          <!-- Feeding -->
+          <div class="collapsible">
+            <button type="button" class="collapsible-head" (click)="toggleSection('feeding')"
+                    [attr.aria-expanded]="isOpen('feeding')">
+              <span>Feeding routine <span class="opt-tag">Optional</span></span>
+              <svg class="chev" [class.open]="isOpen('feeding')" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            @if (isOpen('feeding')) {
+              <div class="collapsible-body">
+                <input type="text" formControlName="feedSchedule" placeholder="Feeding schedule" />
+                <input type="text" formControlName="feedAmount" placeholder="Food amount" />
+                <input type="text" formControlName="foodType" placeholder="Food type" />
+                <label class="toggle-row">
+                  <input type="checkbox" [checked]="treatsAllowed()" (change)="treatsAllowed.set($any($event.target).checked)" />
+                  <span>Treats allowed</span>
+                </label>
+                <input type="text" formControlName="treatInstructions" placeholder="Treat instructions" />
+                <input type="text" formControlName="foodAllergies" placeholder="Food allergies / sensitivities" />
+                <input type="text" formControlName="waterBowlLocation" placeholder="Water bowl location" />
+                <input type="text" formControlName="waterInstructions" placeholder="Water replacement instructions" />
+                <p class="section-note">Some human foods are unsafe for pets. Add any food restrictions above.</p>
+              </div>
+            }
+          </div>
+
+          <!-- Behavior -->
+          <div class="collapsible">
+            <button type="button" class="collapsible-head" (click)="toggleSection('behavior')"
+                    [attr.aria-expanded]="isOpen('behavior')">
+              <span>Behavior &amp; personality <span class="opt-tag">Optional</span></span>
+              <svg class="chev" [class.open]="isOpen('behavior')" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            @if (isOpen('behavior')) {
+              <div class="collapsible-body">
+                <input type="text" formControlName="triggers" placeholder="Fears / triggers" />
+                <input type="text" formControlName="stressSigns" placeholder="How they show stress" />
+                <input type="text" formControlName="hidingPlaces" placeholder="Hiding places" />
+                <input type="text" formControlName="houseRules" placeholder="House rules" />
+                <input type="text" formControlName="sleepingLocation" placeholder="Sleeping location" />
+                <label class="toggle-row"><input type="checkbox" [checked]="canGoOnFurniture()" (change)="canGoOnFurniture.set($any($event.target).checked)" /><span>Can go on sofa / bed</span></label>
+                <label class="toggle-row"><input type="checkbox" [checked]="goodWithPeople()" (change)="goodWithPeople.set($any($event.target).checked)" /><span>Good with people</span></label>
+                <label class="toggle-row"><input type="checkbox" [checked]="goodWithChildren()" (change)="goodWithChildren.set($any($event.target).checked)" /><span>Good with children</span></label>
+                <label class="toggle-row"><input type="checkbox" [checked]="goodWithAnimals()" (change)="goodWithAnimals.set($any($event.target).checked)" /><span>Good with other animals</span></label>
+                <label class="toggle-row"><input type="checkbox" [checked]="needsSupervision()" (change)="needsSupervision.set($any($event.target).checked)" /><span>Needs supervision</span></label>
+              </div>
+            }
+          </div>
+
+          @if (isDog()) {
+            <div class="collapsible">
+              <button type="button" class="collapsible-head" (click)="toggleSection('dog')" [attr.aria-expanded]="isOpen('dog')">
+                <span>Dog walking routine <span class="opt-tag">Optional</span></span>
+                <svg class="chev" [class.open]="isOpen('dog')" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+              @if (isOpen('dog')) {
+                <div class="collapsible-body">
+                  <input type="text" formControlName="walksPerDay" placeholder="Walks per day" />
+                  <input type="text" formControlName="preferredWalkTimes" placeholder="Preferred walk times" />
+                  <input type="text" formControlName="reactionToOtherDogs" placeholder="Reaction to other dogs" />
+                  <input type="text" formControlName="leashInstructions" placeholder="Leash / harness instructions" />
+                  <label class="toggle-row"><input type="checkbox" [checked]="pullsOnLeash()" (change)="pullsOnLeash.set($any($event.target).checked)" /><span>Pulls on the leash</span></label>
+                  <label class="toggle-row"><input type="checkbox" [checked]="canBeOffLeash()" (change)="canBeOffLeash.set($any($event.target).checked)" /><span>Can be off-leash in a dog park</span></label>
+                  <p class="section-note">Don't release a dog you don't know unless the owner explicitly allows it.</p>
+                </div>
+              }
+            </div>
+          }
+
+          @if (isCat()) {
+            <div class="collapsible">
+              <button type="button" class="collapsible-head" (click)="toggleSection('cat')" [attr.aria-expanded]="isOpen('cat')">
+                <span>Cat routine <span class="opt-tag">Optional</span></span>
+                <svg class="chev" [class.open]="isOpen('cat')" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </button>
+              @if (isOpen('cat')) {
+                <div class="collapsible-body">
+                  <input type="text" formControlName="litterBoxLocation" placeholder="Litter box location" />
+                  <input type="text" formControlName="cleaningFrequency" placeholder="Cleaning frequency" />
+                  <input type="text" formControlName="litterDisposal" placeholder="Where to throw litter waste" />
+                  <input type="text" formControlName="windowBalconyRules" placeholder="Window / balcony rules" />
+                  <input type="text" formControlName="indoorOutdoor" placeholder="Indoor / outdoor cat" />
+                  <input type="text" formControlName="catHidingPlaces" placeholder="Hiding places" />
+                </div>
+              }
+            </div>
+          }
+        } @else {
+          <!-- Plant care -->
+          <div class="collapsible">
+            <button type="button" class="collapsible-head" (click)="toggleSection('plant')" [attr.aria-expanded]="isOpen('plant')">
+              <span>Plant care <span class="opt-tag">Optional</span></span>
+              <svg class="chev" [class.open]="isOpen('plant')" viewBox="0 0 24 24" fill="none"><path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </button>
+            @if (isOpen('plant')) {
+              <div class="collapsible-body">
+                <input type="text" formControlName="wateringFrequency" placeholder="Watering frequency" />
+                <input type="text" formControlName="waterAmount" placeholder="Water amount" />
+                <input type="text" formControlName="sunlight" placeholder="Sunlight preference" />
+                <input type="text" formControlName="indoorOutdoor" placeholder="Indoor / outdoor" />
+                <input type="text" formControlName="fertilizer" placeholder="Fertilizer instructions" />
+                <input type="text" formControlName="sensitiveNotes" placeholder="Sensitive plant notes" />
+                <input type="text" formControlName="specialInstructions" placeholder="Special care instructions" />
+              </div>
+            }
+          </div>
+        }
+      </form>
+    }
+  </div>
+
+  <div class="footer">
+    @if (hasItems()) {
+      <button class="continue-btn" (click)="saveAndContinue()">
+        Save &amp; continue
+        <span aria-hidden="true">&rarr;</span>
+      </button>
+    }
+    <button class="text-btn" (click)="skip()">Skip for now</button>
+  </div>
+</div>
